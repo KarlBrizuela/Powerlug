@@ -19,10 +19,7 @@ class ClientController extends Controller
      */
     public function create()
     {
-        // If you have a create form view, use it here
-        // If not, create one or use a different approach
-        return view('client-list.create');
-        return view('client.create'); // This will still cause error if view doesn't exist
+        return view('pages.new-client');
     }
 
     /**

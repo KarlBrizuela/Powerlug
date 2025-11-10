@@ -177,13 +177,13 @@
                                                 <td>POL-001236</td>
                                                 <td>Robert Johnson</td>
                                                 <td>6 Months</td>
-                                                <td>$800.00</td>
-                                                <td>$650.00</td>
-                                                <td>$325.00</td>
-                                                <td>$325.00</td>
-                                                <td>$0.00</td>
+                                                <td>₱800.00</td>
+                                                <td>₱650.00</td>
+                                                <td>₱325.00</td>
+                                                <td>₱325.00</td>
+                                                <td>₱0.00</td>
                                                 <td>2023-11-05</td>
-                                                <td>$97.50</td>
+                                                <td>₱97.50</td>
                                                 <td>
                                                     <button class="btn btn-sm btn-outline-primary view-commission" data-commission-id="3">
                                                         <i class="fas fa-eye"></i>
@@ -195,13 +195,13 @@
                                                 <td>POL-001237</td>
                                                 <td>Sarah Williams</td>
                                                 <td>36 Months</td>
-                                                <td>$4,200.00</td>
-                                                <td>$3,500.00</td>
-                                                <td>$1,166.67</td>
-                                                <td>$1,166.67</td>
-                                                <td>$1,166.66</td>
-                                                <td>2023-08-30</td>
-                                                <td>$525.00</td>
+                                                <td>₱4,200.00</td>
+                                                <td>₱3,500.00</td>
+                                                <td>₱1,166.67</td>
+                                                <td>₱1,166.67</td>
+                                                <td>₱1,166.66</td>
+                                                <td>2023-11-05</td>
+                                                <td>₱525.00</td>
                                                 <td>
                                                     <button class="btn btn-sm btn-outline-primary view-commission" data-commission-id="4">
                                                         <i class="fas fa-eye"></i>
@@ -213,13 +213,13 @@
                                                 <td>POL-001238</td>
                                                 <td>Michael Brown</td>
                                                 <td>12 Months</td>
-                                                <td>$1,500.00</td>
-                                                <td>$1,250.00</td>
-                                                <td>$625.00</td>
-                                                <td>$625.00</td>
-                                                <td>$0.00</td>
-                                                <td>2023-10-28</td>
-                                                <td>$187.50</td>
+                                                <td>₱1,500.00</td>
+                                                <td>₱1,250.00</td>
+                                                <td>₱625.00</td>
+                                                <td>₱625.00</td>
+                                                <td>₱0.00</td>
+                                                <td>2023-11-05</td>
+                                                <td>₱187.50</td>
                                                 <td>
                                                     <button class="btn btn-sm btn-outline-primary view-commission" data-commission-id="5">
                                                         <i class="fas fa-eye"></i>
@@ -231,13 +231,13 @@
                                                 <td>POL-001239</td>
                                                 <td>Lisa Anderson</td>
                                                 <td>18 Months</td>
-                                                <td>$2,100.00</td>
-                                                <td>$1,800.00</td>
-                                                <td>$600.00</td>
-                                                <td>$600.00</td>
-                                                <td>$600.00</td>
+                                                <td>₱2,100.00</td>
+                                                <td>₱1,800.00</td>
+                                                <td>₱600.00</td>
+                                                <td>₱600.00</td>
+                                                <td>₱270.00</td>
                                                 <td>2023-09-15</td>
-                                                <td>$270.00</td>
+                                                <td>₱270.00</td>
                                                 <td>
                                                     <button class="btn btn-sm btn-outline-primary view-commission" data-commission-id="6">
                                                         <i class="fas fa-eye"></i>
@@ -249,13 +249,13 @@
                                                 <td>POL-001240</td>
                                                 <td>David Miller</td>
                                                 <td>24 Months</td>
-                                                <td>$3,000.00</td>
-                                                <td>$2,500.00</td>
-                                                <td>$833.33</td>
-                                                <td>$833.33</td>
-                                                <td>$833.34</td>
-                                                <td>2023-11-10</td>
-                                                <td>$375.00</td>
+                                                <td>₱3,000.00</td>
+                                                <td>₱2,500.00</td>
+                                                <td>₱833.33</td>
+                                                <td>₱833.33</td>
+                                                <td>₱833.34</td>
+                                                <td>2023-11-05</td>
+                                                <td>₱375.00</td>
                                                 <td>
                                                     <button class="btn btn-sm btn-outline-primary view-commission" data-commission-id="7">
                                                         <i class="fas fa-eye"></i>
@@ -267,13 +267,13 @@
                                                 <td>POL-001241</td>
                                                 <td>Emily Davis</td>
                                                 <td>12 Months</td>
-                                                <td>$950.00</td>
-                                                <td>$800.00</td>
-                                                <td>$400.00</td>
-                                                <td>$400.00</td>
-                                                <td>$0.00</td>
-                                                <td>2023-10-05</td>
-                                                <td>$120.00</td>
+                                                <td>₱950.00</td>
+                                                <td>₱800.00</td>
+                                                <td>₱400.00</td>
+                                                <td>₱400.00</td>
+                                                <td>₱0.00</td>
+                                                <td>2023-11-05</td>
+                                                <td>₱120.00</td>
                                                 <td>
                                                     <button class="btn btn-sm btn-outline-primary view-commission" data-commission-id="8">
                                                         <i class="fas fa-eye"></i>
@@ -285,13 +285,13 @@
                                                 <td>POL-001242</td>
                                                 <td>James Wilson</td>
                                                 <td>36 Months</td>
-                                                <td>$5,000.00</td>
-                                                <td>$4,200.00</td>
-                                                <td>$1,400.00</td>
-                                                <td>$1,400.00</td>
-                                                <td>$1,400.00</td>
-                                                <td>2023-08-15</td>
-                                                <td>$630.00</td>
+                                                <td>₱5,000.00</td>
+                                                <td>₱4,200.00</td>
+                                                <td>₱1,400.00</td>
+                                                <td>₱1,400.00</td>
+                                                <td>₱1,400.00</td>
+                                                <td>2023-11-05</td>
+                                                <td>₱630.00</td>
                                                 <td>
                                                     <button class="btn btn-sm btn-outline-primary view-commission" data-commission-id="9">
                                                         <i class="fas fa-eye"></i>
@@ -303,13 +303,13 @@
                                                 <td>POL-001243</td>
                                                 <td>Amanda Taylor</td>
                                                 <td>6 Months</td>
-                                                <td>$700.00</td>
-                                                <td>$600.00</td>
-                                                <td>$300.00</td>
-                                                <td>$300.00</td>
-                                                <td>$0.00</td>
-                                                <td>2023-11-20</td>
-                                                <td>$90.00</td>
+                                                <td>₱700.00</td>
+                                                <td>₱600.00</td>
+                                                <td>₱300.00</td>
+                                                <td>₱300.00</td>
+                                                <td>₱0.00</td>
+                                                <td>2023-11-05</td>
+                                                <td>₱90.00</td>
                                                 <td>
                                                     <button class="btn btn-sm btn-outline-primary view-commission" data-commission-id="10">
                                                         <i class="fas fa-eye"></i>
@@ -424,11 +424,11 @@
                             <table class="table table-sm">
                                 <tr>
                                     <td><strong>Gross Premium:</strong></td>
-                                    <td>$1,200.00</td>
+                                    <td>₱1,200.00</td>
                                 </tr>
                                 <tr>
                                     <td><strong>Net Premium:</strong></td>
-                                    <td>$1,000.00</td>
+                                    <td>₱1,000.00</td>
                                 </tr>
                                 <tr>
                                     <td><strong>Commission Rate:</strong></td>
@@ -436,7 +436,7 @@
                                 </tr>
                                 <tr>
                                     <td><strong>Commission Amount:</strong></td>
-                                    <td>$150.00</td>
+                                    <td>₱150.00</td>
                                 </tr>
                             </table>
                         </div>
@@ -456,19 +456,19 @@
                                 <tbody>
                                     <tr>
                                         <td>30 Days</td>
-                                        <td>$400.00</td>
+                                        <td>₱400.00</td>
                                         <td>2023-10-15</td>
                                         <td><span class="badge bg-success">Paid</span></td>
                                     </tr>
                                     <tr>
                                         <td>60 Days</td>
-                                        <td>$300.00</td>
+                                        <td>₱300.00</td>
                                         <td>2023-11-15</td>
                                         <td><span class="badge bg-warning">Pending</span></td>
                                     </tr>
                                     <tr>
                                         <td>90 Days</td>
-                                        <td>$300.00</td>
+                                        <td>₱300.00</td>
                                         <td>2023-12-15</td>
                                         <td><span class="badge bg-secondary">Upcoming</span></td>
                                     </tr>

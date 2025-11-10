@@ -164,6 +164,7 @@
                                                            title="Edit Client">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
+                                                        @if(auth()->user()->position === 'superadmin')
                                                         <button type="button" 
                                                                 class="btn btn-danger delete-client" 
                                                                 data-client-id="1"
@@ -172,6 +173,7 @@
                                                                 title="Delete Client">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
+                                                        @endif
                                                     </div>
                                                 </td>
                                             </tr>
@@ -197,14 +199,16 @@
                                                            title="Edit Client">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
+                                                        @if(auth()->user()->position === 'superadmin')
                                                         <button type="button" 
                                                                 class="btn btn-danger delete-client" 
-                                                                data-client-id="2"
-                                                                data-client-name="Sarah Johnson"
+                                                                data-client-id="1"
+                                                                data-client-name="John Smith"
                                                                 data-bs-toggle="tooltip" 
                                                                 title="Delete Client">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
+                                                        @endif
                                                     </div>
                                                 </td>
                                             </tr>
@@ -217,7 +221,7 @@
                                                     <span class="badge bg-danger">No</span>
                                                 </td>
                                                 <td>
-                                                    <div class="btn-group btn-group-sm">
+                                                   <div class="btn-group btn-group-sm">
                                                         <a href="#" 
                                                            class="btn btn-info" 
                                                            data-bs-toggle="tooltip" 
@@ -230,14 +234,16 @@
                                                            title="Edit Client">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
+                                                        @if(auth()->user()->position === 'superadmin')
                                                         <button type="button" 
                                                                 class="btn btn-danger delete-client" 
-                                                                data-client-id="3"
-                                                                data-client-name="Michael Brown"
+                                                                data-client-id="1"
+                                                                data-client-name="John Smith"
                                                                 data-bs-toggle="tooltip" 
                                                                 title="Delete Client">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
+                                                        @endif
                                                     </div>
                                                 </td>
                                             </tr>

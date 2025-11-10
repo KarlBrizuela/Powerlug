@@ -262,12 +262,14 @@
                 <ul class="metismenu list-unstyled" id="side-menu">
                     <li class="menu-title" data-key="t-menu">Menu</li>
 
+                    @if(auth()->user()->position === 'superadmin')
                     <li>
                         <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
                             <i data-feather="home"></i>
                             <span data-key="t-dashboard">Dashboard</span>
                         </a>
                     </li>
+                    @endif
 
                    <li>
     <a href="{{ route('policy') }}" class="@if(request()->url() === route('policy')) active @endif">
@@ -302,12 +304,12 @@
                         </a>
                         <ul class="sub-menu" aria-expanded="false">
                             <li>
-                                <a href="{{ route('clients.index') }}" class="{{ request()->routeIs('clients.index') ? 'active' : '' }}">
+                                <a href="{{ route('clients.create') }}" class="{{ request()->routeIs('clients.create') ? 'active' : '' }}">
                                     New Client
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('client-list.index') }}" class="{{ request()->routeIs('client-list.index') ? 'active' : '' }}">
+                                <a href="{{ route('clients.index') }}" class="{{ request()->routeIs('clients.index') ? 'active' : '' }}">
                                     Client List
                                 </a>
                             </li>

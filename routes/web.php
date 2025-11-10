@@ -2,11 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
-use App\Http\Controllers\WalkInController; // Add this import
-use App\Http\Controllers\ClientController; // Add this import
+use App\Http\Controllers\WalkInController;
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\InsuranceProviderController;
 use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\AuditTrailController;
+use App\Http\Controllers\SalesReportController;
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
@@ -29,10 +30,15 @@ Route::get('/', function () {
 
 // Protected routes
 Route::middleware(['auth'])->group(function () {
-    // Dashboard
+    // Dashboard (Superadmin only)
     Route::get('/dashboard', function () {
         return view('pages.dashboard');
-    })->name('dashboard');
+    })->middleware('check.position:superadmin')->name('dashboard');
+
+    // Sales Report (Superadmin only)
+    Route::get('/sales-report', [SalesReportController::class, 'index'])
+        ->middleware('check.position:superadmin')
+        ->name('sales.report');
 
     // Policy routes
     Route::get('/policy', function () {
@@ -41,6 +47,16 @@ Route::middleware(['auth'])->group(function () {
     
     Route::post('/policies', [App\Http\Controllers\PolicyController::class, 'store'])->name('policies.store');
     Route::resource('policies', App\Http\Controllers\PolicyController::class)->except(['create']);
+
+    // Client routes
+    Route::get('/new-client', [ClientController::class, 'create'])->name('clients.create');
+    Route::get('/clients', [ClientController::class, 'index'])->name('clients.index');
+    Route::post('/clients', [ClientController::class, 'store'])->name('clients.store');
+    
+    // Only superadmin can delete clients
+    Route::delete('/clients/{client}', [ClientController::class, 'destroy'])
+        ->middleware('check.position:superadmin')
+        ->name('clients.destroy');
 
     // Claims routes
     Route::get('/claims/create', function () {
