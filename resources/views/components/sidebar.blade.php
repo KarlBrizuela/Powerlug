@@ -302,12 +302,12 @@
                         </a>
                         <ul class="sub-menu" aria-expanded="false">
                             <li>
-                                <a href="{{ route('clients.create') }}" class="{{ request()->routeIs('clients.create') ? 'active' : '' }}">
+                                <a href="{{ route('clients.index') }}" class="{{ request()->routeIs('clients.index') ? 'active' : '' }}">
                                     New Client
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('clients.index') }}" class="{{ request()->routeIs('clients.index') ? 'active' : '' }}">
+                                <a href="{{ route('client-list.index') }}" class="{{ request()->routeIs('client-list.index') ? 'active' : '' }}">
                                     Client List
                                 </a>
                             </li>
@@ -321,7 +321,7 @@
                         </a>
                         <ul class="sub-menu" aria-expanded="false">
                             <li>
-                                <a href="{{ route('providers.create') }}" class="{{ request()->routeIs('providers.create') ? 'active' : '' }}">
+                                <a href="{{ route('providers.create') }}" class="{{ request()->routeIs('providerd.create') ? 'active' : '' }}">
                                     New Insurance Provider
                                 </a>
                             </li>
@@ -340,7 +340,7 @@
                         </a>
                         <ul class="sub-menu" aria-expanded="false">
                             <li>
-                                <a href="{{ route('collections.index') }}" class="{{ request()->routeIs('collections.index') ? 'active' : '' }}">
+                                <a href="{{ route('collections.create') }}" class="{{ request()->routeIs('collections.create') ? 'active' : '' }}">
                                     New Collection
                                 </a>
                             </li>
@@ -353,7 +353,7 @@
                     </li>
 
                     <li>
-                        <a href="{{ route('audit-trail') }}" class="{{ request()->routeIs('audit-trail') ? 'active' : '' }}">
+                        <a href="{{ route('audit-trail.index') }}" class="{{ request()->routeIs('audit-trail.index') ? 'active' : '' }}">
                             <i data-feather="settings"></i>
                             <span data-key="t-pages">Audit Trail</span>
                         </a>

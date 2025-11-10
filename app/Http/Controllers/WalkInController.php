@@ -9,10 +9,45 @@ class WalkInController extends Controller
 {
     public function index()
     {
-        $walkIns = WalkIn::latest()->paginate(10); // or whatever pagination you prefer
-        
-        return view('pages.walk-in', compact('walkIns'));
+        return view('pages.walk-in-create');
     }
 
-    // Your other methods (create, store, show, edit, update, destroy) here...
+    public function create()
+    {
+        return view('pages.walk-in-create');
+    }
+
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([
+            'insured_name' => 'required|string|max:255',
+            'unit' => 'required|string|max:255',
+            'plate_number' => 'required|string|max:255',
+            'address' => 'required|string',
+            'contact_number' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'file_upload' => 'nullable|file|max:2048',
+            'parts_amount' => 'required|numeric|min:0',
+            'labor_cost' => 'required|numeric|min:0',
+            'materials_cost' => 'required|numeric|min:0',
+            'vat_amount' => 'required|numeric|min:0',
+            'total_amount' => 'required|numeric|min:0',
+            'payment_type' => 'required|in:down_payment,full_payment',
+        ]);
+
+        // Handle file upload if present
+        if ($request->hasFile('file_upload')) {
+            $path = $request->file('file_upload')->store('walk-in-files', 'public');
+            $validatedData['file_path'] = $path;
+        }
+
+        // Generate walk-in number (you might want to customize this)
+        $validatedData['walkin_number'] = 'WI-' . date('Ymd') . '-' . str_pad(WalkIn::count() + 1, 4, '0', STR_PAD_LEFT);
+        
+        // Create the walk-in record
+        WalkIn::create($validatedData);
+
+        return redirect()->route('walk-in.index')
+            ->with('success', 'Walk-in created successfully.');
+    }
 }

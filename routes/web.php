@@ -3,6 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\WalkInController; // Add this import
+use App\Http\Controllers\ClientController; // Add this import
+use App\Http\Controllers\InsuranceProviderController;
+use App\Http\Controllers\CollectionController;
+use App\Http\Controllers\AuditTrailController;
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
@@ -48,19 +52,24 @@ Route::middleware(['auth'])->group(function () {
     })->name('claims.index');
 
     // Walk-in routes - FIXED: Added to protected group and used correct controller
-    Route::get('walk-in/create', [WalkInController::class, 'create'])->name('walk-in.create');
+    Route::resource('walk-in', WalkInController::class);
+    Route::get('/walk-in', [WalkInController::class, 'index'])->name('walk-in.index');
+ Route::get('/walk-in', [WalkInController::class, 'index'])->name('walk-in.index');
+// Route::get('/walk-in/create', [WalkInController::class, 'create'])->name('walk-in.create');
     Route::post('walk-in', [WalkInController::class, 'store'])->name('walk-in.store');
 
     // Client Management routes
-    Route::resource('clients', 'App\Http\Controllers\ClientController');
+      Route::resource('clients', ClientController::class);
+    Route::get('/client-list', [ClientController::class, 'index'])->name('client-list.index');
 
-    // Insurance Provider routes
-    Route::resource('providers', 'App\Http\Controllers\InsuranceProviderController');
-
+   
+ // In your web.php routes file
+Route::middleware(['auth'])->group(function () {
     // Collection Management routes
-    Route::get('/collections', function () {
-        return view('pages.collections');
-    })->name('collections.index');
+    Route::get('/collections', [CollectionController::class, 'index'])->name('collections.index');
+    Route::get('/collections/create', [CollectionController::class, 'create'])->name('collections.create');
+    Route::post('/collections', [CollectionController::class, 'store'])->name('collections.store');
+});
 
     // Audit Trail route
     Route::get('/audit-trail', function () {
@@ -81,3 +90,14 @@ Route::get('/forgot-password', function () {
 Route::get('/register', function () {
     return 'Registration page coming soon!';
 })->name('register');
+
+// Insurance Provider routes - Consistent naming
+Route::resource('providers', InsuranceProviderController::class);
+Route::get('/providers/create', [InsuranceProviderController::class, 'create'])->name('providers.create');
+Route::get('/providers', [InsuranceProviderController::class, 'index'])->name('providers.index');
+
+// routes/web.php
+Route::get('/audit-trail', [AuditTrailController::class, 'index'])->name('audit-trail.index');
+Route::get('/audit/{id}/details', [AuditTrailController::class, 'show'])->name('audit-trail.show');
+Route::delete('/audit/{id}', [AuditTrailController::class, 'destroy'])->name('audit-trail.destroy');
+Route::post('/audit/clear', [AuditTrailController::class, 'clear'])->name('audit-trail.clear');
