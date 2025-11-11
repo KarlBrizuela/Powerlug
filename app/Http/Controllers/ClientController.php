@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Client;
 use Illuminate\Http\Request;
 
 class ClientController extends Controller
@@ -11,7 +12,8 @@ class ClientController extends Controller
      */
     public function index()
     {
-        return view('pages.client-list'); // Use your actual view name
+        $clients = Client::latest()->paginate(10);
+        return view('pages.client-list', compact('clients'));
     }
 
     /**
@@ -27,21 +29,56 @@ class ClientController extends Controller
      */
     public function store(Request $request)
     {
-        // Your store logic here
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email',
-            'contact_number' => 'required|string',
-            'address' => 'required|string',
-            'active_status' => 'boolean',
+        $validatedData = $request->validate([
+            'firstName' => 'required|string|max:255',
+            'middleName' => 'nullable|string|max:255',
+            'lastName' => 'required|string|max:255',
+            'email' => 'required|email|unique:clients',
+            'phone' => 'required|string|size:11',
+            'address' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'province' => 'required|string|max:255',
+            'postalCode' => 'required|string|size:4',
+            'birthDate' => 'required|date',
+            'occupation' => 'required|string|max:255',
         ]);
 
-        // Save to database here
-        // Client::create($validated);
+        Client::create($validatedData);
 
-        // return redirect()->route('client.index')
-        //                 ->with('success', 'Client created successfully!');
+        return redirect()->route('clients.index')
+                        ->with('success', 'Client created successfully');
     }
 
-    // ... other methods (show, edit, update, destroy)
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Client $client)
+    {
+        return view('pages.edit-client', compact('client'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Client $client)
+    {
+        $validatedData = $request->validate([
+            'firstName' => 'required|string|max:255',
+            'middleName' => 'nullable|string|max:255',
+            'lastName' => 'required|string|max:255',
+            'email' => 'required|email|unique:clients,email,' . $client->id,
+            'phone' => 'required|string|size:11',
+            'address' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'province' => 'required|string|max:255',
+            'postalCode' => 'required|string|size:4',
+            'birthDate' => 'required|date',
+            'occupation' => 'required|string|max:255',
+        ]);
+
+        $client->update($validatedData);
+
+        return redirect()->route('clients.index')
+                        ->with('success', 'Client updated successfully');
+    }
 }

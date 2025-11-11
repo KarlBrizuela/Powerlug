@@ -191,94 +191,12 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @php
-                                            // Create fake data directly in Blade
-                                            $fakeCollections = collect([
-                                                (object)[
-                                                    'id' => 1,
-                                                    'collection_number' => 'COL-001',
-                                                    'client_name' => 'John Doe Corporation International Limited',
-                                                    'invoice_number' => 'INV-2024-001-12345',
-                                                    'billing_status' => 'billed',
-                                                    'collection_amount' => 1500.00,
-                                                    'collection_status' => 'deposited',
-                                                    'payment_method' => 'bank_transfer',
-                                                    'collection_date' => '2024-01-15',
-                                                    'bank_name' => 'BDO Unibank Inc.'
-                                                ],
-                                                (object)[
-                                                    'id' => 2,
-                                                    'collection_number' => 'COL-002',
-                                                    'client_name' => 'Jane Smith Enterprises Global Solutions',
-                                                    'invoice_number' => 'INV-2024-002-67890',
-                                                    'billing_status' => 'pending',
-                                                    'collection_amount' => 2000.00,
-                                                    'collection_status' => 'pending',
-                                                    'payment_method' => 'cash',
-                                                    'collection_date' => '2024-01-16',
-                                                    'bank_name' => null
-                                                ],
-                                                (object)[
-                                                    'id' => 3,
-                                                    'collection_number' => 'COL-003',
-                                                    'client_name' => 'Mike Johnson & Sons Manufacturing Co.',
-                                                    'invoice_number' => 'INV-2024-003-54321',
-                                                    'billing_status' => 'overdue',
-                                                    'collection_amount' => 3500.50,
-                                                    'collection_status' => 'cleared',
-                                                    'payment_method' => 'check',
-                                                    'collection_date' => '2024-01-14',
-                                                    'bank_name' => 'Bank of the Philippine Islands'
-                                                ],
-                                                (object)[
-                                                    'id' => 4,
-                                                    'collection_number' => 'COL-004',
-                                                    'client_name' => 'Sarah Wilson Trading International Ltd.',
-                                                    'invoice_number' => 'INV-2024-004-98765',
-                                                    'billing_status' => 'billed',
-                                                    'collection_amount' => 1200.00,
-                                                    'collection_status' => 'cash',
-                                                    'payment_method' => 'cash',
-                                                    'collection_date' => '2024-01-17',
-                                                    'bank_name' => null
-                                                ],
-                                                (object)[
-                                                    'id' => 5,
-                                                    'collection_number' => 'COL-005',
-                                                    'client_name' => 'Robert Brown Holdings Corporation',
-                                                    'invoice_number' => 'INV-2024-005-13579',
-                                                    'billing_status' => 'billed',
-                                                    'collection_amount' => 2800.00,
-                                                    'collection_status' => 'deposited',
-                                                    'payment_method' => 'online_banking_transfer',
-                                                    'collection_date' => '2024-01-13',
-                                                    'bank_name' => 'BDO Unibank Inc.'
-                                                ]
-                                            ]);
-
-                                            // Create paginated data
-                                            $currentPage = request()->get('page', 1);
-                                            $perPage = 10;
-                                            $currentPageItems = $fakeCollections->slice(($currentPage - 1) * $perPage, $perPage);
-                                            $paginatedCollections = new \Illuminate\Pagination\LengthAwarePaginator(
-                                                $currentPageItems,
-                                                $fakeCollections->count(),
-                                                $perPage,
-                                                $currentPage,
-                                                ['path' => request()->url(), 'query' => request()->query()]
-                                            );
-                                        @endphp
-
-                                        @forelse($paginatedCollections as $collection)
+                                        @forelse($collections as $collection)
                                             <tr>
                                                 <td>{{ $collection->collection_number }}</td>
-                                                <td>{{ $collection->client_name }}</td>
+                                                <td>{{ $collection->client->lastName }}, {{ $collection->client->firstName }} {{ $collection->client->middleName }}</td>
                                                 <td>{{ $collection->invoice_number }}</td>
-                                                <td>
-                                                    <span class="badge bg-{{ $collection->billing_status == 'billed' ? 'success' : ($collection->billing_status == 'pending' ? 'warning' : 'danger') }}">
-                                                        {{ ucfirst($collection->billing_status) }}
-                                                    </span>
-                                                </td>
+                                                <td>{{ ucfirst($collection->billing_status) }}</td>
                                                 <td>₱{{ number_format($collection->collection_amount, 2) }}</td>
                                                 <td>
                                                     <span class="badge bg-{{ $collection->collection_status == 'deposited' ? 'success' : ($collection->collection_status == 'pending' ? 'warning' : ($collection->collection_status == 'cleared' ? 'info' : ($collection->collection_status == 'bounced' ? 'danger' : 'primary'))) }}">
@@ -293,9 +211,9 @@
                                                         <button type="button" class="btn btn-sm btn-outline-primary view-collection" data-collection-id="{{ $collection->id }}" title="View">
                                                             <i class="fas fa-eye"></i>
                                                         </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-warning" title="Edit">
+                                                        <a href="{{ route('collections.edit', $collection->id) }}" class="btn btn-sm btn-outline-warning" title="Edit">
                                                             <i class="fas fa-edit"></i>
-                                                        </button>
+                                                        </a>
                                                         <button type="button" class="btn btn-sm btn-outline-danger delete-collection" 
                                                                 data-collection-id="{{ $collection->id }}" 
                                                                 data-collection-number="{{ $collection->collection_number }}"
@@ -323,15 +241,15 @@
                             </div>
 
                             <!-- Pagination -->
-                            @if($paginatedCollections->hasPages())
-                                <div class="row mt-3">
+                            @if($collections->hasPages())
+                                <div class="row mt-4">
                                     <div class="col-md-12">
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div class="text-muted">
-                                                Showing {{ $paginatedCollections->firstItem() }} to {{ $paginatedCollections->lastItem() }} of {{ $paginatedCollections->total() }} entries
+                                                Showing {{ $collections->firstItem() }} to {{ $collections->lastItem() }} of {{ $collections->total() }} entries
                                             </div>
                                             <nav>
-                                                {{ $paginatedCollections->links() }}
+                                                {{ $collections->links() }}
                                             </nav>
                                         </div>
                                     </div>

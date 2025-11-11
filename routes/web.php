@@ -45,6 +45,12 @@ Route::middleware(['auth'])->group(function () {
         return view('pages.policy');
     })->name('policy');
     
+    // Client routes
+    Route::resource('clients', ClientController::class);
+    
+    // Insurance Provider routes
+    Route::resource('insurance-providers', InsuranceProviderController::class);
+    
     Route::post('/policies', [App\Http\Controllers\PolicyController::class, 'store'])->name('policies.store');
     Route::resource('policies', App\Http\Controllers\PolicyController::class)->except(['create']);
 
@@ -78,14 +84,12 @@ Route::middleware(['auth'])->group(function () {
       Route::resource('clients', ClientController::class);
     Route::get('/client-list', [ClientController::class, 'index'])->name('client-list.index');
 
-   
- // In your web.php routes file
-Route::middleware(['auth'])->group(function () {
     // Collection Management routes
     Route::get('/collections', [CollectionController::class, 'index'])->name('collections.index');
     Route::get('/collections/create', [CollectionController::class, 'create'])->name('collections.create');
     Route::post('/collections', [CollectionController::class, 'store'])->name('collections.store');
-});
+    Route::get('/collections/{collection}/edit', [CollectionController::class, 'edit'])->name('collections.edit');
+    Route::put('/collections/{collection}', [CollectionController::class, 'update'])->name('collections.update');
 
     // Audit Trail route
     Route::get('/audit-trail', function () {

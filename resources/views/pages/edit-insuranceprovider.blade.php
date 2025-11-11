@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Insurance Provider - Powerlug</title>
+    <title>Edit Insurance Provider - Powerlug</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -51,7 +51,7 @@
             <div class="container-fluid">
                 <!-- Page Header -->
                 <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                    <h1 class="h3 mb-0 text-gray-800">New Insurance Provider</h1>
+                    <h1 class="h3 mb-0 text-gray-800">Edit Insurance Provider</h1>
                     <a href="{{ route('insurance-providers.index') }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left me-1"></i> Back to List
                     </a>
@@ -71,8 +71,9 @@
                     <div class="col-12">
                         <div class="card">
                             <div class="card-body">
-                                <form action="{{ route('insurance-providers.store') }}" method="POST">
+                                <form action="{{ route('insurance-providers.update', $insuranceProvider->id) }}" method="POST">
                                     @csrf
+                                    @method('PUT')
                                     
                                     <div class="row mb-3">
                                         <div class="col-md-6">
@@ -80,7 +81,7 @@
                                             <input type="text" 
                                                    class="form-control @error('code') is-invalid @enderror" 
                                                    name="code" 
-                                                   value="{{ old('code') }}" 
+                                                   value="{{ old('code', $insuranceProvider->code) }}" 
                                                    placeholder="e.g., HGI-001"
                                                    required>
                                             @error('code')
@@ -92,7 +93,7 @@
                                             <input type="text" 
                                                    class="form-control @error('name') is-invalid @enderror" 
                                                    name="name" 
-                                                   value="{{ old('name') }}" 
+                                                   value="{{ old('name', $insuranceProvider->name) }}" 
                                                    placeholder="e.g., Standard Insurance"
                                                    required>
                                             @error('name')
@@ -109,7 +110,7 @@
                                                        name="is_active" 
                                                        id="is_active" 
                                                        value="1" 
-                                                       {{ old('is_active', true) ? 'checked' : '' }}>
+                                                       {{ old('is_active', $insuranceProvider->is_active) ? 'checked' : '' }}>
                                                 <label class="form-check-label" for="is_active">
                                                     Active Status
                                                 </label>
@@ -120,7 +121,7 @@
                                     <div class="text-end">
                                         <a href="{{ route('insurance-providers.index') }}" class="btn btn-secondary me-2">Cancel</a>
                                         <button type="submit" class="btn btn-primary">
-                                            <i class="fas fa-save me-1"></i> Save Provider
+                                            <i class="fas fa-save me-1"></i> Update Provider
                                         </button>
                                     </div>
                                 </form>

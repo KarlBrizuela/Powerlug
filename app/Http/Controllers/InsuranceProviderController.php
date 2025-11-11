@@ -2,44 +2,66 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\InsuranceProvider;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 class InsuranceProviderController extends Controller
 {
     public function index()
-{
-    // Create dummy data for viewing
-    $providers = collect([
-        (object)[
-            'id' => 1,
-            'code' => 'HGI-001',
-            'name' => 'Standard Insurance',
-            'contact_person' => 'John Smith',
-            'contact_phone' => '(555) 123-4567',
-            'formatted_commission_rate' => '15%',
-            'active_policies_count' => 25,
-            'is_active' => true
-        ],
-        (object)[
-            'id' => 2,
-            'code' => 'SLI-002', 
-            'name' => 'Cocogen Insurance',
-            'contact_person' => 'Sarah Johnson',
-            'contact_phone' => '(555) 987-6543',
-            'formatted_commission_rate' => '12%',
-            'active_policies_count' => 18,
-            'is_active' => true
-        ]
-    ]);
-
-    return view('pages.insurance-provider-list', compact('providers'));
-}
+    {
+        $providers = InsuranceProvider::latest()->paginate(10);
+        return view('pages.insurance-provider-list', compact('providers'));
+    }
 
     public function create()
     {
-        return view('pages.new-insuranceprovider'); // Your actual file name
+        return view('pages.new-insuranceprovider');
     }
 
-    // ... rest of your methods
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([
+            'code' => 'required|string|unique:insurance_providers',
+            'name' => 'required|string|max:255',
+            'is_active' => 'boolean'
+        ]);
+
+        // Set default value for is_active if not provided
+        $validatedData['is_active'] = $request->has('is_active');
+
+        InsuranceProvider::create($validatedData);
+
+        return redirect()->route('insurance-providers.index')
+                        ->with('success', 'Insurance Provider created successfully');
+    }
+
+    public function edit(InsuranceProvider $insuranceProvider)
+    {
+        return view('pages.edit-insuranceprovider', compact('insuranceProvider'));
+    }
+
+    public function update(Request $request, InsuranceProvider $insuranceProvider)
+    {
+        $validatedData = $request->validate([
+            'code' => 'required|string|unique:insurance_providers,code,' . $insuranceProvider->id,
+            'name' => 'required|string|max:255',
+            'is_active' => 'boolean'
+        ]);
+
+        // Set default value for is_active if not provided
+        $validatedData['is_active'] = $request->has('is_active');
+
+        $insuranceProvider->update($validatedData);
+
+        return redirect()->route('insurance-providers.index')
+                        ->with('success', 'Insurance Provider updated successfully');
+    }
+
+    public function destroy(InsuranceProvider $insuranceProvider)
+    {
+        $insuranceProvider->delete();
+        return redirect()->route('insurance-providers.index')
+                        ->with('success', 'Insurance Provider deleted successfully');
+    }
 }

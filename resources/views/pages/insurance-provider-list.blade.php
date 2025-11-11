@@ -52,7 +52,7 @@
                 <div class="col-12">
                     <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                         <h4 class="mb-sm-0 font-size-18">Insurance Provider List</h4>
-                        <a href="{{ route('providers.create') }}" class="btn btn-primary">
+                        <a href="{{ route('insurance-providers.create') }}" class="btn btn-primary">
                             <i class="fas fa-plus me-1"></i> Add New Provider
                         </a>
                     </div>
@@ -106,12 +106,8 @@
                                 <table id="providersTable" class="table table-bordered dt-responsive nowrap w-100">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>Insurance Provider Code</th>
-                                            <th>Insurance Provider Name</th>
-                                            <th>Contact Person</th>
-                                            <th>Contact Phone</th>
-                                            <th>Commission Rate</th>
-                                            <th>Active Policies</th>
+                                            <th>Provider Code</th>
+                                            <th>Provider Name</th>
                                             <th>Active Status</th>
                                             <th>Actions</th>
                                         </tr>
@@ -119,37 +115,25 @@
                                     <tbody>
                                         @forelse($providers as $provider)
                                             <tr>
-                                                <td><strong>{{ $provider->code ?? 'PROV-' . $loop->iteration }}</strong></td>
-                                                <td>{{ $provider->name ?? 'Provider ' . $loop->iteration }}</td>
-                                                <td>{{ $provider->contact_person ?? 'N/A' }}</td>
-                                                <td>{{ $provider->contact_phone ?? 'N/A' }}</td>
-                                                <td>{{ $provider->formatted_commission_rate ?? '15%' }}</td>
+                                                <td><strong>{{ $provider->code }}</strong></td>
+                                                <td>{{ $provider->name }}</td>
                                                 <td>
-                                                    <span class="badge bg-info">{{ $provider->active_policies_count ?? '0' }}</span>
-                                                </td>
-                                                <td>
-                                                    <span class="badge bg-{{ ($provider->is_active ?? true) ? 'success' : 'danger' }}">
-                                                        {{ ($provider->is_active ?? true) ? 'Yes' : 'No' }}
+                                                    <span class="badge bg-{{ $provider->is_active ? 'success' : 'danger' }}">
+                                                        {{ $provider->is_active ? 'Yes' : 'No' }}
                                                     </span>
                                                 </td>
                                                 <td>
                                                     <div class="btn-group btn-group-sm">
-                                                        <button type="button" 
-                                                                class="btn btn-info view-provider" 
-                                                                data-bs-toggle="tooltip" 
-                                                                title="View Provider Details">
-                                                            <i class="fas fa-eye"></i>
-                                                        </button>
-                                                        <button type="button" 
-                                                                class="btn btn-primary" 
-                                                                data-bs-toggle="tooltip" 
-                                                                title="Edit Provider">
+                                                        <a href="{{ route('insurance-providers.edit', $provider) }}" 
+                                                           class="btn btn-primary" 
+                                                           data-bs-toggle="tooltip" 
+                                                           title="Edit Provider">
                                                             <i class="fas fa-edit"></i>
-                                                        </button>
+                                                        </a>
                                                         <button type="button" 
                                                                 class="btn btn-danger delete-provider" 
-                                                                data-provider-id="{{ $provider->id ?? $loop->iteration }}"
-                                                                data-provider-name="{{ $provider->name ?? 'Provider ' . $loop->iteration }}"
+                                                                data-provider-id="{{ $provider->id }}"
+                                                                data-provider-name="{{ $provider->name }}"
                                                                 data-bs-toggle="tooltip" 
                                                                 title="Delete Provider">
                                                             <i class="fas fa-trash"></i>
@@ -159,11 +143,11 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="8" class="text-center py-4">
+                                                <td colspan="4" class="text-center py-4">
                                                     <div class="text-muted">
                                                         <i class="fas fa-briefcase fa-2x mb-3"></i>
                                                         <p>No insurance providers found.</p>
-                                                        <a href="{{ route('providers.create') }}" class="btn btn-primary">
+                                                        <a href="{{ route('insurance-providers.create') }}" class="btn btn-primary">
                                                             Add Your First Provider
                                                         </a>
                                                     </div>
@@ -194,7 +178,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <form id="deleteProviderForm" method="POST">
+                    <form id="deleteProviderForm" action="" method="POST">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-danger">Delete Provider</button>
@@ -273,10 +257,13 @@
                         next: "<i class='fas fa-chevron-right'></i>"
                     }
                 },
-                dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-                columnDefs: [
-                    { orderable: false, targets: [7] } // Disable sorting for actions column
-                ]
+                columns: [
+                    { data: 'code' },       // Provider Code
+                    { data: 'name' },       // Provider Name
+                    { data: 'status' },     // Active Status
+                    { data: 'actions', orderable: false }  // Actions
+                ],
+                dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>'
             });
 
             // Initialize tooltips
@@ -314,11 +301,11 @@
                 const status = this.value;
                 
                 if (status === '') {
-                    table.columns(6).search('').draw();
+                    table.columns(2).search('').draw();
                 } else if (status === 'active') {
-                    table.columns(6).search('Yes').draw();
+                    table.columns(2).search('Yes').draw();
                 } else if (status === 'inactive') {
-                    table.columns(6).search('No').draw();
+                    table.columns(2).search('No').draw();
                 }
             });
         });

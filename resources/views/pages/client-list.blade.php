@@ -88,7 +88,7 @@
                     <div class="col-12">
                         <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                             <h4 class="mb-sm-0 font-size-18">Client List</h4>
-                            <a href="#" class="btn btn-primary">
+                            <a href="{{ route('clients.create') }}" class="btn btn-primary">
                                 <i class="fas fa-plus me-1"></i> Add New Client
                             </a>
                         </div>
@@ -96,11 +96,12 @@
                 </div>
 
                 <!-- Success Alert -->
+                @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle me-2"></i>
-                    Client created successfully!
+                    {{ session('success') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
+                @endif
 
                 <div class="row">
                     <div class="col-lg-12">
@@ -142,23 +143,24 @@
                                             </tr>
                                         </thead>
                                         <tbody>
+                                            @forelse($clients as $client)
                                             <tr>
-                                                <td>John Smith</td>
-                                                <td>123 Main Street, New York, NY 10001</td>
-                                                <td>(555) 123-4567</td>
-                                                <td>john.smith@example.com</td>
+                                                <td>{{ $client->firstName }} {{ $client->middleName }} {{ $client->lastName }}</td>
+                                                <td>{{ $client->address }}, {{ $client->city }}, {{ $client->province }} {{ $client->postalCode }}</td>
+                                                <td>{{ $client->phone }}</td>
+                                                <td>{{ $client->email }}</td>
                                                 <td>
                                                     <span class="badge bg-success">Yes</span>
                                                 </td>
                                                 <td>
                                                     <div class="btn-group btn-group-sm">
-                                                        <a href="#" 
+                                                        <a href="{{ route('clients.show', $client->id) }}" 
                                                            class="btn btn-info" 
                                                            data-bs-toggle="tooltip" 
                                                            title="View Client">
                                                             <i class="fas fa-eye"></i>
                                                         </a>
-                                                        <a href="#" 
+                                                        <a href="{{ route('clients.edit', $client->id) }}" 
                                                            class="btn btn-primary" 
                                                            data-bs-toggle="tooltip" 
                                                            title="Edit Client">
@@ -167,8 +169,8 @@
                                                         @if(auth()->user()->position === 'superadmin')
                                                         <button type="button" 
                                                                 class="btn btn-danger delete-client" 
-                                                                data-client-id="1"
-                                                                data-client-name="John Smith"
+                                                                data-client-id="{{ $client->id }}"
+                                                                data-client-name="{{ $client->firstName }} {{ $client->lastName }}"
                                                                 data-bs-toggle="tooltip" 
                                                                 title="Delete Client">
                                                             <i class="fas fa-trash"></i>
@@ -177,76 +179,11 @@
                                                     </div>
                                                 </td>
                                             </tr>
+                                            @empty
                                             <tr>
-                                                <td>Sarah Johnson</td>
-                                                <td>456 Oak Avenue, Los Angeles, CA 90210</td>
-                                                <td>(555) 987-6543</td>
-                                                <td>sarah.j@example.com</td>
-                                                <td>
-                                                    <span class="badge bg-success">Yes</span>
-                                                </td>
-                                                <td>
-                                                    <div class="btn-group btn-group-sm">
-                                                        <a href="#" 
-                                                           class="btn btn-info" 
-                                                           data-bs-toggle="tooltip" 
-                                                           title="View Client">
-                                                            <i class="fas fa-eye"></i>
-                                                        </a>
-                                                        <a href="#" 
-                                                           class="btn btn-primary" 
-                                                           data-bs-toggle="tooltip" 
-                                                           title="Edit Client">
-                                                            <i class="fas fa-edit"></i>
-                                                        </a>
-                                                        @if(auth()->user()->position === 'superadmin')
-                                                        <button type="button" 
-                                                                class="btn btn-danger delete-client" 
-                                                                data-client-id="1"
-                                                                data-client-name="John Smith"
-                                                                data-bs-toggle="tooltip" 
-                                                                title="Delete Client">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                        @endif
-                                                    </div>
-                                                </td>
+                                                <td colspan="6" class="text-center">No clients found</td>
                                             </tr>
-                                            <tr>
-                                                <td>Michael Brown</td>
-                                                <td>789 Pine Road, Chicago, IL 60601</td>
-                                                <td>(555) 456-7890</td>
-                                                <td>m.brown@example.com</td>
-                                                <td>
-                                                    <span class="badge bg-danger">No</span>
-                                                </td>
-                                                <td>
-                                                   <div class="btn-group btn-group-sm">
-                                                        <a href="#" 
-                                                           class="btn btn-info" 
-                                                           data-bs-toggle="tooltip" 
-                                                           title="View Client">
-                                                            <i class="fas fa-eye"></i>
-                                                        </a>
-                                                        <a href="#" 
-                                                           class="btn btn-primary" 
-                                                           data-bs-toggle="tooltip" 
-                                                           title="Edit Client">
-                                                            <i class="fas fa-edit"></i>
-                                                        </a>
-                                                        @if(auth()->user()->position === 'superadmin')
-                                                        <button type="button" 
-                                                                class="btn btn-danger delete-client" 
-                                                                data-client-id="1"
-                                                                data-client-name="John Smith"
-                                                                data-bs-toggle="tooltip" 
-                                                                title="Delete Client">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                        @endif
-                                                    </div>
-                                                </td>
-                                            </tr>
+                                            @endforelse
                                         </tbody>
                                     </table>
                                 </div>
@@ -256,19 +193,9 @@
                                     <div class="col-md-12">
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div class="text-muted">
-                                                Showing 1 to 3 of 3 entries
+                                                Showing {{ $clients->firstItem() ?? 0 }} to {{ $clients->lastItem() ?? 0 }} of {{ $clients->total() ?? 0 }} entries
                                             </div>
-                                            <nav>
-                                                <ul class="pagination mb-0">
-                                                    <li class="page-item disabled">
-                                                        <a class="page-link" href="#" tabindex="-1">Previous</a>
-                                                    </li>
-                                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                                    <li class="page-item disabled">
-                                                        <a class="page-link" href="#">Next</a>
-                                                    </li>
-                                                </ul>
-                                            </nav>
+                                            {{ $clients->links() }}
                                         </div>
                                     </div>
                                 </div>
@@ -293,6 +220,8 @@
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             <form id="deleteClientForm" method="POST">
+                                @csrf
+                                @method('DELETE')
                                 <button type="submit" class="btn btn-danger">Delete Client</button>
                             </form>
                         </div>
