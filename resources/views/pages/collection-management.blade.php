@@ -105,7 +105,7 @@
                                                 <option value="">Select Client</option>
                                                 @foreach($clients as $client)
                                                     <option value="{{ $client->id }}" {{ old('client_id') == $client->id ? 'selected' : '' }}>
-                                                        {{ $client->lastName }}, {{ $client->firstName }} {{ $client->middleName }}
+                                                        {{ $client->lastName }}, {{ $client->firstName }} {{ $client->middleName }} ({{ $client->source ?? 'Unknown' }})
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -120,7 +120,7 @@
                                             <label for="invoice_number" class="form-label">Service Invoice Number <span class="text-danger">*</span></label>
                                             <input type="text" class="form-control @error('invoice_number') is-invalid @enderror" 
                                                 id="invoice_number" name="invoice_number" value="{{ old('invoice_number') }}" 
-                                                placeholder="Enter service invoice number" required>
+                                                placeholder="Auto-generated" readonly>
                                             @error('invoice_number')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -264,7 +264,7 @@
             const invoiceInput = document.querySelector('input[name="invoice_number"]');
             if (!invoiceInput.value) {
                 const timestamp = new Date().getTime();
-                invoiceInput.value = `INV-${timestamp}`;
+                invoiceInput.value = `SIN-${timestamp}`;
             }
 
             // Initialize Feather Icons

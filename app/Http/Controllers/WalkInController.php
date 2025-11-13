@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\WalkIn;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class WalkInController extends Controller
 {
     public function index()
     {
-        return view('pages.walk-in-create');
+        $walkIns = WalkIn::orderBy('created_at', 'desc')->paginate(15);
+        return view('pages.walk-in-index', compact('walkIns'));
     }
 
     public function create()
@@ -49,5 +51,30 @@ class WalkInController extends Controller
 
         return redirect()->route('walk-in.index')
             ->with('success', 'Walk-in created successfully.');
+    }
+
+    public function show(WalkIn $walkIn)
+    {
+        return view('pages.walk-in-show', compact('walkIn'));
+    }
+
+    public function download(WalkIn $walkIn)
+    {
+        if (!$walkIn->file_path || !file_exists(storage_path('app/public/' . $walkIn->file_path))) {
+            return redirect()->back()->with('error', 'File not found.');
+        }
+
+        return response()->download(storage_path('app/public/' . $walkIn->file_path));
+    }
+
+    public function destroy(WalkIn $walkIn)
+    {
+        if ($walkIn->file_path && Storage::disk('public')->exists($walkIn->file_path)) {
+            Storage::disk('public')->delete($walkIn->file_path);
+        }
+
+        $walkIn->delete();
+
+        return redirect()->route('walk-in.index')->with('success', 'Walk-in deleted successfully.');
     }
 }

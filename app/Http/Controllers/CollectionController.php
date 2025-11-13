@@ -6,12 +6,14 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Client;
 use App\Models\Collection;
+use App\Models\WalkIn;
+use App\Models\Claim;
 
 class CollectionController extends Controller
 {
     public function create()
     {
-        $clients = Client::orderBy('lastName')->orderBy('firstName')->get();
+        $clients = $this->syncAndGetClientsFromWalkinsAndClaims();
         return view('pages.collection-management', compact('clients'));
     }
 
@@ -25,15 +27,118 @@ class CollectionController extends Controller
         ];
         
         $collections = Collection::with('client')->latest()->paginate(10);
-        $clients = Client::orderBy('lastName')->orderBy('firstName')->get();
+        $clients = $this->syncAndGetClientsFromWalkinsAndClaims();
         
         return view('pages.collection-info', compact('stats', 'collections', 'clients'));
     }
 
     public function edit(Collection $collection)
     {
-        $clients = Client::orderBy('lastName')->orderBy('firstName')->get();
+        $clients = $this->syncAndGetClientsFromWalkinsAndClaims();
         return view('pages.collection-edit', compact('collection', 'clients'));
+    }
+
+    /**
+     * Create Client records for walk-in and claim names that don't have a matching client yet.
+     * Returns the filtered list of clients to display in the dropdown (only those from walk-in/claims).
+     */
+    protected function syncAndGetClientsFromWalkinsAndClaims()
+    {
+        $createdClients = [];
+
+        // Process walk-in insured names
+        $walkIns = WalkIn::query()->select('id', 'insured_name')->whereNotNull('insured_name')->distinct()->get();
+        foreach ($walkIns as $walk) {
+            $name = trim($walk->insured_name);
+            if (empty($name)) {
+                continue;
+            }
+
+            // Parse name
+            $first = $name;
+            $last = '';
+            $parts = preg_split('/\s+/', $name);
+            if (count($parts) > 1) {
+                $first = array_shift($parts);
+                $last = array_pop($parts);
+            }
+
+            // Check if client already exists
+            $existing = Client::where('firstName', $first)->where('lastName', $last)->first();
+            if (!$existing) {
+                $uniqueSuffix = uniqid() . '-' . bin2hex(random_bytes(4));
+                $client = Client::create([
+                    'firstName' => $first,
+                    'middleName' => implode(' ', $parts),
+                    'lastName' => $last,
+                    'email' => 'unknown+' . $uniqueSuffix . '@example.com',
+                    'phone' => '00000000000',
+                    'address' => $name,
+                    'city' => 'Unknown',
+                    'province' => 'Unknown',
+                    'postalCode' => '0000',
+                    'birthDate' => '1970-01-01',
+                    'occupation' => 'Unknown',
+                ]);
+                $createdClients[$client->id] = 'Walk-in';
+            } else {
+                $createdClients[$existing->id] = 'Walk-in';
+            }
+        }
+
+        // Process claim client names
+        $claims = Claim::query()->select('id', 'client_name')->whereNotNull('client_name')->distinct()->get();
+        foreach ($claims as $claim) {
+            $name = trim($claim->client_name);
+            if (empty($name)) {
+                continue;
+            }
+
+            // Parse name
+            $first = $name;
+            $last = '';
+            $parts = preg_split('/\s+/', $name);
+            if (count($parts) > 1) {
+                $first = array_shift($parts);
+                $last = array_pop($parts);
+            }
+
+            // Check if client already exists
+            $existing = Client::where('firstName', $first)->where('lastName', $last)->first();
+            if (!$existing) {
+                $uniqueSuffix = uniqid() . '-' . bin2hex(random_bytes(4));
+                $client = Client::create([
+                    'firstName' => $first,
+                    'middleName' => implode(' ', $parts),
+                    'lastName' => $last,
+                    'email' => 'unknown+' . $uniqueSuffix . '@example.com',
+                    'phone' => '00000000000',
+                    'address' => $name,
+                    'city' => 'Unknown',
+                    'province' => 'Unknown',
+                    'postalCode' => '0000',
+                    'birthDate' => '1970-01-01',
+                    'occupation' => 'Unknown',
+                ]);
+                if (!isset($createdClients[$client->id])) {
+                    $createdClients[$client->id] = 'Claim';
+                }
+            } else {
+                if (!isset($createdClients[$existing->id])) {
+                    $createdClients[$existing->id] = 'Claim';
+                }
+            }
+        }
+
+        // Fetch clients and attach source information
+        $clientIds = array_keys($createdClients);
+        $clients = Client::whereIn('id', $clientIds)->orderBy('lastName')->orderBy('firstName')->get();
+        
+        foreach ($clients as $client) {
+            $client->source = $createdClients[$client->id] ?? 'Unknown';
+        }
+
+        return $clients;
     }
 
     public function update(Request $request, Collection $collection)

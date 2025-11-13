@@ -73,14 +73,11 @@
                             <h4 class="mb-1 text-primary">Claim Form</h4>
                             <p class="text-muted mb-0">Powerlug Claim Filing System</p>
                         </div>
-                        <!-- <div class="d-flex gap-2">
-                            <a href="#" class="btn btn-outline-primary">
-                                <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                        <div class="d-flex gap-2">
+                            <a href="{{ route('claims.index') }}" class="btn btn-outline-primary">
+                                <i class="bi bi-list-ul me-1"></i> View Claims
                             </a>
-                            <a href="#" class="btn btn-outline-secondary">
-                                <i class="bi bi-box-arrow-right me-1"></i> Logout
-                            </a>
-                        </div> -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -90,7 +87,8 @@
                 <div class="col-12 col-lg-10 col-xl-8">
                     <div class="card shadow-sm border-0">
                         <div class="card-body p-4 p-md-5">
-                            <form>
+                            <form method="POST" action="{{ route('claims.store') }}" enctype="multipart/form-data">
+                                @csrf
                                 <!-- Claim Section -->
                                 <div class="bg-light p-3 rounded mb-4 border-primary-left">
                                     <h6 class="mb-0 text-dark">Insured Claim:</h6>
@@ -99,7 +97,7 @@
                                 <div class="row mb-3">
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold">Date of Claim</label>
-                                        <input type="date" class="form-control">
+                                        <input type="date" name="date_of_claim" class="form-control">
                                     </div>
                                 </div>
 
@@ -120,35 +118,35 @@
                                 <div class="row mb-3">
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold">Claim Number</label>
-                                        <input type="text" class="form-control" placeholder="Enter claim number">
+                                        <input type="text" name="claim_number" class="form-control" placeholder="Enter claim number">
                                     </div>
                                 </div>
 
                                 <div class="row mb-3">
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold">LOA Amount</label>
-                                        <input type="text" class="form-control" placeholder="Enter LOA amount">
+                                        <input type="text" name="loa_amount" class="form-control" placeholder="Enter LOA amount">
                                     </div>
                                 </div>
 
                                 <div class="row mb-3">
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold">Participation Amount</label>
-                                        <input type="text" class="form-control" placeholder="Enter Participation amount">
+                                        <input type="text" name="participation_amount" class="form-control" placeholder="Enter Participation amount">
                                     </div>
                                 </div>
 
                                 <div class="row mb-3">
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold">Deductible</label>
-                                        <input type="text" class="form-control" placeholder="Enter Deductible">
+                                        <input type="text" name="deductible" class="form-control" placeholder="Enter Deductible">
                                     </div>
                                 </div>
 
                                 <div class="row mb-4">
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold">File Upload</label>
-                                        <input type="file" class="form-control">
+                                        <input type="file" name="file" class="form-control">
                                     </div>
                                 </div>
 
@@ -161,19 +159,19 @@
                                                     <tr>
                                                         <td class="fw-semibold">PARTS</td>
                                                         <td class="w-25">
-                                                            <input type="number" id="parts" class="form-control text-end" placeholder="0" min="0" step="0.01" oninput="calculateTotals()">
+                                                            <input type="number" id="parts" name="parts" class="form-control text-end" placeholder="0" min="0" step="0.01" oninput="calculateTotals()">
                                                         </td>
                                                     </tr>
                                                     <tr>
                                                         <td class="fw-semibold">LABOR COST</td>
                                                         <td>
-                                                            <input type="number" id="laborCost" class="form-control text-end" placeholder="0" min="0" step="0.01" oninput="calculateTotals()">
+                                                            <input type="number" id="laborCost" name="laborCost" class="form-control text-end" placeholder="0" min="0" step="0.01" oninput="calculateTotals()">
                                                         </td>
                                                     </tr>
                                                     <tr>
                                                         <td class="fw-semibold">MATERIALS</td>
                                                         <td>
-                                                            <input type="number" id="materials" class="form-control text-end" placeholder="0" min="0" step="0.01" oninput="calculateTotals()">
+                                                            <input type="number" id="materials" name="materials" class="form-control text-end" placeholder="0" min="0" step="0.01" oninput="calculateTotals()">
                                                         </td>
                                                     </tr>
                                                     <tr>

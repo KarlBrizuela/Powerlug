@@ -57,6 +57,7 @@ Route::middleware(['auth'])->group(function () {
     
     // Insurance Provider routes
     Route::resource('insurance-providers', InsuranceProviderController::class);    // Claims routes
+    // Claims: use controller resource for create/index/store
     Route::get('/claims/create', function () {
         // Load distinct client names from policies for the claim form dropdown
         $clients = \App\Models\Policy::select('client_name')
@@ -66,17 +67,21 @@ Route::middleware(['auth'])->group(function () {
             ->get();
         return view('pages.claim', compact('clients'));
     })->name('claims.create');
-    
-    Route::get('/claims', function () {
-        return view('pages.walk-in');
-    })->name('claims.index');
 
-    // Walk-in routes - FIXED: Added to protected group and used correct controller
-    Route::resource('walk-in', WalkInController::class);
-    Route::get('/walk-in', [WalkInController::class, 'index'])->name('walk-in.index');
- Route::get('/walk-in', [WalkInController::class, 'index'])->name('walk-in.index');
-// Route::get('/walk-in/create', [WalkInController::class, 'create'])->name('walk-in.create');
-    Route::post('walk-in', [WalkInController::class, 'store'])->name('walk-in.store');
+    Route::get('/claims', [App\Http\Controllers\ClaimController::class, 'index'])->name('claims.index');
+    Route::post('/claims', [App\Http\Controllers\ClaimController::class, 'store'])->name('claims.store');
+    Route::get('/claims/{claim}', [App\Http\Controllers\ClaimController::class, 'show'])->name('claims.show');
+    Route::get('/claims/{claim}/download', [App\Http\Controllers\ClaimController::class, 'download'])->name('claims.download');
+    Route::delete('/claims/{claim}', [App\Http\Controllers\ClaimController::class, 'destroy'])->name('claims.destroy');
+
+    // Walk-in routes - Default to create form, with list accessible via button
+    Route::get('/walk-in', [WalkInController::class, 'create'])->name('walk-in.create');
+    Route::get('/walk-in/list', [WalkInController::class, 'index'])->name('walk-in.index');
+    Route::post('/walk-in', [WalkInController::class, 'store'])->name('walk-in.store');
+    // Individual walk-in actions
+    Route::get('/walk-in/{walkIn}', [WalkInController::class, 'show'])->name('walk-in.show');
+    Route::get('/walk-in/{walkIn}/download', [WalkInController::class, 'download'])->name('walk-in.download');
+    Route::delete('/walk-in/{walkIn}', [WalkInController::class, 'destroy'])->name('walk-in.destroy');
 
     // Client Management routes
       Route::resource('clients', ClientController::class);

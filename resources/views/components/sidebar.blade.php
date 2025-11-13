@@ -290,7 +290,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('walk-in.index') }}" class="{{ request()->routeIs('claims.index') ? 'active' : '' }}">
+                                <a href="{{ route('walk-in.create') }}" class="{{ request()->routeIs('walk-in.create') ? 'active' : '' }}">
                                    walk-in
                                 </a>
                             </li>
