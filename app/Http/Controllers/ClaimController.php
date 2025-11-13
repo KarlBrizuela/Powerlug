@@ -15,9 +15,21 @@ class ClaimController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $claims = Claim::orderBy('created_at', 'desc')->paginate(15);
+        $query = Claim::with(['insuranceProvider', 'policy'])
+            ->orderBy('created_at', 'desc');
+
+        // Apply filters
+        if ($request->has('admin_status') && $request->admin_status) {
+            $query->where('admin_status', $request->admin_status);
+        }
+
+        if ($request->has('superadmin_status') && $request->superadmin_status) {
+            $query->where('superadmin_status', $request->superadmin_status);
+        }
+
+        $claims = $query->paginate(15)->withQueryString();
 
         return view('pages.claims.index', compact('claims'));
     }
@@ -44,7 +56,9 @@ class ClaimController extends Controller
         $validated = $request->validate([
             'date_of_claim' => 'nullable|date',
             'client' => 'nullable|string',
-            'claim_number' => 'nullable|string',
+            'insurance_provider_id' => 'required|exists:insurance_providers,id',
+            'policy_id' => 'required|exists:policies,id',
+            'policy_number' => 'required|string',
             'loa_amount' => 'nullable|numeric|min:0',
             'participation_amount' => 'nullable|numeric|min:0',
             'deductible' => 'nullable|numeric|min:0',
@@ -54,10 +68,16 @@ class ClaimController extends Controller
             'materials' => 'nullable|numeric|min:0',
         ]);
 
+        // Auto-generate claim number
+        $claimNumber = Claim::generateClaimNumber();
+
         $data = [
             'date_of_claim' => $validated['date_of_claim'] ?? null,
             'client_name' => $validated['client'] ?? null,
-            'claim_number' => $validated['claim_number'] ?? null,
+            'insurance_provider_id' => $validated['insurance_provider_id'],
+            'policy_id' => $validated['policy_id'],
+            'policy_number' => $validated['policy_number'],
+            'claim_number' => $claimNumber,
             'loa_amount' => $validated['loa_amount'] ?? null,
             'participation_amount' => $validated['participation_amount'] ?? null,
             'deductible' => $validated['deductible'] ?? null,
@@ -155,5 +175,33 @@ class ClaimController extends Controller
         $claim->delete();
 
         return redirect()->route('claims.index')->with('success', 'Claim deleted');
+    }
+
+    /**
+     * Update admin status for a claim.
+     */
+    public function updateAdminStatus(Request $request, Claim $claim)
+    {
+        $validated = $request->validate([
+            'admin_status' => 'required|in:billed,pending',
+        ]);
+
+        $claim->update(['admin_status' => $validated['admin_status']]);
+
+        return redirect()->back()->with('success', 'Admin status updated successfully');
+    }
+
+    /**
+     * Update superadmin status for a claim.
+     */
+    public function updateSuperadminStatus(Request $request, Claim $claim)
+    {
+        $validated = $request->validate([
+            'superadmin_status' => 'required|in:cleared,deposited',
+        ]);
+
+        $claim->update(['superadmin_status' => $validated['superadmin_status']]);
+
+        return redirect()->back()->with('success', 'Super admin status updated successfully');
     }
 }

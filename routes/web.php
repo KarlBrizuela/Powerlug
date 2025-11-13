@@ -65,7 +65,14 @@ Route::middleware(['auth'])->group(function () {
             ->distinct()
             ->orderBy('client_name')
             ->get();
-        return view('pages.claim', compact('clients'));
+        
+        // Load insurance providers
+        $insuranceProviders = \App\Models\InsuranceProvider::orderBy('name')->get();
+        
+        // Load policies
+        $policies = \App\Models\Policy::with('insuranceProvider')->orderBy('policy_number')->get();
+        
+        return view('pages.claim', compact('clients', 'insuranceProviders', 'policies'));
     })->name('claims.create');
 
     Route::get('/claims', [App\Http\Controllers\ClaimController::class, 'index'])->name('claims.index');
@@ -73,6 +80,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/claims/{claim}', [App\Http\Controllers\ClaimController::class, 'show'])->name('claims.show');
     Route::get('/claims/{claim}/download', [App\Http\Controllers\ClaimController::class, 'download'])->name('claims.download');
     Route::delete('/claims/{claim}', [App\Http\Controllers\ClaimController::class, 'destroy'])->name('claims.destroy');
+    Route::patch('/claims/{claim}/admin-status', [App\Http\Controllers\ClaimController::class, 'updateAdminStatus'])->name('claims.update-admin-status');
+    Route::patch('/claims/{claim}/superadmin-status', [App\Http\Controllers\ClaimController::class, 'updateSuperadminStatus'])->name('claims.update-superadmin-status');
 
     // Walk-in routes - Default to create form, with list accessible via button
     Route::get('/walk-in', [WalkInController::class, 'create'])->name('walk-in.create');
