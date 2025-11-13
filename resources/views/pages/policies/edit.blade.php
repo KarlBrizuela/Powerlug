@@ -1,231 +1,265 @@
-@extends('layouts.app')
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Policy - Policy Management</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .main-content {
+            margin-left: 280px;
+            padding: 20px;
+            transition: margin-left 0.3s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                padding: 15px;
+            }
+        }
 
-@section('content')
-<div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <h2 class="page-title">Edit Policy</h2>
-        </div>
-        <div class="col-md-4 text-end">
-            <a href="{{ route('policies.index') }}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Back
-            </a>
-        </div>
+        .page-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .card {
+            border: 1px solid #dee2e6;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex">
+        <!-- Sidebar -->
+        @include('components.sidebar')
+        
+        <!-- Main content -->
+        <main class="main-content flex-grow-1">
+            <div class="container-fluid">
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <h2 class="page-title">Edit Policy</h2>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <a href="{{ route('policies.index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </a>
+                    </div>
+                </div>
+
+                @if ($errors->any())
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <h6 class="alert-heading">Validation Errors</h6>
+                        <ul class="mb-0">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
+
+                <div class="card">
+                    <div class="card-body">
+                        <form action="{{ route('policies.update', $policy->id) }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            @method('PUT')
+
+                            @include('pages.policies._form', ['policy' => $policy, 'insuranceProviders' => $insuranceProviders, 'showDetailsButtons' => false])
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
 
-    @if ($errors->any())
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <h6 class="alert-heading">Validation Errors</h6>
-            <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom Scripts -->
+    <script>
+        (function() {
+            // Bank transfer options based on insurance provider (keyed by provider code)
+            const bankOptions = {
+                'MERCANTILE': ['BDO', 'Metrobank', 'BPI'],
+                'MALAYAN': ['Bills payment'],
+                'FPG': ['BDO'],
+                'FORTUNE_GEN': ['BDO', 'Union Bank', 'BPI', 'GCash'],
+                'Cocogen Insurance': ['No specific banks'],
+                'COUNTRY_BANKER': ['BPI', 'Union Bank'],
+                'Standard Insurance': ['BDO']
+            };
+
+            // Map of insurance provider id -> provider code (populated from server-side $insuranceProviders)
+            const providerIdToCodeMap = {
+                @foreach($insuranceProviders as $provider)
+                    '{{ $provider->id }}': '{{ $provider->code ?? '' }}',
                 @endforeach
-            </ul>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+            };
 
-    <div class="card">
-        <div class="card-body">
-            <form action="{{ route('policies.update', $policy->id) }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
+            // Normalized bank options (keys lowercased and trimmed) for robust lookup
+            const normalizedBankOptions = {};
+            Object.keys(bankOptions).forEach(k => {
+                const key = (k || '').toString().trim().toLowerCase();
+                normalizedBankOptions[key] = bankOptions[k];
+            });
 
-                @include('pages.policies._form', ['policy' => $policy, 'insuranceProviders' => $insuranceProviders, 'showDetailsButtons' => false])
-            </form>
-        </div>
-    </div>
-</div>
+            function initPolicyForm() {
+                const policyDetailsBtn = document.getElementById('policyDetailsBtn');
+                const walkinDetailsBtn = document.getElementById('walkinDetailsBtn');
+                const policyDetails = document.getElementById('policyDetails');
+                const walkinDetails = document.getElementById('walkinDetails');
+                const insuranceProvider = document.getElementById('insuranceProvider');
+                const paymentMethod = document.getElementById('paymentMethod');
+                const bankTransferFields = document.getElementById('bankTransferFields');
+                const bankTransfer = document.getElementById('bankTransfer');
 
-<style>
-    .page-title {
-        font-size: 2rem;
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 1rem;
-    }
-
-    .card {
-        border: 1px solid #dee2e6;
-        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    }
-
-    .form-label {
-        font-weight: 600;
-        color: #495057;
-    }
-
-    .form-control:focus {
-        border-color: #007bff;
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-    }
-</style>
-@endsection
-
-@push('scripts')
-<script>
-    (function() {
-        // Bank transfer options based on insurance provider (keyed by provider code)
-        const bankOptions = {
-            'MERCANTILE': ['BDO', 'Metrobank', 'BPI'],
-            'MALAYAN': ['Bills payment'],
-            'FPG': ['BDO'],
-            'FORTUNE_GEN': ['BDO', 'Union Bank', 'BPI', 'GCash'],
-            'Cocogen Insurance': ['No specific banks'],
-            'COUNTRY_BANKER': ['BPI', 'Union Bank'],
-            'Standard Insurance': ['BDO']
-        };
-
-        // Map of insurance provider id -> provider code (populated from server-side $insuranceProviders)
-        const providerIdToCodeMap = {
-            @foreach($insuranceProviders as $provider)
-                '{{ $provider->id }}': '{{ $provider->code ?? '' }}',
-            @endforeach
-        };
-
-        // Normalized bank options (keys lowercased and trimmed) for robust lookup
-        const normalizedBankOptions = {};
-        Object.keys(bankOptions).forEach(k => {
-            const key = (k || '').toString().trim().toLowerCase();
-            normalizedBankOptions[key] = bankOptions[k];
-        });
-
-        function initPolicyForm() {
-            const policyDetailsBtn = document.getElementById('policyDetailsBtn');
-            const walkinDetailsBtn = document.getElementById('walkinDetailsBtn');
-            const policyDetails = document.getElementById('policyDetails');
-            const walkinDetails = document.getElementById('walkinDetails');
-            const insuranceProvider = document.getElementById('insuranceProvider');
-            const paymentMethod = document.getElementById('paymentMethod');
-            const bankTransferFields = document.getElementById('bankTransferFields');
-            const bankTransfer = document.getElementById('bankTransfer');
-
-            // Initialize sections if present
-            if (policyDetails && walkinDetails) {
-                policyDetails.classList.add('active');
-                walkinDetails.classList.remove('active');
-            }
-
-            if (policyDetailsBtn) {
-                policyDetailsBtn.addEventListener('click', function() {
-                    if (policyDetails && walkinDetails) {
-                        policyDetails.classList.add('active');
-                        walkinDetails.classList.remove('active');
-                        policyDetailsBtn.classList.remove('btn-outline-primary');
-                        policyDetailsBtn.classList.add('btn-primary');
-                        walkinDetailsBtn.classList.remove('btn-primary');
-                        walkinDetailsBtn.classList.add('btn-outline-primary');
-                    }
-                });
-            }
-
-            if (walkinDetailsBtn) {
-                walkinDetailsBtn.addEventListener('click', function() {
-                    if (policyDetails && walkinDetails) {
-                        walkinDetails.classList.add('active');
-                        policyDetails.classList.remove('active');
-                        walkinDetailsBtn.classList.remove('btn-outline-primary');
-                        walkinDetailsBtn.classList.add('btn-primary');
-                        policyDetailsBtn.classList.remove('btn-primary');
-                        policyDetailsBtn.classList.add('btn-outline-primary');
-                    }
-                });
-            }
-
-            // Show/hide bank transfer fields based on payment method
-            if (paymentMethod) {
-                paymentMethod.addEventListener('change', function() {
-                    if (this.value === 'Transfer' && bankTransferFields) {
-                        bankTransferFields.classList.add('show');
-                        updateBankOptions();
-                    } else if (bankTransferFields) {
-                        bankTransferFields.classList.remove('show');
-                    }
-                });
-            }
-
-            if (insuranceProvider) {
-                insuranceProvider.addEventListener('change', function() {
-                    if (paymentMethod && paymentMethod.value === 'Transfer') {
-                        updateBankOptions();
-                    }
-                });
-            }
-
-            if (bankTransfer) {
-                bankTransfer.addEventListener('change', function() {
-                    const bankOther = document.getElementById('bankOther');
-                    if (!bankOther) return;
-                    if (this.value === 'OTHER') {
-                        bankOther.style.display = 'block';
-                    } else {
-                        bankOther.style.display = 'none';
-                        bankOther.value = '';
-                    }
-                });
-            }
-
-            function updateBankOptions() {
-                const selectedOption = insuranceProvider && insuranceProvider.selectedOptions && insuranceProvider.selectedOptions[0] ? insuranceProvider.selectedOptions[0] : null;
-                const providerId = insuranceProvider ? insuranceProvider.value : null;
-                const providerName = selectedOption ? selectedOption.textContent.trim() : '';
-                // Prefer provider-specific banks provided in data-banks attribute
-                let banks = [];
-                const dataBanks = selectedOption ? selectedOption.dataset.banks : null;
-                if (dataBanks) {
-                    try {
-                        const parsed = JSON.parse(dataBanks);
-                        if (Array.isArray(parsed)) {
-                            banks = parsed;
-                        }
-                    } catch (e) {
-                        // fallback: split by comma or newline
-                        banks = (dataBanks || '').toString().split(/[,\r\n]+/).map(s => s.trim()).filter(Boolean);
-                    }
+                // Initialize sections if present
+                if (policyDetails && walkinDetails) {
+                    policyDetails.classList.add('active');
+                    walkinDetails.classList.remove('active');
                 }
 
-                if (banks.length === 0) {
-                    const providerCode = (providerId && providerIdToCodeMap[providerId]) || (selectedOption ? selectedOption.dataset.code : '') || providerName || providerId;
-                    const lookupKey = (providerCode || '').toString().trim().toLowerCase();
-                    banks = normalizedBankOptions[lookupKey] || [];
+                if (policyDetailsBtn) {
+                    policyDetailsBtn.addEventListener('click', function() {
+                        if (policyDetails && walkinDetails) {
+                            policyDetails.classList.add('active');
+                            walkinDetails.classList.remove('active');
+                            policyDetailsBtn.classList.remove('btn-outline-primary');
+                            policyDetailsBtn.classList.add('btn-primary');
+                            walkinDetailsBtn.classList.remove('btn-primary');
+                            walkinDetailsBtn.classList.add('btn-outline-primary');
+                        }
+                    });
+                }
+
+                if (walkinDetailsBtn) {
+                    walkinDetailsBtn.addEventListener('click', function() {
+                        if (policyDetails && walkinDetails) {
+                            walkinDetails.classList.add('active');
+                            policyDetails.classList.remove('active');
+                            walkinDetailsBtn.classList.remove('btn-outline-primary');
+                            walkinDetailsBtn.classList.add('btn-primary');
+                            policyDetailsBtn.classList.remove('btn-primary');
+                            policyDetailsBtn.classList.add('btn-outline-primary');
+                        }
+                    });
+                }
+
+                // Show/hide bank transfer fields based on payment method
+                if (paymentMethod) {
+                    paymentMethod.addEventListener('change', function() {
+                        if (this.value === 'Transfer' && bankTransferFields) {
+                            bankTransferFields.classList.add('show');
+                            updateBankOptions();
+                        } else if (bankTransferFields) {
+                            bankTransferFields.classList.remove('show');
+                        }
+                    });
+                }
+
+                if (insuranceProvider) {
+                    insuranceProvider.addEventListener('change', function() {
+                        if (paymentMethod && paymentMethod.value === 'Transfer') {
+                            updateBankOptions();
+                        }
+                    });
                 }
 
                 if (bankTransfer) {
-                    bankTransfer.innerHTML = '<option value="">Select bank</option>';
-                    banks.forEach(bank => {
-                        const option = document.createElement('option');
-                        option.value = bank;
-                        option.textContent = bank;
-                        bankTransfer.appendChild(option);
+                    bankTransfer.addEventListener('change', function() {
+                        const bankOther = document.getElementById('bankOther');
+                        if (!bankOther) return;
+                        if (this.value === 'OTHER') {
+                            bankOther.style.display = 'block';
+                        } else {
+                            bankOther.style.display = 'none';
+                            bankOther.value = '';
+                        }
                     });
+                }
+
+                function updateBankOptions() {
+                    const selectedOption = insuranceProvider && insuranceProvider.selectedOptions && insuranceProvider.selectedOptions[0] ? insuranceProvider.selectedOptions[0] : null;
+                    const providerId = insuranceProvider ? insuranceProvider.value : null;
+                    const providerName = selectedOption ? selectedOption.textContent.trim() : '';
+                    // Prefer provider-specific banks provided in data-banks attribute
+                    let banks = [];
+                    const dataBanks = selectedOption ? selectedOption.dataset.banks : null;
+                    if (dataBanks) {
+                        try {
+                            const parsed = JSON.parse(dataBanks);
+                            if (Array.isArray(parsed)) {
+                                banks = parsed;
+                            }
+                        } catch (e) {
+                            // fallback: split by comma or newline
+                            banks = (dataBanks || '').toString().split(/[,\r\n]+/).map(s => s.trim()).filter(Boolean);
+                        }
+                    }
 
                     if (banks.length === 0) {
-                        const option = document.createElement('option');
-                        option.value = '';
-                        option.textContent = 'No banks available for this provider';
-                        bankTransfer.appendChild(option);
+                        const providerCode = (providerId && providerIdToCodeMap[providerId]) || (selectedOption ? selectedOption.dataset.code : '') || providerName || providerId;
+                        const lookupKey = (providerCode || '').toString().trim().toLowerCase();
+                        banks = normalizedBankOptions[lookupKey] || [];
+                    }
 
-                        const otherOption = document.createElement('option');
-                        otherOption.value = 'OTHER';
-                        otherOption.textContent = 'Other (specify)';
-                        bankTransfer.appendChild(otherOption);
+                    if (bankTransfer) {
+                        bankTransfer.innerHTML = '<option value="">Select bank</option>';
+                        banks.forEach(bank => {
+                            const option = document.createElement('option');
+                            option.value = bank;
+                            option.textContent = bank;
+                            bankTransfer.appendChild(option);
+                        });
 
-                        bankTransfer.disabled = false;
-                    } else {
-                        bankTransfer.disabled = false;
+                        if (banks.length === 0) {
+                            const option = document.createElement('option');
+                            option.value = '';
+                            option.textContent = 'No banks available for this provider';
+                            bankTransfer.appendChild(option);
+
+                            const otherOption = document.createElement('option');
+                            otherOption.value = 'OTHER';
+                            otherOption.textContent = 'Other (specify)';
+                            bankTransfer.appendChild(otherOption);
+
+                            bankTransfer.disabled = false;
+                        } else {
+                            bankTransfer.disabled = false;
+                        }
                     }
                 }
+
+                // Initialize on load
+                updateBankOptions();
             }
 
-            // Initialize on load
-            updateBankOptions();
-        }
-
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initPolicyForm);
-        } else {
-            initPolicyForm();
-        }
-    })();
-</script>
-@endpush
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initPolicyForm);
+            } else {
+                initPolicyForm();
+            }
+        })();
+    </script>
+</body>
+</html>
