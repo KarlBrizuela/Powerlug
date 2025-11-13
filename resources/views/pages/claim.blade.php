@@ -105,6 +105,20 @@
 
                                 <div class="row mb-3">
                                     <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Client</label>
+                                        <select name="client" class="form-select">
+                                            <option value="">Select client</option>
+                                            @if(isset($clients) && $clients->count())
+                                                @foreach($clients as $c)
+                                                    <option value="{{ $c->client_name }}">{{ $c->client_name }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
                                         <label class="form-label fw-semibold">Claim Number</label>
                                         <input type="text" class="form-control" placeholder="Enter claim number">
                                     </div>

@@ -76,6 +76,32 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-body">
+                            @if(isset($policy) && $policy)
+                                <div class="mb-3">
+                                    <h6 class="mb-2">Policy Audit Info</h6>
+                                    <div class="d-flex flex-column">
+                                        <div class="d-flex justify-content-between">
+                                            <strong>Created By:</strong>
+                                            <span>{{ $policy->createdBy->name ?? 'System' }}</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <strong>Created At:</strong>
+                                            <span>{{ optional($policy->created_at)->format('F d, Y h:i A') }}</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <strong>Last Updated:</strong>
+                                            <span>{{ optional($policy->updated_at)->format('F d, Y h:i A') }}</span>
+                                        </div>
+                                        @if($policy->updatedBy)
+                                            <div class="d-flex justify-content-between">
+                                                <strong>Updated By:</strong>
+                                                <span>{{ $policy->updatedBy->name }}</span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    <hr />
+                                </div>
+                            @endif
                             <div class="section-title">System Activity Log</div>
 
                             <div class="table-responsive">
@@ -92,17 +118,40 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td colspan="7" class="text-center py-4">
-                                                <div class="text-muted">
-                                                    <i class="fas fa-history fa-2x mb-3"></i>
-                                                    <p>No audit trail activities found.</p>
-                                                    <p class="small">Activities will appear here as users interact with the system.</p>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                        @if(isset($audits) && $audits->count() > 0)
+                                            @foreach($audits as $audit)
+                                                <tr>
+                                                    <td>{{ $audit->user->name ?? 'System' }}</td>
+                                                    <td><span class="badge bg-{{ $audit->getActionColor() }}">{{ ucfirst($audit->action) }}</span></td>
+                                                    <td>{{ $audit->module }}</td>
+                                                    <td>{{ $audit->description }}</td>
+                                                    <td>{{ $audit->ip_address ?? '-' }}</td>
+                                                    <td>{{ $audit->created_at->format('F d, Y h:i A') }}</td>
+                                                    <td class="text-center">
+                                                        <a href="{{ route('audit-trail.show', $audit->id) }}" class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="tooltip" title="View Details">View</a>
+                                                        <button class="btn btn-sm btn-outline-danger delete-activity" data-activity-id="{{ $audit->id }}" data-activity-description="{{ $audit->description }}">Delete</button>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        @else
+                                            <tr>
+                                                <td colspan="7" class="text-center py-4">
+                                                    <div class="text-muted">
+                                                        <i class="fas fa-history fa-2x mb-3"></i>
+                                                        <p>No audit trail activities found.</p>
+                                                        <p class="small">Activities will appear here as users interact with the system.</p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endif
                                     </tbody>
                                 </table>
+
+                                @if(isset($audits) && $audits->hasPages())
+                                    <div class="mt-3">
+                                        {{ $audits->links() }}
+                                    </div>
+                                @endif
                             </div>
 
                             <div class="row mt-3" style="display: none;">
@@ -231,10 +280,10 @@
                 return new bootstrap.Tooltip(tooltipTriggerEl)
             });
 
-            // View activity details
+            // View activity details (load via AJAX into modal)
             $(document).on('click', '.view-activity', function() {
                 const activityId = $(this).data('activity-id');
-                
+
                 // Show loading state
                 $('#activityDetailsContent').html(`
                     <div class="text-center py-4">
@@ -244,8 +293,15 @@
                         <p class="mt-2">Loading activity details...</p>
                     </div>
                 `);
-                
+
                 $('#activityDetailsModal').modal('show');
+
+                // Fetch details
+                $.get('/audit/' + activityId + '/details').done(function(html) {
+                    $('#activityDetailsContent').html(html);
+                }).fail(function() {
+                    $('#activityDetailsContent').html('<div class="text-danger">Failed to load activity details.</div>');
+                });
             });
 
             // Delete activity functionality

@@ -8,6 +8,8 @@ use App\Http\Controllers\InsuranceProviderController;
 use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\AuditTrailController;
 use App\Http\Controllers\SalesReportController;
+use App\Http\Controllers\PolicyController;
+use App\Http\Controllers\FreebieController;
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
@@ -41,32 +43,28 @@ Route::middleware(['auth'])->group(function () {
         ->name('sales.report');
 
     // Policy routes
-    Route::get('/policy', function () {
-        return view('pages.policy');
-    })->name('policy');
-    
+    Route::resource('policies', PolicyController::class);
+    Route::get('/policy', [PolicyController::class, 'create'])->name('policy');
+
+    // Freebies
+    // Explicit parameter name mapping to ensure route-model binding uses {freebie}
+    Route::resource('freebies', FreebieController::class)->parameters([
+        'freebies' => 'freebie'
+    ]);
+
     // Client routes
     Route::resource('clients', ClientController::class);
     
     // Insurance Provider routes
-    Route::resource('insurance-providers', InsuranceProviderController::class);
-    
-    Route::post('/policies', [App\Http\Controllers\PolicyController::class, 'store'])->name('policies.store');
-    Route::resource('policies', App\Http\Controllers\PolicyController::class)->except(['create']);
-
-    // Client routes
-    Route::get('/new-client', [ClientController::class, 'create'])->name('clients.create');
-    Route::get('/clients', [ClientController::class, 'index'])->name('clients.index');
-    Route::post('/clients', [ClientController::class, 'store'])->name('clients.store');
-    
-    // Only superadmin can delete clients
-    Route::delete('/clients/{client}', [ClientController::class, 'destroy'])
-        ->middleware('check.position:superadmin')
-        ->name('clients.destroy');
-
-    // Claims routes
+    Route::resource('insurance-providers', InsuranceProviderController::class);    // Claims routes
     Route::get('/claims/create', function () {
-        return view('pages.claim');
+        // Load distinct client names from policies for the claim form dropdown
+        $clients = \App\Models\Policy::select('client_name')
+            ->whereNotNull('client_name')
+            ->distinct()
+            ->orderBy('client_name')
+            ->get();
+        return view('pages.claim', compact('clients'));
     })->name('claims.create');
     
     Route::get('/claims', function () {

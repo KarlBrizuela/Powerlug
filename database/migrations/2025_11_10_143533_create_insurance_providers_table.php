@@ -18,6 +18,7 @@ class CreateInsuranceProvidersTable extends Migration
             $table->string('code')->unique();
             $table->string('name');
             $table->boolean('is_active')->default(true);
+            $table->json('banks')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

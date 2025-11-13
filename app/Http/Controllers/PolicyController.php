@@ -2,10 +2,43 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Policy;
+use App\Models\Client;
+use App\Models\InsuranceProvider;
 use Illuminate\Http\Request;
 
 class PolicyController extends Controller
 {
+    /**
+     * Display a listing of policies.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        $policies = Policy::with('client', 'insuranceProvider', 'createdBy')
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        return view('pages.policies.index', compact('policies'));
+    }
+
+    /**
+     * Show the form for creating a new policy.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        // Avoid loading all clients (can be large) — only load insurance providers needed by the form
+        $insuranceProviders = InsuranceProvider::all();
+
+        // Load active freebies for the freebie select
+        $freebies = \App\Models\Freebie::where('is_active', true)->orderBy('name')->get();
+
+        return view('pages.policy', compact('insuranceProviders', 'freebies'));
+    }
+
     /**
      * Store a newly created policy in storage.
      *
@@ -14,14 +47,306 @@ class PolicyController extends Controller
      */
     public function store(Request $request)
     {
-        // Validate the request
+    // Check if user is submitting policy details or walk-in details
+    $hasPolicyData = $request->filled('insurance_provider_id') || 
+                         $request->filled('issue_date') || 
+                         $request->filled('coverage_from') || 
+                         $request->filled('coverage_to') ||
+                         $request->filled('chassis_number');
+        
+        $hasWalkinData = $request->filled('walkin_date') || 
+                         $request->filled('estimate_amount') || 
+                         $request->filled('size') ||
+                         $request->filled('rate') ||
+                         $request->filled('walkin_payment');
+
         $validated = $request->validate([
-            // Add your validation rules here based on your policy form fields
+            // Primary Information
+            'client_name' => 'nullable|string',
+            'address' => 'nullable|string',
+            'email' => 'nullable|email',
+            'contact_number' => 'nullable|string',
+            
+            // Vehicle Information
+            'make_model' => 'nullable|string',
+            'plate_number' => 'nullable|string',
+            'model_year' => 'nullable|string',
+            'color' => 'nullable|string',
+            
+            // Policy Details - At least one is required if policy type is selected
+            // policy_number will be auto-assigned when omitted
+            'policy_number' => 'nullable|string|unique:policies,policy_number',
+            'client_id' => 'nullable|exists:clients,id',
+            'insurance_provider_id' => 'nullable|exists:insurance_providers,id',
+            'insurance_provider' => 'nullable|string',
+            'issue_date' => 'nullable|date',
+            'coverage_from' => 'nullable|date',
+            'coverage_to' => 'nullable|date',
+            'chassis_number' => 'nullable|string',
+            'engine_number' => 'nullable|string',
+            'mv_file_number' => 'nullable|string',
+            'mortgage' => 'nullable|string',
+            'freebie' => 'nullable|string',
+            
+            // Walk-in Details - At least one is required if walk-in type is selected
+            'walkin_date' => 'nullable|date',
+            'walkin_file' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png',
+            'estimate_amount' => 'nullable|numeric|min:0',
+            'size' => 'nullable|string',
+            'services' => 'nullable|array',
+            'rate' => 'nullable|numeric|min:0',
+            'walkin_payment' => 'nullable|numeric|min:0',
+            
+            // Additional Payment Information
+            'payment_terms' => 'nullable|string',
+            'paid_amount' => 'nullable|numeric|min:0',
+            'payment_method' => 'nullable|in:Cash,Transfer,PDC,Cancelled',
+            'bank_transfer' => 'nullable|string',
+            'bank_transfer_other' => 'nullable|string',
+            'bank_transfer_other' => 'nullable|string',
+            'additional_freebie' => 'nullable|string',
+            'reference_number' => 'nullable|string',
+            
+            // Premium Summary
+            'coverage_amount' => 'nullable|numeric|min:0',
+            'premium' => 'nullable|numeric|min:0',
+            'vat' => 'nullable|numeric|min:0',
+            'documentary_stamp_tax' => 'nullable|numeric|min:0',
+            'local_gov_tax' => 'nullable|numeric|min:0',
+            'amount_due' => 'nullable|numeric|min:0',
+            'coc_vp' => 'nullable|numeric|min:0',
+            'premium_remarks' => 'nullable|string',
+            
+            // Status Information
+            'policy_type' => 'nullable|in:individual,family,corporate',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+            'status' => 'nullable|in:active,inactive,expired,cancelled',
+            'billing_status' => 'nullable|in:paid,unpaid,partial',
+            'remarks' => 'nullable|string',
         ]);
 
-        // Store the policy logic here
-        // You can add your policy creation logic here
+        // Validate that at least policy details OR walk-in details are provided
+        if (!$hasPolicyData && !$hasWalkinData) {
+            return back()->withErrors([
+                'details' => 'Please fill in either Policy Details or Walk-in Details (or both).'
+            ])->withInput();
+        }
 
-        return redirect()->back()->with('success', 'Policy created successfully');
+        $validated['created_by'] = auth()->id();
+
+        // If no policy_number provided, give a temporary unique value so DB constraints are satisfied
+        $providedPolicyNumber = $validated['policy_number'] ?? null;
+        if (empty($providedPolicyNumber)) {
+            $validated['policy_number'] = 'TEMP-' . uniqid();
+        }
+
+        // Create the policy
+        // If user selected a provider id, also store the provider code into the insurance_provider column
+        if (!empty($validated['insurance_provider_id'])) {
+            $prov = InsuranceProvider::find($validated['insurance_provider_id']);
+            if ($prov) {
+                $validated['insurance_provider'] = $prov->code;
+            }
+        }
+
+        // If bank_transfer was set to OTHER, replace with manual value if provided
+        if ($request->input('bank_transfer') === 'OTHER' && $request->filled('bank_transfer_other')) {
+            $validated['bank_transfer'] = $request->input('bank_transfer_other');
+        }
+
+        // Ensure DB non-nullable columns have safe defaults or are mapped correctly
+        // coverage_amount and premium are non-nullable in the migration, default to 0 when omitted
+        if (!isset($validated['coverage_amount']) || $validated['coverage_amount'] === null) {
+            $validated['coverage_amount'] = 0.00;
+        }
+        if (!isset($validated['premium']) || $validated['premium'] === null) {
+            $validated['premium'] = 0.00;
+        }
+
+        // Map coverage_from/coverage_to to start_date/end_date used by the DB schema
+        if (!empty($validated['coverage_from'])) {
+            $validated['start_date'] = $validated['coverage_from'];
+        }
+        if (!empty($validated['coverage_to'])) {
+            $validated['end_date'] = $validated['coverage_to'];
+        }
+
+        // Ensure required DB columns start_date/end_date are set even for walk-in only submissions.
+        // Preference: coverage_from/coverage_to -> walkin_date -> today
+        $today = now()->toDateString();
+        if (empty($validated['start_date'])) {
+            $validated['start_date'] = $validated['coverage_from'] ?? $validated['walkin_date'] ?? $today;
+        }
+        if (empty($validated['end_date'])) {
+            $validated['end_date'] = $validated['coverage_to'] ?? $validated['start_date'] ?? $today;
+        }
+
+        $policy = Policy::create($validated);
+
+        // If the policy number wasn't provided by user, set it to the auto-increment id (or any desired format)
+        if (empty($providedPolicyNumber)) {
+            // Option: use numeric id directly or prefix like POL-<id>
+            $policy->policy_number = $policy->id; // or: 'POL-' . $policy->id
+            $policy->save();
+        }
+
+        return redirect()->route('policies.index')->with('success', 'Policy created successfully');
+    }
+
+    /**
+     * Display the specified policy.
+     *
+     * @param  \App\Models\Policy  $policy
+     * @return \Illuminate\Http\Response
+     */
+    public function show(Policy $policy)
+    {
+        $policy->load('client', 'insuranceProvider', 'createdBy', 'updatedBy');
+
+        return view('pages.policies.show', compact('policy'));
+    }
+
+    /**
+     * Show the form for editing the specified policy.
+     *
+     * @param  \App\Models\Policy  $policy
+     * @return \Illuminate\Http\Response
+     */
+    public function edit(Policy $policy)
+    {
+        // Avoid loading all clients here to speed up the edit page
+        $insuranceProviders = InsuranceProvider::all();
+
+        // Load active freebies for the freebie select
+        $freebies = \App\Models\Freebie::where('is_active', true)->orderBy('name')->get();
+
+        return view('pages.policies.edit', compact('policy', 'insuranceProviders', 'freebies'));
+    }
+
+    /**
+     * Update the specified policy in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Policy  $policy
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, Policy $policy)
+    {
+        // Check if user is submitting policy details or walk-in details
+        $hasPolicyData = $request->filled('insurance_provider') || 
+                         $request->filled('issue_date') || 
+                         $request->filled('coverage_from') || 
+                         $request->filled('coverage_to') ||
+                         $request->filled('chassis_number');
+        
+        $hasWalkinData = $request->filled('walkin_date') || 
+                         $request->filled('estimate_amount') || 
+                         $request->filled('size') ||
+                         $request->filled('rate') ||
+                         $request->filled('walkin_payment');
+
+        $validated = $request->validate([
+            // Primary Information
+            'client_name' => 'nullable|string',
+            'address' => 'nullable|string',
+            'email' => 'nullable|email',
+            'contact_number' => 'nullable|string',
+            
+            // Vehicle Information
+            'make_model' => 'nullable|string',
+            'plate_number' => 'nullable|string',
+            'model_year' => 'nullable|string',
+            'color' => 'nullable|string',
+            
+            // Policy Details
+            // Allow nullable on update; if omitted we won't overwrite existing value
+            'policy_number' => 'nullable|string|unique:policies,policy_number,' . $policy->id,
+            'client_id' => 'nullable|exists:clients,id',
+            'insurance_provider_id' => 'nullable|exists:insurance_providers,id',
+            'insurance_provider' => 'nullable|string',
+            'issue_date' => 'nullable|date',
+            'coverage_from' => 'nullable|date',
+            'coverage_to' => 'nullable|date',
+            'chassis_number' => 'nullable|string',
+            'engine_number' => 'nullable|string',
+            'mv_file_number' => 'nullable|string',
+            'mortgage' => 'nullable|string',
+            'freebie' => 'nullable|string',
+            
+            // Walk-in Details
+            'walkin_date' => 'nullable|date',
+            'walkin_file' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png',
+            'estimate_amount' => 'nullable|numeric|min:0',
+            'size' => 'nullable|string',
+            'services' => 'nullable|array',
+            'rate' => 'nullable|numeric|min:0',
+            'walkin_payment' => 'nullable|numeric|min:0',
+            
+            // Additional Payment Information
+            'payment_terms' => 'nullable|string',
+            'paid_amount' => 'nullable|numeric|min:0',
+            'payment_method' => 'nullable|in:Cash,Transfer,PDC,Cancelled',
+            'bank_transfer' => 'nullable|string',
+            'additional_freebie' => 'nullable|string',
+            'reference_number' => 'nullable|string',
+            
+            // Premium Summary
+            'coverage_amount' => 'nullable|numeric|min:0',
+            'premium' => 'nullable|numeric|min:0',
+            'vat' => 'nullable|numeric|min:0',
+            'documentary_stamp_tax' => 'nullable|numeric|min:0',
+            'local_gov_tax' => 'nullable|numeric|min:0',
+            'amount_due' => 'nullable|numeric|min:0',
+            'coc_vp' => 'nullable|numeric|min:0',
+            'premium_remarks' => 'nullable|string',
+            
+            // Status Information
+            'policy_type' => 'nullable|in:individual,family,corporate',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+            'status' => 'nullable|in:active,inactive,expired,cancelled',
+            'billing_status' => 'nullable|in:paid,unpaid,partial',
+            'remarks' => 'nullable|string',
+        ]);
+
+        // Validate that at least policy details OR walk-in details are provided
+        if (!$hasPolicyData && !$hasWalkinData) {
+            return back()->withErrors([
+                'details' => 'Please fill in either Policy Details or Walk-in Details (or both).'
+            ])->withInput();
+        }
+
+        // If user selected a provider id, also store the provider code into the insurance_provider column
+        if (!empty($validated['insurance_provider_id'])) {
+            $prov = InsuranceProvider::find($validated['insurance_provider_id']);
+            if ($prov) {
+                $validated['insurance_provider'] = $prov->code;
+            }
+        }
+
+        // If bank_transfer was set to OTHER, replace with manual value if provided
+        if ($request->input('bank_transfer') === 'OTHER' && $request->filled('bank_transfer_other')) {
+            $validated['bank_transfer'] = $request->input('bank_transfer_other');
+        }
+
+        $validated['updated_by'] = auth()->id();
+
+        $policy->update($validated);
+
+        return redirect()->route('policies.index')->with('success', 'Policy updated successfully');
+    }
+
+    /**
+     * Remove the specified policy from storage.
+     *
+     * @param  \App\Models\Policy  $policy
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Policy $policy)
+    {
+        $policy->delete();
+
+        return redirect()->route('policies.index')->with('success', 'Policy deleted successfully');
     }
 }

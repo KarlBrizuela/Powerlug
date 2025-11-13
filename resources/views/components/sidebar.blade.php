@@ -354,6 +354,14 @@
                         </ul>
                     </li>
 
+                    <!-- Freebies -->
+                    <li>
+                        <a href="{{ route('freebies.index') }}" class="{{ request()->routeIs('freebies.*') ? 'active' : '' }}">
+                            <i data-feather="gift"></i>
+                            <span data-key="t-pages">Freebies</span>
+                        </a>
+                    </li>
+
                     <li>
                         <a href="{{ route('audit-trail.index') }}" class="{{ request()->routeIs('audit-trail.index') ? 'active' : '' }}">
                             <i data-feather="settings"></i>

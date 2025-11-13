@@ -24,13 +24,19 @@ class InsuranceProviderController extends Controller
         $validatedData = $request->validate([
             'code' => 'required|string|unique:insurance_providers',
             'name' => 'required|string|max:255',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
+            'banks' => 'nullable|string'
         ]);
 
-        // Set default value for is_active if not provided
-        $validatedData['is_active'] = $request->has('is_active');
+    // Set default value for is_active if not provided
+    $validatedData['is_active'] = $request->has('is_active');
 
-        InsuranceProvider::create($validatedData);
+    // Parse banks (newline or comma separated) into array
+    $banksInput = $request->input('banks', '');
+    $banks = array_values(array_filter(array_map('trim', preg_split('/[\r\n,]+/', $banksInput))));
+    $validatedData['banks'] = $banks;
+
+    InsuranceProvider::create($validatedData);
 
         return redirect()->route('insurance-providers.index')
                         ->with('success', 'Insurance Provider created successfully');
@@ -46,13 +52,19 @@ class InsuranceProviderController extends Controller
         $validatedData = $request->validate([
             'code' => 'required|string|unique:insurance_providers,code,' . $insuranceProvider->id,
             'name' => 'required|string|max:255',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
+            'banks' => 'nullable|string'
         ]);
 
-        // Set default value for is_active if not provided
-        $validatedData['is_active'] = $request->has('is_active');
+    // Set default value for is_active if not provided
+    $validatedData['is_active'] = $request->has('is_active');
 
-        $insuranceProvider->update($validatedData);
+    // Parse banks into array
+    $banksInput = $request->input('banks', '');
+    $banks = array_values(array_filter(array_map('trim', preg_split('/[\r\n,]+/', $banksInput))));
+    $validatedData['banks'] = $banks;
+
+    $insuranceProvider->update($validatedData);
 
         return redirect()->route('insurance-providers.index')
                         ->with('success', 'Insurance Provider updated successfully');

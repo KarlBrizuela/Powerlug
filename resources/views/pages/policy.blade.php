@@ -162,8 +162,23 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-12">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2>Client Form</h2>
+                        <a href="{{ route('policies.index') }}" class="btn btn-primary">
+                            <i class="fas fa-list"></i> Policy List
+                        </a>
+                    </div>
                     <div class="card">
                         <div class="card-body">
+                           
+
+                            @if ($errors->has('details'))
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <strong>Validation Error:</strong> {{ $errors->first('details') }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            @endif
+
                             <form method="POST" action="{{ route('policies.store') }}" enctype="multipart/form-data">
                                 @csrf
 
@@ -173,17 +188,17 @@
                                     <div class="section-content">
                                         <div class="row mb-3">
                                             <div class="col-md-6">
-                                                <label class="form-label">Client Name</label>
-                                                <input type="text" class="form-control @error('client_name') is-invalid @enderror" 
-                                                       name="client_name" value="{{ old('client_name') }}" required>
+                              <label class="form-label">Client Name</label>
+                              <input type="text" class="form-control @error('client_name') is-invalid @enderror" 
+                                  name="client_name" value="{{ old('client_name') }}">
                                                 @error('client_name')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
                                             <div class="col-md-6">
-                                                <label class="form-label">Address</label>
-                                                <input type="text" class="form-control @error('address') is-invalid @enderror" 
-                                                       name="address" value="{{ old('address') }}" required>
+                              <label class="form-label">Address</label>
+                              <input type="text" class="form-control @error('address') is-invalid @enderror" 
+                                  name="address" value="{{ old('address') }}">
                                                 @error('address')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
@@ -192,17 +207,17 @@
 
                                         <div class="row mb-3">
                                             <div class="col-md-6">
-                                                <label class="form-label">Email</label>
-                                                <input type="email" class="form-control @error('email') is-invalid @enderror" 
-                                                       name="email" value="{{ old('email') }}" required>
+                              <label class="form-label">Email</label>
+                              <input type="email" class="form-control @error('email') is-invalid @enderror" 
+                                  name="email" value="{{ old('email') }}">
                                                 @error('email')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
                                             <div class="col-md-6">
-                                                <label class="form-label">Contact Number</label>
-                                                <input type="text" class="form-control @error('contact_number') is-invalid @enderror" 
-                                                       name="contact_number" value="{{ old('contact_number') }}" required>
+                              <label class="form-label">Contact Number</label>
+                              <input type="text" class="form-control @error('contact_number') is-invalid @enderror" 
+                                  name="contact_number" value="{{ old('contact_number') }}">
                                                 @error('contact_number')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
@@ -211,17 +226,17 @@
 
                                         <div class="row mb-3">
                                             <div class="col-md-6">
-                                                <label class="form-label">Make Model</label>
-                                                <input type="text" class="form-control @error('make_model') is-invalid @enderror" 
-                                                       name="make_model" value="{{ old('make_model') }}" required>
+                              <label class="form-label">Make Model</label>
+                              <input type="text" class="form-control @error('make_model') is-invalid @enderror" 
+                                  name="make_model" value="{{ old('make_model') }}">
                                                 @error('make_model')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
                                             <div class="col-md-6">
-                                                <label class="form-label">Plate No.</label>
-                                                <input type="text" class="form-control @error('plate_number') is-invalid @enderror" 
-                                                       name="plate_number" value="{{ old('plate_number') }}" required>
+                              <label class="form-label">Plate No.</label>
+                              <input type="text" class="form-control @error('plate_number') is-invalid @enderror" 
+                                  name="plate_number" value="{{ old('plate_number') }}">
                                                 @error('plate_number')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
@@ -230,17 +245,17 @@
 
                                         <div class="row mb-3">
                                             <div class="col-md-6">
-                                                <label class="form-label">Model Year</label>
-                                                <input type="text" class="form-control @error('model_year') is-invalid @enderror" 
-                                                       name="model_year" value="{{ old('model_year') }}" required>
+                              <label class="form-label">Model Year</label>
+                              <input type="text" class="form-control @error('model_year') is-invalid @enderror" 
+                                  name="model_year" value="{{ old('model_year') }}">
                                                 @error('model_year')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
                                             <div class="col-md-6">
-                                                <label class="form-label">Color</label>
-                                                <input type="text" class="form-control @error('color') is-invalid @enderror" 
-                                                       name="color" value="{{ old('color') }}" required>
+                              <label class="form-label">Color</label>
+                              <input type="text" class="form-control @error('color') is-invalid @enderror" 
+                                  name="color" value="{{ old('color') }}">
                                                 @error('color')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
@@ -267,18 +282,18 @@
                                                 <div class="row mb-2">
                                                     <div class="col-md-3">
                                                         <label class="form-label">Insurance Provider</label>
-                                                        <select class="form-select @error('insurance_provider') is-invalid @enderror" 
-                                                                id="insuranceProvider" name="insurance_provider" required>
-                                                            <option value="">Select insurance provider</option>
-                                                            @foreach(['MERCANTILE', 'MALAYAN', 'FPG', 'FORTUNE_GEN', 'COCOGEN', 'COUNTRY_BANKER', 'STANDARD'] as $provider)
-                                                                <option value="{{ $provider }}" {{ old('insurance_provider') == $provider ? 'selected' : '' }}>
-                                                                    {{ $provider }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                        @error('insurance_provider')
-                                                            <div class="invalid-feedback">{{ $message }}</div>
-                                                        @enderror
+                                <select class="form-select @error('insurance_provider_id') is-invalid @enderror" 
+                                    id="insuranceProvider" name="insurance_provider_id">
+                                                                <option value="">Select insurance provider</option>
+                                                                @foreach($insuranceProviders as $provider)
+                                                                    <option value="{{ $provider->id }}" data-code="{{ $provider->code }}" data-banks='@json($provider->banks)' {{ old('insurance_provider_id') == $provider->id ? 'selected' : '' }}>
+                                                                        {{ $provider->name }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                            @error('insurance_provider_id')
+                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                            @enderror
                                                     </div>
                                                     <div class="col-md-3">
                                                         <label class="form-label">Issue Date</label>
@@ -358,11 +373,15 @@
                                                         <label class="form-label">Freebie</label>
                                                         <select class="form-select @error('freebie') is-invalid @enderror" name="freebie">
                                                             <option value="">Select freebie</option>
-                                                            @foreach(['Undercoat', 'Buffing'] as $freebie)
-                                                                <option value="{{ $freebie }}" {{ old('freebie') == $freebie ? 'selected' : '' }}>
-                                                                    {{ $freebie }}
-                                                                </option>
-                                                            @endforeach
+                                                            @if(isset($freebies) && $freebies->count())
+                                                                @foreach($freebies as $f)
+                                                                    <option value="{{ $f->name }}" {{ old('freebie') == $f->name ? 'selected' : '' }}>{{ $f->name }}</option>
+                                                                @endforeach
+                                                            @else
+                                                                @foreach(['Undercoat', 'Buffing'] as $freebie)
+                                                                    <option value="{{ $freebie }}" {{ old('freebie') == $freebie ? 'selected' : '' }}>{{ $freebie }}</option>
+                                                                @endforeach
+                                                            @endif
                                                         </select>
                                                         @error('freebie')
                                                             <div class="invalid-feedback">{{ $message }}</div>
@@ -519,6 +538,14 @@
                                                     @error('bank_transfer')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
+                                                    
+                                                    <!-- Manual bank input when provider has no banks or user selects Other -->
+                                                    <input type="text" id="bankOther" name="bank_transfer_other" 
+                                                           class="form-control mt-2 @error('bank_transfer_other') is-invalid @enderror" 
+                                                           style="display:none;" placeholder="Enter bank name">
+                                                    @error('bank_transfer_other')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
                                                 </div>
                                             </div>
                                         </div>
@@ -528,11 +555,15 @@
                                                 <label class="form-label">Freebie</label>
                                                 <select class="form-select @error('additional_freebie') is-invalid @enderror" name="additional_freebie">
                                                     <option value="">Select freebie</option>
-                                                    @foreach(['Undercoat', 'Buffing'] as $freebie)
-                                                        <option value="{{ $freebie }}" {{ old('additional_freebie') == $freebie ? 'selected' : '' }}>
-                                                            {{ $freebie }}
-                                                        </option>
-                                                    @endforeach
+                                                    @if(isset($freebies) && $freebies->count())
+                                                        @foreach($freebies as $f)
+                                                            <option value="{{ $f->name }}" {{ old('additional_freebie') == $f->name ? 'selected' : '' }}>{{ $f->name }}</option>
+                                                        @endforeach
+                                                    @else
+                                                        @foreach(['Undercoat', 'Buffing'] as $freebie)
+                                                            <option value="{{ $freebie }}" {{ old('additional_freebie') == $freebie ? 'selected' : '' }}>{{ $freebie }}</option>
+                                                        @endforeach
+                                                    @endif
                                                 </select>
                                                 @error('additional_freebie')
                                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -729,10 +760,26 @@
                 });
             }
 
+            // Show manual bank input when "Other" selected
+            if (bankTransfer) {
+                bankTransfer.addEventListener('change', function() {
+                    const bankOther = document.getElementById('bankOther');
+                    if (!bankOther) return;
+                    if (this.value === 'OTHER') {
+                        bankOther.style.display = 'block';
+                    } else {
+                        bankOther.style.display = 'none';
+                        bankOther.value = '';
+                    }
+                });
+            }
+
             // Update bank options when insurance provider changes
             if (insuranceProvider) {
                 insuranceProvider.addEventListener('change', function() {
-                    console.log('Insurance provider changed to:', this.value);
+                    // provider value is the id; read data-code for mapping
+                    const selectedCode = this.selectedOptions && this.selectedOptions[0] ? this.selectedOptions[0].dataset.code : this.value;
+                    console.log('Insurance provider changed to code:', selectedCode);
                     if (paymentMethod && paymentMethod.value === 'Transfer') {
                         updateBankOptions();
                     }
@@ -747,15 +794,33 @@
             }
 
             function updateBankOptions() {
-                const provider = insuranceProvider.value;
-                console.log('Updating bank options for provider:', provider);
-                
-                const banks = bankOptions[provider] || [];
-                
+                const selectedOption = insuranceProvider && insuranceProvider.selectedOptions && insuranceProvider.selectedOptions[0] ? insuranceProvider.selectedOptions[0] : null;
+                const providerId = insuranceProvider ? insuranceProvider.value : null;
+                const providerName = selectedOption ? selectedOption.textContent.trim() : '';
+
+                // Prefer provider-specific banks provided in data-banks attribute
+                let banks = [];
+                const dataBanks = selectedOption ? selectedOption.dataset.banks : null;
+                if (dataBanks) {
+                    try {
+                        const parsed = JSON.parse(dataBanks);
+                        if (Array.isArray(parsed)) {
+                            banks = parsed;
+                        }
+                    } catch (e) {
+                        banks = (dataBanks || '').toString().split(/[\r\n,]+/).map(s => s.trim()).filter(Boolean);
+                    }
+                }
+
+                if (banks.length === 0) {
+                    const providerCode = (selectedOption ? selectedOption.dataset.code : '') || providerName || providerId;
+                    banks = bankOptions[providerCode] || [];
+                }
+
                 // Clear existing options
                 if (bankTransfer) {
                     bankTransfer.innerHTML = '<option value="">Select bank</option>';
-                    
+
                     // Add new options
                     banks.forEach(bank => {
                         const option = document.createElement('option');
@@ -763,18 +828,24 @@
                         option.textContent = bank;
                         bankTransfer.appendChild(option);
                     });
-                    
-                    // If no banks available for the provider
+
+                    // If no banks available for the provider, offer "Other" so user can enter manually
                     if (banks.length === 0) {
                         const option = document.createElement('option');
                         option.value = '';
                         option.textContent = 'No banks available for this provider';
                         bankTransfer.appendChild(option);
-                        bankTransfer.disabled = true;
+
+                        const otherOption = document.createElement('option');
+                        otherOption.value = 'OTHER';
+                        otherOption.textContent = 'Other (specify)';
+                        bankTransfer.appendChild(otherOption);
+
+                        bankTransfer.disabled = false;
                     } else {
                         bankTransfer.disabled = false;
                     }
-                    
+
                     console.log('Bank options updated. Available banks:', banks);
                 }
             }

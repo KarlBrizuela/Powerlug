@@ -12,12 +12,14 @@ class InsuranceProvider extends Model
     protected $fillable = [
         'code',
         'name',
-        'is_active'
+        'is_active',
+        'banks'
     ];
 
     protected $casts = [
         'commission_rate' => 'decimal:2',
-        'is_active' => 'boolean'
+        'is_active' => 'boolean',
+        'banks' => 'array'
     ];
 
     public function getFormattedCommissionRateAttribute()

@@ -40,22 +40,11 @@
                                     </div>
                                     <h5 class="card-title text-muted">Total Customers</h5>
                                     <h2 class="fw-bold text-primary">1,234</h2>
-                                    <p class="text-muted small">+12% from last month</p>
+                                    
                                 </div>
                             </div>
                         </div>
-                        <div class="col-xl-4 col-md-6 mb-4">
-                            <div class="card border-0 shadow-sm h-100">
-                                <div class="card-body text-center">
-                                    <div class="text-primary mb-3">
-                                        <i class="fas fa-user-tie fa-2x"></i>
-                                    </div>
-                                    <h5 class="card-title text-muted">Total Employee</h5>
-                                    <h2 class="fw-bold text-primary">45</h2>
-                                    <p class="text-muted small">+2 new this month</p>
-                                </div>
-                            </div>
-                        </div>
+                       
                         <div class="col-xl-4 col-md-6 mb-4">
                             <div class="card border-0 bg-primary text-white shadow-sm h-100" data-bs-toggle="modal" data-bs-target="#pendingTasksModal" style="cursor: pointer;">
                                 <div class="card-body text-center">

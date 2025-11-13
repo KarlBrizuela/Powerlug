@@ -117,6 +117,14 @@
                                         </div>
                                     </div>
 
+                                    <div class="row mb-3">
+                                        <div class="col-12">
+                                            <label class="form-label">Banks (one per line or comma separated)</label>
+                                            <textarea name="banks" class="form-control" rows="4" placeholder="e.g. BDO, Metrobank, BPI">{{ old('banks') }}</textarea>
+                                            <div class="form-text">Enter banks associated with this provider. These will be used to populate bank transfer options.</div>
+                                        </div>
+                                    </div>
+
                                     <div class="text-end">
                                         <a href="{{ route('insurance-providers.index') }}" class="btn btn-secondary me-2">Cancel</a>
                                         <button type="submit" class="btn btn-primary">
