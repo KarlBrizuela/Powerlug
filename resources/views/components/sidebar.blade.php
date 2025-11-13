@@ -370,7 +370,7 @@
                     </li>
 
                     <li>
-                        <a href="{{ route('commission') }}" class="{{ request()->routeIs('commission') ? 'active' : '' }}">
+                        <a href="{{ route('commission.index') }}" class="{{ request()->routeIs('commission.*') ? 'active' : '' }}">
                             <i data-feather="user"></i>
                             <span data-key="t-pages">Commission</span>
                         </a>

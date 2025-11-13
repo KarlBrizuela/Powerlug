@@ -36,6 +36,44 @@
             max-height: 400px;
             overflow-y: auto;
         }
+        .data-table {
+            margin-bottom: 0;
+        }
+        .data-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            text-transform: capitalize;
+            width: 30%;
+            color: #495057;
+        }
+        .data-table td {
+            word-break: break-word;
+        }
+        .diff-removed {
+            background-color: #ffebe9;
+            color: #d73a49;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .diff-added {
+            background-color: #e6ffec;
+            color: #22863a;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .null-value {
+            color: #999;
+            font-style: italic;
+        }
+        .json-string {
+            color: #22863a;
+        }
+        .json-number {
+            color: #005cc5;
+        }
+        .json-boolean {
+            color: #d73a49;
+        }
         @media (max-width: 768px) {
             .page-content {
                 margin-left: 0;
@@ -133,33 +171,107 @@
                             @if($audit->action === 'updated')
                                 <h5 class="card-title mb-4">Changes Made</h5>
                                 
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="info-label">
-                                            <i class="fas fa-minus-circle text-danger me-2"></i>Old Values
-                                        </div>
-                                        <div class="json-viewer">
-                                            <pre class="mb-0"><code>{{ json_encode(json_decode($audit->old_values), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</code></pre>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="info-label">
-                                            <i class="fas fa-plus-circle text-success me-2"></i>New Values
-                                        </div>
-                                        <div class="json-viewer">
-                                            <pre class="mb-0"><code>{{ json_encode(json_decode($audit->new_values), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</code></pre>
-                                        </div>
-                                    </div>
+                                @php
+                                    $oldValues = json_decode($audit->old_values, true) ?? [];
+                                    $newValues = json_decode($audit->new_values, true) ?? [];
+                                    $allKeys = array_unique(array_merge(array_keys($oldValues), array_keys($newValues)));
+                                @endphp
+                                
+                                <div class="table-responsive">
+                                    <table class="table table-bordered data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Field</th>
+                                                <th><i class="fas fa-minus-circle text-danger me-2"></i>Old Value</th>
+                                                <th><i class="fas fa-plus-circle text-success me-2"></i>New Value</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($allKeys as $key)
+                                                @php
+                                                    $oldVal = $oldValues[$key] ?? null;
+                                                    $newVal = $newValues[$key] ?? null;
+                                                    $changed = $oldVal != $newVal;
+                                                @endphp
+                                                @if($changed)
+                                                    <tr>
+                                                        <th>{{ str_replace('_', ' ', $key) }}</th>
+                                                        <td>
+                                                            @if(is_null($oldVal))
+                                                                <span class="null-value">null</span>
+                                                            @elseif(is_array($oldVal))
+                                                                <code>{{ json_encode($oldVal) }}</code>
+                                                            @elseif(is_bool($oldVal))
+                                                                <span class="json-boolean">{{ $oldVal ? 'true' : 'false' }}</span>
+                                                            @elseif(is_numeric($oldVal))
+                                                                <span class="json-number">{{ $oldVal }}</span>
+                                                            @else
+                                                                <span class="diff-removed">{{ $oldVal }}</span>
+                                                            @endif
+                                                        </td>
+                                                        <td>
+                                                            @if(is_null($newVal))
+                                                                <span class="null-value">null</span>
+                                                            @elseif(is_array($newVal))
+                                                                <code>{{ json_encode($newVal) }}</code>
+                                                            @elseif(is_bool($newVal))
+                                                                <span class="json-boolean">{{ $newVal ? 'true' : 'false' }}</span>
+                                                            @elseif(is_numeric($newVal))
+                                                                <span class="json-number">{{ $newVal }}</span>
+                                                            @else
+                                                                <span class="diff-added">{{ $newVal }}</span>
+                                                            @endif
+                                                        </td>
+                                                    </tr>
+                                                @endif
+                                            @endforeach
+                                        </tbody>
+                                    </table>
                                 </div>
                             @else
                                 <h5 class="card-title mb-4">Data Snapshot</h5>
                                 
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="json-viewer">
-                                            <pre class="mb-0"><code>{{ json_encode(json_decode($audit->new_values), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</code></pre>
-                                        </div>
-                                    </div>
+                                @php
+                                    $dataSnapshot = json_decode($audit->new_values, true) ?? [];
+                                @endphp
+                                
+                                <div class="table-responsive">
+                                    <table class="table table-bordered data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Field</th>
+                                                <th>Value</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($dataSnapshot as $key => $value)
+                                                <tr>
+                                                    <th>{{ str_replace('_', ' ', $key) }}</th>
+                                                    <td>
+                                                        @if(is_null($value))
+                                                            <span class="null-value">null</span>
+                                                        @elseif(is_array($value))
+                                                            <code class="json-string">{{ json_encode($value) }}</code>
+                                                        @elseif(is_bool($value))
+                                                            <span class="json-boolean">{{ $value ? 'true' : 'false' }}</span>
+                                                        @elseif(is_numeric($value))
+                                                            <span class="json-number">{{ $value }}</span>
+                                                        @elseif(filter_var($value, FILTER_VALIDATE_URL))
+                                                            <a href="{{ $value }}" target="_blank" class="text-primary">{{ $value }}</a>
+                                                        @elseif(filter_var($value, FILTER_VALIDATE_EMAIL))
+                                                            <a href="mailto:{{ $value }}" class="text-primary">{{ $value }}</a>
+                                                        @elseif(preg_match('/^\d{4}-\d{2}-\d{2}/', $value))
+                                                            <span class="text-muted">
+                                                                <i class="fas fa-calendar me-1"></i>{{ \Carbon\Carbon::parse($value)->format('F d, Y') }}
+                                                            </span>
+                                                        @else
+                                                            {{ $value }}
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
                                 </div>
                             @endif
 
