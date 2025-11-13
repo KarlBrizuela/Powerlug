@@ -133,10 +133,13 @@
                         <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                             <h4 class="mb-sm-0 font-size-18">Commission</h4>
                             <div>
+                                <a href="{{ route('commission.create') }}" class="btn btn-primary me-2">
+                                    <i class="fas fa-plus me-1"></i> Add Commission
+                                </a>
                                 <button class="btn btn-success me-2" onclick="exportToExcel()">
                                     <i class="fas fa-file-excel me-1"></i> Export to Excel
                                 </button>
-                                <button class="btn btn-primary" onclick="generateCommissionReport()">
+                                <button class="btn btn-info" onclick="generateCommissionReport()">
                                     <i class="fas fa-chart-bar me-1"></i> Generate Report
                                 </button>
                             </div>
@@ -148,6 +151,55 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-body">
+                                <!-- Filters Section -->
+                                <div class="mb-4">
+                                    <form method="GET" action="{{ route('commission.index') }}" id="filterForm">
+                                        <div class="row g-3">
+                                            <div class="col-md-3">
+                                                <label class="form-label">Insurance Provider</label>
+                                                <select name="insurance_provider_id" class="form-select">
+                                                    <option value="">All Providers</option>
+                                                    @foreach($insuranceProviders as $provider)
+                                                        <option value="{{ $provider->id }}" {{ request('insurance_provider_id') == $provider->id ? 'selected' : '' }}>
+                                                            {{ $provider->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label">Payment Status</label>
+                                                <select name="payment_status" class="form-select">
+                                                    <option value="">All Status</option>
+                                                    <option value="pending" {{ request('payment_status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                                    <option value="partial" {{ request('payment_status') == 'partial' ? 'selected' : '' }}>Partial</option>
+                                                    <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Paid</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label">Date From</label>
+                                                <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label">Date To</label>
+                                                <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label">&nbsp;</label>
+                                                <div class="d-flex gap-1">
+                                                    <button type="submit" class="btn btn-primary">
+                                                        <i class="fas fa-filter me-1"></i> Filter
+                                                    </button>
+                                                    @if(request()->hasAny(['insurance_provider_id', 'payment_status', 'date_from', 'date_to']))
+                                                        <a href="{{ route('commission.index') }}" class="btn btn-outline-secondary">
+                                                            <i class="fas fa-times"></i> Clear
+                                                        </a>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+
                                 <div class="section-title">Commission Summary</div>
 
                                 <div class="table-container">
@@ -169,156 +221,63 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <!-- Sample data for demonstration -->
-                                        
-                                          
-                                            <tr>
-                                                <td>Standard Insurance</td>
-                                                <td>POL-001236</td>
-                                                <td>Robert Johnson</td>
-                                                <td>6 Months</td>
-                                                <td>₱800.00</td>
-                                                <td>₱650.00</td>
-                                                <td>₱325.00</td>
-                                                <td>₱325.00</td>
-                                                <td>₱0.00</td>
-                                                <td>2023-11-05</td>
-                                                <td>₱97.50</td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-outline-primary view-commission" data-commission-id="3">
-                                                        <i class="fas fa-eye"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Malayan Insurance</td>
-                                                <td>POL-001237</td>
-                                                <td>Sarah Williams</td>
-                                                <td>36 Months</td>
-                                                <td>₱4,200.00</td>
-                                                <td>₱3,500.00</td>
-                                                <td>₱1,166.67</td>
-                                                <td>₱1,166.67</td>
-                                                <td>₱1,166.66</td>
-                                                <td>2023-11-05</td>
-                                                <td>₱525.00</td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-outline-primary view-commission" data-commission-id="4">
-                                                        <i class="fas fa-eye"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>FPG Insurance Corporation</td>
-                                                <td>POL-001238</td>
-                                                <td>Michael Brown</td>
-                                                <td>12 Months</td>
-                                                <td>₱1,500.00</td>
-                                                <td>₱1,250.00</td>
-                                                <td>₱625.00</td>
-                                                <td>₱625.00</td>
-                                                <td>₱0.00</td>
-                                                <td>2023-11-05</td>
-                                                <td>₱187.50</td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-outline-primary view-commission" data-commission-id="5">
-                                                        <i class="fas fa-eye"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Cocogen Insurance</td>
-                                                <td>POL-001239</td>
-                                                <td>Lisa Anderson</td>
-                                                <td>18 Months</td>
-                                                <td>₱2,100.00</td>
-                                                <td>₱1,800.00</td>
-                                                <td>₱600.00</td>
-                                                <td>₱600.00</td>
-                                                <td>₱270.00</td>
-                                                <td>2023-09-15</td>
-                                                <td>₱270.00</td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-outline-primary view-commission" data-commission-id="6">
-                                                        <i class="fas fa-eye"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Standard Insurance</td>
-                                                <td>POL-001240</td>
-                                                <td>David Miller</td>
-                                                <td>24 Months</td>
-                                                <td>₱3,000.00</td>
-                                                <td>₱2,500.00</td>
-                                                <td>₱833.33</td>
-                                                <td>₱833.33</td>
-                                                <td>₱833.34</td>
-                                                <td>2023-11-05</td>
-                                                <td>₱375.00</td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-outline-primary view-commission" data-commission-id="7">
-                                                        <i class="fas fa-eye"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Mlayan Insurance</td>
-                                                <td>POL-001241</td>
-                                                <td>Emily Davis</td>
-                                                <td>12 Months</td>
-                                                <td>₱950.00</td>
-                                                <td>₱800.00</td>
-                                                <td>₱400.00</td>
-                                                <td>₱400.00</td>
-                                                <td>₱0.00</td>
-                                                <td>2023-11-05</td>
-                                                <td>₱120.00</td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-outline-primary view-commission" data-commission-id="8">
-                                                        <i class="fas fa-eye"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>FPG Insurance Corporation</td>
-                                                <td>POL-001242</td>
-                                                <td>James Wilson</td>
-                                                <td>36 Months</td>
-                                                <td>₱5,000.00</td>
-                                                <td>₱4,200.00</td>
-                                                <td>₱1,400.00</td>
-                                                <td>₱1,400.00</td>
-                                                <td>₱1,400.00</td>
-                                                <td>2023-11-05</td>
-                                                <td>₱630.00</td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-outline-primary view-commission" data-commission-id="9">
-                                                        <i class="fas fa-eye"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Standard Insurance</td>
-                                                <td>POL-001243</td>
-                                                <td>Amanda Taylor</td>
-                                                <td>6 Months</td>
-                                                <td>₱700.00</td>
-                                                <td>₱600.00</td>
-                                                <td>₱300.00</td>
-                                                <td>₱300.00</td>
-                                                <td>₱0.00</td>
-                                                <td>2023-11-05</td>
-                                                <td>₱90.00</td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-outline-primary view-commission" data-commission-id="10">
-                                                        <i class="fas fa-eye"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
+                                            @if(isset($commissions) && $commissions->count() > 0)
+                                                @foreach($commissions as $commission)
+                                                    <tr>
+                                                        <td>{{ $commission->insuranceProvider->name ?? 'N/A' }}</td>
+                                                        <td>{{ $commission->policy_number }}</td>
+                                                        <td>{{ $commission->insured }}</td>
+                                                        <td>{{ $commission->term }}</td>
+                                                        <td>₱{{ number_format($commission->gross_premium, 2) }}</td>
+                                                        <td>₱{{ number_format($commission->net_premium, 2) }}</td>
+                                                        <td>₱{{ number_format($commission->days_30, 2) }}</td>
+                                                        <td>₱{{ number_format($commission->days_60, 2) }}</td>
+                                                        <td>₱{{ number_format($commission->days_90, 2) }}</td>
+                                                        <td>{{ $commission->last_pdc_date ? $commission->last_pdc_date->format('Y-m-d') : 'N/A' }}</td>
+                                                        <td>₱{{ number_format($commission->commission_amount, 2) }}</td>
+                                                        <td class="text-center">
+                                                            <div class="btn-group" role="group">
+                                                                <button class="btn btn-sm btn-outline-primary view-commission" data-commission-id="{{ $commission->id }}" title="View Details">
+                                                                    <i class="fas fa-eye"></i>
+                                                                </button>
+                                                                <a href="{{ route('commission.edit', $commission->id) }}" class="btn btn-sm btn-outline-warning" title="Edit">
+                                                                    <i class="fas fa-edit"></i>
+                                                                </a>
+                                                                <button class="btn btn-sm btn-outline-danger delete-commission" data-commission-id="{{ $commission->id }}" data-commission-number="{{ $commission->policy_number }}" title="Delete">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            @else
+                                                <tr>
+                                                    <td colspan="12" class="text-center py-4">
+                                                        <div class="text-muted">
+                                                            <i class="fas fa-dollar-sign fa-2x mb-3"></i>
+                                                            <p>No commission records found.</p>
+                                                            @if(request()->hasAny(['insurance_provider_id', 'payment_status', 'date_from', 'date_to']))
+                                                                <p class="small">Try adjusting your filters or <a href="{{ route('commission.index') }}">clear filters</a>.</p>
+                                                            @else
+                                                                <p class="small">
+                                                                    <a href="{{ route('commission.create') }}" class="btn btn-sm btn-primary">
+                                                                        <i class="fas fa-plus me-1"></i> Add your first commission
+                                                                    </a>
+                                                                </p>
+                                                            @endif
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            @endif
                                         </tbody>
                                     </table>
                                 </div>
+
+                                @if(isset($commissions) && $commissions->hasPages())
+                                    <div class="mt-3">
+                                        {{ $commissions->links() }}
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -351,10 +310,40 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="commissionDetailsContent">
-                    <!-- Details will be loaded via AJAX -->
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading commission details...</p>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteCommissionModal" tabindex="-1" aria-labelledby="deleteCommissionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteCommissionModalLabel">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this commission record?</p>
+                    <p><strong>Policy Number: <span id="commissionNumberToDelete"></span></strong></p>
+                    <p class="text-danger"><small>This action cannot be undone.</small></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form id="deleteCommissionForm" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger">Delete Commission</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -371,124 +360,179 @@
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
     <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         $(document).ready(function() {
-            // Initialize DataTable
-            var table = $('#commissionsTable').DataTable({
-                responsive: true,
-                order: [[10, 'desc']],
-                language: {
-                    emptyTable: "No commission records found.",
-                    search: "_INPUT_",
-                    searchPlaceholder: "Search commissions...",
-                    lengthMenu: "Show _MENU_ entries",
-                    paginate: {
-                        previous: "<i class='fas fa-chevron-left'></i>",
-                        next: "<i class='fas fa-chevron-right'></i>"
-                    }
-                },
-                dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>'
-            });
+            // Show success message if present
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: '{{ session('success') }}',
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            @endif
+
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: '{{ session('error') }}',
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            @endif
 
             // View commission details
             $(document).on('click', '.view-commission', function() {
                 const commissionId = $(this).data('commission-id');
                 
-                // For demo purposes, showing static content
-                $('#commissionDetailsContent').html(`
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6>Policy Information</h6>
-                            <table class="table table-sm">
-                                <tr>
-                                    <td><strong>Insurance Provider:</strong></td>
-                                    <td>ABC Insurance</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Policy Number:</strong></td>
-                                    <td>POL-00123${commissionId}</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Insured:</strong></td>
-                                    <td>John Smith</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Term:</strong></td>
-                                    <td>12 Months</td>
-                                </tr>
-                            </table>
-                        </div>
-                        <div class="col-md-6">
-                            <h6>Commission Details</h6>
-                            <table class="table table-sm">
-                                <tr>
-                                    <td><strong>Gross Premium:</strong></td>
-                                    <td>₱1,200.00</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Net Premium:</strong></td>
-                                    <td>₱1,000.00</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Commission Rate:</strong></td>
-                                    <td>15%</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Commission Amount:</strong></td>
-                                    <td>₱150.00</td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            <h6>Payment Schedule</h6>
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Period</th>
-                                        <th>Amount</th>
-                                        <th>Due Date</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>30 Days</td>
-                                        <td>₱400.00</td>
-                                        <td>2023-10-15</td>
-                                        <td><span class="badge bg-success">Paid</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>60 Days</td>
-                                        <td>₱300.00</td>
-                                        <td>2023-11-15</td>
-                                        <td><span class="badge bg-warning">Pending</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>90 Days</td>
-                                        <td>₱300.00</td>
-                                        <td>2023-12-15</td>
-                                        <td><span class="badge bg-secondary">Upcoming</span></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                `);
-                
                 $('#commissionDetailsModal').modal('show');
+
+                // Fetch details via AJAX
+                $.get('/commission/' + commissionId + '/details')
+                    .done(function(data) {
+                        $('#commissionDetailsContent').html(`
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Policy Information</h6>
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td><strong>Insurance Provider:</strong></td>
+                                            <td>${data.insurance_provider?.name || 'N/A'}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Policy Number:</strong></td>
+                                            <td>${data.policy_number}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Insured:</strong></td>
+                                            <td>${data.insured}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Term:</strong></td>
+                                            <td>${data.term}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Payment Status:</strong></td>
+                                            <td><span class="badge bg-${data.payment_status === 'paid' ? 'success' : data.payment_status === 'partial' ? 'warning' : 'secondary'}">${data.payment_status.toUpperCase()}</span></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Commission Details</h6>
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td><strong>Gross Premium:</strong></td>
+                                            <td>₱${parseFloat(data.gross_premium).toLocaleString('en-PH', {minimumFractionDigits: 2})}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Net Premium:</strong></td>
+                                            <td>₱${parseFloat(data.net_premium).toLocaleString('en-PH', {minimumFractionDigits: 2})}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Commission Rate:</strong></td>
+                                            <td>${data.commission_rate}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Commission Amount:</strong></td>
+                                            <td class="text-success fw-bold">₱${parseFloat(data.commission_amount).toLocaleString('en-PH', {minimumFractionDigits: 2})}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Last PDC Date:</strong></td>
+                                            <td>${data.last_pdc_date || 'N/A'}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <h6>Payment Schedule</h6>
+                                    <table class="table table-sm table-bordered">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Period</th>
+                                                <th>Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>30 Days</td>
+                                                <td>₱${parseFloat(data.days_30).toLocaleString('en-PH', {minimumFractionDigits: 2})}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>60 Days</td>
+                                                <td>₱${parseFloat(data.days_60).toLocaleString('en-PH', {minimumFractionDigits: 2})}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>90 Days</td>
+                                                <td>₱${parseFloat(data.days_90).toLocaleString('en-PH', {minimumFractionDigits: 2})}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            ${data.remarks ? `
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <h6>Remarks</h6>
+                                    <p class="text-muted">${data.remarks}</p>
+                                </div>
+                            </div>
+                            ` : ''}
+                        `);
+                    })
+                    .fail(function() {
+                        $('#commissionDetailsContent').html('<div class="alert alert-danger">Failed to load commission details.</div>');
+                    });
+            });
+
+            // Delete commission
+            $(document).on('click', '.delete-commission', function() {
+                const commissionId = $(this).data('commission-id');
+                const commissionNumber = $(this).data('commission-number');
+                
+                $('#commissionNumberToDelete').text(commissionNumber);
+                $('#deleteCommissionForm').attr('action', '/commission/' + commissionId);
+                $('#deleteCommissionModal').modal('show');
             });
 
             // Export to Excel functionality
             window.exportToExcel = function() {
-                alert('Export functionality would be implemented when there is data to export.');
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Export to Excel',
+                    text: 'This feature will export commission data to Excel.',
+                    showCancelButton: true,
+                    confirmButtonText: 'Export',
+                    confirmButtonColor: '#28a745'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Implementation for Excel export
+                        Swal.fire('Coming Soon', 'Export functionality will be implemented', 'info');
+                    }
+                });
             };
 
             // Generate commission report
             window.generateCommissionReport = function() {
-                alert('Report generation functionality would be implemented when there is data.');
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Generate Report',
+                    text: 'This feature will generate a commission report.',
+                    showCancelButton: true,
+                    confirmButtonText: 'Generate',
+                    confirmButtonColor: '#17a2b8'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Implementation for report generation
+                        Swal.fire('Coming Soon', 'Report generation functionality will be implemented', 'info');
+                    }
+                });
             };
         });
     </script>

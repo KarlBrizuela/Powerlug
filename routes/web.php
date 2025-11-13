@@ -89,15 +89,22 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/collections/{collection}/edit', [CollectionController::class, 'edit'])->name('collections.edit');
     Route::put('/collections/{collection}', [CollectionController::class, 'update'])->name('collections.update');
 
-    // Audit Trail route
-    Route::get('/audit-trail', function () {
-        return view('pages.audit-trail');
-    })->name('audit-trail');
+    // Audit Trail routes
+    Route::get('/audit-trail', [App\Http\Controllers\AuditTrailController::class, 'index'])->name('audit-trail.index');
+    Route::get('/audit/{id}/details', [App\Http\Controllers\AuditTrailController::class, 'show'])->name('audit-trail.show');
+    Route::delete('/audit/{id}', [App\Http\Controllers\AuditTrailController::class, 'destroy'])->name('audit-trail.destroy');
+    Route::post('/audit/clear', [App\Http\Controllers\AuditTrailController::class, 'clear'])->name('audit-trail.clear');
 
-    // Commission route
-    Route::get('/commission', function () {
-        return view('pages.commission');
-    })->name('commission');
+    // Commission routes
+    Route::get('/commission', [App\Http\Controllers\CommissionController::class, 'index'])->name('commission.index');
+    Route::get('/commission/create', [App\Http\Controllers\CommissionController::class, 'create'])->name('commission.create');
+    Route::post('/commission', [App\Http\Controllers\CommissionController::class, 'store'])->name('commission.store');
+    Route::get('/commission/{id}', [App\Http\Controllers\CommissionController::class, 'show'])->name('commission.show');
+    Route::get('/commission/{id}/edit', [App\Http\Controllers\CommissionController::class, 'edit'])->name('commission.edit');
+    Route::put('/commission/{id}', [App\Http\Controllers\CommissionController::class, 'update'])->name('commission.update');
+    Route::delete('/commission/{id}', [App\Http\Controllers\CommissionController::class, 'destroy'])->name('commission.destroy');
+    Route::get('/commission/{id}/details', [App\Http\Controllers\CommissionController::class, 'getDetails'])->name('commission.details');
+    Route::get('/policy/{id}/data', [App\Http\Controllers\CommissionController::class, 'getPolicyData'])->name('policy.data');
 });
 
 // Authentication routes
