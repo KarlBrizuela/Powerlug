@@ -23,14 +23,33 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        // Register model observers for audit trail
+        // Automatically register all models for audit trail tracking
+        $this->registerAuditObservers();
+    }
+
+    /**
+     * Register audit observers for all models in the app
+     */
+    protected function registerAuditObservers()
+    {
         try {
-            \App\Models\Policy::observe(\App\Observers\AuditObserver::class);
-            \App\Models\Client::observe(\App\Observers\AuditObserver::class);
-            \App\Models\InsuranceProvider::observe(\App\Observers\AuditObserver::class);
-            \App\Models\Collection::observe(\App\Observers\AuditObserver::class);
-            \App\Models\WalkIn::observe(\App\Observers\AuditObserver::class);
-            // Add more models here if you want auditing on other entities
+            $modelsPath = app_path('Models');
+            $modelFiles = glob($modelsPath . '/*.php');
+            
+            foreach ($modelFiles as $modelFile) {
+                $modelName = basename($modelFile, '.php');
+                
+                // Skip the AuditTrail model itself to prevent infinite loop
+                if ($modelName === 'AuditTrail') {
+                    continue;
+                }
+                
+                $modelClass = "App\\Models\\{$modelName}";
+                
+                if (class_exists($modelClass)) {
+                    $modelClass::observe(\App\Observers\AuditObserver::class);
+                }
+            }
         } catch (\Throwable $e) {
             // If models are not available during some artisan commands, ignore
             logger()->info('Audit observer registration skipped: ' . $e->getMessage());

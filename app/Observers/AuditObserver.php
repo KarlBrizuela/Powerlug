@@ -38,6 +38,7 @@ class AuditObserver
                 'user_id' => auth()->id() ?? null,
                 'action' => $action,
                 'module' => $module,
+                'record_id' => $id,
                 'description' => $description,
                 'old_values' => $old,
                 'new_values' => $new,

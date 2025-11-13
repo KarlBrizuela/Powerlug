@@ -59,7 +59,7 @@
             <div class="row">
                 <div class="col-12">
                     <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                        <h4 class="mb-sm-0 font-size-18">Audit Trail</h4>
+                        <h4 class="mb-sm-0 font-size-18">Audit Trail - System Activity Tracking</h4>
                         <div>
                             <button class="btn btn-success me-2" onclick="exportToExcel()">
                                 <i class="fas fa-file-excel me-1"></i> Export to Excel
@@ -76,33 +76,76 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-body">
-                            @if(isset($policy) && $policy)
-                                <div class="mb-3">
-                                    <h6 class="mb-2">Policy Audit Info</h6>
-                                    <div class="d-flex flex-column">
-                                        <div class="d-flex justify-content-between">
-                                            <strong>Created By:</strong>
-                                            <span>{{ $policy->createdBy->name ?? 'System' }}</span>
+                            <!-- Filters Section -->
+                            <div class="mb-4">
+                                <form method="GET" action="{{ route('audit-trail.index') }}" id="filterForm">
+                                    <div class="row g-3">
+                                        <div class="col-md-3">
+                                            <label class="form-label">Module/Table</label>
+                                            <select name="module" class="form-select">
+                                                <option value="">All Modules</option>
+                                                @foreach($modules as $mod)
+                                                    <option value="{{ $mod }}" {{ request('module') == $mod ? 'selected' : '' }}>
+                                                        {{ $mod }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
                                         </div>
-                                        <div class="d-flex justify-content-between">
-                                            <strong>Created At:</strong>
-                                            <span>{{ optional($policy->created_at)->format('F d, Y h:i A') }}</span>
+                                        <div class="col-md-2">
+                                            <label class="form-label">Action</label>
+                                            <select name="action" class="form-select">
+                                                <option value="">All Actions</option>
+                                                @foreach($actions as $act)
+                                                    <option value="{{ $act }}" {{ request('action') == $act ? 'selected' : '' }}>
+                                                        {{ ucfirst($act) }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
                                         </div>
-                                        <div class="d-flex justify-content-between">
-                                            <strong>Last Updated:</strong>
-                                            <span>{{ optional($policy->updated_at)->format('F d, Y h:i A') }}</span>
+                                        <div class="col-md-2">
+                                            <label class="form-label">User</label>
+                                            <select name="user_id" class="form-select">
+                                                <option value="">All Users</option>
+                                                @foreach($users as $user)
+                                                    <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>
+                                                        {{ $user->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
                                         </div>
-                                        @if($policy->updatedBy)
-                                            <div class="d-flex justify-content-between">
-                                                <strong>Updated By:</strong>
-                                                <span>{{ $policy->updatedBy->name }}</span>
+                                        <div class="col-md-2">
+                                            <label class="form-label">Date From</label>
+                                            <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label">Date To</label>
+                                            <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
+                                        </div>
+                                        <div class="col-md-1">
+                                            <label class="form-label">&nbsp;</label>
+                                            <div class="d-flex gap-1">
+                                                <button type="submit" class="btn btn-primary w-100">
+                                                    <i class="fas fa-filter"></i>
+                                                </button>
                                             </div>
-                                        @endif
+                                        </div>
                                     </div>
-                                    <hr />
-                                </div>
-                            @endif
-                            <div class="section-title">System Activity Log</div>
+                                    @if(request()->hasAny(['module', 'action', 'user_id', 'date_from', 'date_to']))
+                                        <div class="mt-2">
+                                            <a href="{{ route('audit-trail.index') }}" class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-times me-1"></i> Clear Filters
+                                            </a>
+                                        </div>
+                                    @endif
+                                </form>
+                            </div>
+
+                            <div class="section-title">
+                                System Activity Log
+                                @if(request()->hasAny(['module', 'action', 'user_id', 'date_from', 'date_to']))
+                                    <span class="badge bg-primary">Filtered</span>
+                                @endif
+                            </div>
 
                             <div class="table-responsive">
                                 <table id="auditTable" class="table table-bordered dt-responsive nowrap w-100">
@@ -111,6 +154,7 @@
                                             <th>User</th>
                                             <th>Action</th>
                                             <th>Module</th>
+                                            <th>Record ID</th>
                                             <th>Description</th>
                                             <th>IP Address</th>
                                             <th>Date & Time</th>
@@ -123,23 +167,32 @@
                                                 <tr>
                                                     <td>{{ $audit->user->name ?? 'System' }}</td>
                                                     <td><span class="badge bg-{{ $audit->getActionColor() }}">{{ ucfirst($audit->action) }}</span></td>
-                                                    <td>{{ $audit->module }}</td>
+                                                    <td><span class="badge bg-secondary">{{ $audit->module }}</span></td>
+                                                    <td>{{ $audit->record_id ?? '-' }}</td>
                                                     <td>{{ $audit->description }}</td>
                                                     <td>{{ $audit->ip_address ?? '-' }}</td>
                                                     <td>{{ $audit->created_at->format('F d, Y h:i A') }}</td>
                                                     <td class="text-center">
-                                                        <a href="{{ route('audit-trail.show', $audit->id) }}" class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="tooltip" title="View Details">View</a>
-                                                        <button class="btn btn-sm btn-outline-danger delete-activity" data-activity-id="{{ $audit->id }}" data-activity-description="{{ $audit->description }}">Delete</button>
+                                                        <a href="{{ route('audit-trail.show', $audit->id) }}" class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="tooltip" title="View Details">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                        <button class="btn btn-sm btn-outline-danger delete-activity" data-activity-id="{{ $audit->id }}" data-activity-description="{{ $audit->description }}">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
                                                     </td>
                                                 </tr>
                                             @endforeach
                                         @else
                                             <tr>
-                                                <td colspan="7" class="text-center py-4">
+                                                <td colspan="8" class="text-center py-4">
                                                     <div class="text-muted">
                                                         <i class="fas fa-history fa-2x mb-3"></i>
                                                         <p>No audit trail activities found.</p>
-                                                        <p class="small">Activities will appear here as users interact with the system.</p>
+                                                        @if(request()->hasAny(['module', 'action', 'user_id', 'date_from', 'date_to']))
+                                                            <p class="small">Try adjusting your filters or <a href="{{ route('audit-trail.index') }}">clear filters</a>.</p>
+                                                        @else
+                                                            <p class="small">Activities will appear here as users interact with the system.</p>
+                                                        @endif
                                                     </div>
                                                 </td>
                                             </tr>
@@ -248,60 +301,10 @@
 
     <script>
         $(document).ready(function() {
-            // Initialize DataTable with empty data
-            var table = $('#auditTable').DataTable({
-                responsive: true,
-                data: [], // Empty data
-                columns: [
-                    { data: 'user', title: 'User' },
-                    { data: 'action', title: 'Action' },
-                    { data: 'module', title: 'Module' },
-                    { data: 'description', title: 'Description' },
-                    { data: 'ip_address', title: 'IP Address' },
-                    { data: 'date_time', title: 'Date & Time' },
-                    { data: 'actions', title: 'Actions', orderable: false }
-                ],
-                order: [[5, 'desc']], // Sort by date column descending
-                language: {
-                    emptyTable: "No audit trail activities found.",
-                    search: "_INPUT_",
-                    searchPlaceholder: "Search activities...",
-                    paginate: {
-                        previous: "<i class='fas fa-chevron-left'></i>",
-                        next: "<i class='fas fa-chevron-right'></i>"
-                    }
-                },
-                dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>'
-            });
-
             // Initialize tooltips
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl)
-            });
-
-            // View activity details (load via AJAX into modal)
-            $(document).on('click', '.view-activity', function() {
-                const activityId = $(this).data('activity-id');
-
-                // Show loading state
-                $('#activityDetailsContent').html(`
-                    <div class="text-center py-4">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p class="mt-2">Loading activity details...</p>
-                    </div>
-                `);
-
-                $('#activityDetailsModal').modal('show');
-
-                // Fetch details
-                $.get('/audit/' + activityId + '/details').done(function(html) {
-                    $('#activityDetailsContent').html(html);
-                }).fail(function() {
-                    $('#activityDetailsContent').html('<div class="text-danger">Failed to load activity details.</div>');
-                });
             });
 
             // Delete activity functionality
@@ -316,29 +319,49 @@
 
             // Export to Excel functionality
             window.exportToExcel = function() {
-                alert('Export functionality would be implemented when there is data to export.');
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Export to Excel',
+                    text: 'This feature will export the current filtered audit trail data to Excel.',
+                    showCancelButton: true,
+                    confirmButtonText: 'Export',
+                    confirmButtonColor: '#28a745'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Implementation for Excel export would go here
+                        Swal.fire('Success', 'Export functionality to be implemented', 'success');
+                    }
+                });
             };
 
             // Clear audit logs functionality
             window.clearAuditLogs = function() {
-                if (confirm('Are you sure you want to clear all audit logs? This action cannot be undone.')) {
-                    Swal.fire({
-                        title: 'Clearing Logs',
-                        text: 'Please wait while we clear the audit logs...',
-                        allowOutsideClick: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-
-                    setTimeout(() => {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Success',
-                            text: 'All audit logs have been cleared successfully.',
-                        });
-                    }, 1500);
-                }
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'This will permanently delete all audit logs. This action cannot be undone!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, clear all logs',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Submit form to clear logs
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = '{{ route("audit-trail.clear") }}';
+                        
+                        const csrf = document.createElement('input');
+                        csrf.type = 'hidden';
+                        csrf.name = '_token';
+                        csrf.value = '{{ csrf_token() }}';
+                        form.appendChild(csrf);
+                        
+                        document.body.appendChild(form);
+                        form.submit();
+                    }
+                });
             };
         });
     </script>
