@@ -10,22 +10,54 @@ class AuditTrailController extends Controller
 {
     public function index(Request $request)
     {
-        $policy = null;
-        $policyId = $request->query('policy_id');
-        if ($policyId) {
-            $policy = Policy::with('createdBy', 'updatedBy')->find($policyId);
-        }
+        // Get filter parameters
+        $module = $request->query('module');
+        $recordId = $request->query('record_id');
+        $action = $request->query('action');
+        $userId = $request->query('user_id');
+        $dateFrom = $request->query('date_from');
+        $dateTo = $request->query('date_to');
 
-        // Load audit entries, optionally filter by policy id when provided
+        // Build query
         $auditsQuery = \App\Models\AuditTrail::with('user')->orderBy('created_at', 'desc');
-        if ($policyId) {
-            // audit description contains "Policy #<id>" as created by the observer
-            $auditsQuery->where('module', 'Policy')->where('description', 'like', "%#{$policyId}%");
+
+        // Apply filters
+        if ($module) {
+            $auditsQuery->where('module', $module);
+        }
+        
+        if ($recordId) {
+            $auditsQuery->where('record_id', $recordId);
+        }
+        
+        if ($action) {
+            $auditsQuery->where('action', $action);
+        }
+        
+        if ($userId) {
+            $auditsQuery->where('user_id', $userId);
+        }
+        
+        if ($dateFrom) {
+            $auditsQuery->whereDate('created_at', '>=', $dateFrom);
+        }
+        
+        if ($dateTo) {
+            $auditsQuery->whereDate('created_at', '<=', $dateTo);
         }
 
-        $audits = $auditsQuery->paginate(50);
+        $audits = $auditsQuery->paginate(50)->withQueryString();
 
-        return view('pages.audit-trail', compact('policy', 'audits'));
+        // Get distinct modules for filter dropdown
+        $modules = \App\Models\AuditTrail::distinct()->pluck('module')->sort();
+        
+        // Get distinct actions for filter dropdown
+        $actions = \App\Models\AuditTrail::distinct()->pluck('action')->sort();
+        
+        // Get users for filter dropdown
+        $users = \App\Models\User::orderBy('name')->get();
+
+        return view('pages.audit-trail', compact('audits', 'modules', 'actions', 'users'));
     }
 
     public function show($id)
