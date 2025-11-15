@@ -6,6 +6,8 @@
     <title>Policy Form - Powerlug</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
     <style>
         /* Main layout styles for sidebar integration */
         .page-wrapper {
@@ -145,6 +147,87 @@
             body.sidebar-collapsed .page-content {
                 margin-left: 0;
             }
+        }
+        
+        /* Freebie date picker styles */
+        .freebie-date-container {
+            display: flex;
+            gap: 10px;
+            align-items: end;
+        }
+        
+        .freebie-select {
+            flex: 1;
+        }
+
+        /* Services input wrapper styles */
+        .services-input-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 8px 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            background-color: #fff;
+            min-height: 42px;
+            align-items: center;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .services-input-wrapper:focus-within {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        .services-dropdown {
+            border: none !important;
+            padding: 0 !important;
+            flex: 1;
+            min-width: 150px;
+            background: transparent !important;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .services-dropdown:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .services-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background-color: #0d6efd;
+            color: white;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .services-badge .btn-remove {
+            background: none;
+            border: none;
+            color: white;
+            padding: 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        .services-badge .btn-remove:hover {
+            opacity: 0.8;
+        }
+        
+        .date-picker-container {
+            flex: 1;
         }
     </style>
 </head>
@@ -371,21 +454,33 @@
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label">Freebie</label>
-                                                        <select class="form-select @error('freebie') is-invalid @enderror" name="freebie">
-                                                            <option value="">Select freebie</option>
-                                                            @if(isset($freebies) && $freebies->count())
-                                                                @foreach($freebies as $f)
-                                                                    <option value="{{ $f->name }}" {{ old('freebie') == $f->name ? 'selected' : '' }}>{{ $f->name }}</option>
-                                                                @endforeach
-                                                            @else
-                                                                @foreach(['Undercoat', 'Buffing'] as $freebie)
-                                                                    <option value="{{ $freebie }}" {{ old('freebie') == $freebie ? 'selected' : '' }}>{{ $freebie }}</option>
-                                                                @endforeach
-                                                            @endif
-                                                        </select>
-                                                        @error('freebie')
-                                                            <div class="invalid-feedback">{{ $message }}</div>
-                                                        @enderror
+                                                        <div class="freebie-date-container">
+                                                            <div class="freebie-select">
+                                                                <select class="form-select @error('freebie') is-invalid @enderror" name="freebie" id="freebieSelect">
+                                                                    <option value="">Select freebie</option>
+                                                                    @if(isset($freebies) && $freebies->count())
+                                                                        @foreach($freebies as $f)
+                                                                            <option value="{{ $f->name }}" {{ old('freebie') == $f->name ? 'selected' : '' }}>{{ $f->name }}</option>
+                                                                        @endforeach
+                                                                    @else
+                                                                        @foreach(['Undercoat', 'Buffing'] as $freebie)
+                                                                            <option value="{{ $freebie }}" {{ old('freebie') == $freebie ? 'selected' : '' }}>{{ $freebie }}</option>
+                                                                        @endforeach
+                                                                    @endif
+                                                                </select>
+                                                                @error('freebie')
+                                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                                @enderror
+                                                            </div>
+                                                            <div class="date-picker-container">
+                                                                <label class="form-label">Date Availed</label>
+                                                                <input type="date" class="form-control @error('freebie_date') is-invalid @enderror" 
+                                                                       name="freebie_date" id="freebieDate" value="{{ old('freebie_date') }}">
+                                                                @error('freebie_date')
+                                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                                @enderror
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -440,27 +535,18 @@
                                                 <div class="row mb-2">
                                                     <div class="col-md-12">
                                                         <label class="form-label">Services Availed</label>
-                                                        <div class="row">
-                                                            <div class="col-md-3">
-                                                                <div class="form-check">
-                                                                    <input class="form-check-input" type="checkbox" id="carwash" 
-                                                                           name="services[]" value="Carwash" {{ in_array('Carwash', old('services', [])) ? 'checked' : '' }}>
-                                                                    <label class="form-check-label" for="carwash">Carwash</label>
-                                                                </div>
-                                                                <div class="form-check">
-                                                                    <input class="form-check-input" type="checkbox" id="change-oil" 
-                                                                           name="services[]" value="Change Oil" {{ in_array('Change Oil', old('services', [])) ? 'checked' : '' }}>
-                                                                    <label class="form-check-label" for="change-oil">Change Oil</label>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-3">
-                                                                <div class="form-check">
-                                                                    <input class="form-check-input" type="checkbox" id="tire-rotation" 
-                                                                           name="services[]" value="Etc" {{ in_array('Etc', old('services', [])) ? 'checked' : '' }}>
-                                                                    <label class="form-check-label" for="tire-rotation">Etc</label>
-                                                                </div>
-                                                            </div>
+                                                        <div class="services-input-wrapper" id="servicesInputGroup">
+                                                            <select class="services-dropdown" id="serviceDropdown">
+                                                                <option value="">Select a service to add</option>
+                                                                <option value="Carwash">Carwash</option>
+                                                                <option value="Change Oil">Change Oil</option>
+                                                                <option value="Etc">Etc</option>
+                                                            </select>
                                                         </div>
+                                                        <input type="hidden" name="services[]" id="servicesInput">
+                                                        @error('services')
+                                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                        @enderror
                                                     </div>
                                                 </div>
 
@@ -486,104 +572,7 @@
                                             </div>
                                         </div>
 
-                                        <!-- Additional Information -->
-                                        <div class="row mb-3">
-                                            <div class="col-md-6">
-                                                <label class="form-label">Payment Terms</label>
-                                                <select class="form-select @error('payment_terms') is-invalid @enderror" name="payment_terms">
-                                                    <option value="">Choose payment method</option>
-                                                    @foreach(['Full payment', '30 days', '60 days', '90 days'] as $term)
-                                                        <option value="{{ $term }}" {{ old('payment_terms') == $term ? 'selected' : '' }}>
-                                                            {{ $term }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                                @error('payment_terms')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label">Paid Amount</label>
-                                                <input type="text" class="form-control @error('paid_amount') is-invalid @enderror" 
-                                                       name="paid_amount" value="{{ old('paid_amount') }}" placeholder="Enter paid amount">
-                                                @error('paid_amount')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        </div>
-
-                                        <div class="row mb-3">
-                                            <div class="col-md-6">
-                                                <label class="form-label">Payment Method</label>
-                                                <select class="form-select @error('payment_method') is-invalid @enderror" 
-                                                        id="paymentMethod" name="payment_method">
-                                                    <option value="">Select method</option>
-                                                    @foreach(['Cash', 'Transfer', 'PDC', 'Cancelled'] as $method)
-                                                        <option value="{{ $method }}" {{ old('payment_method') == $method ? 'selected' : '' }}>
-                                                            {{ $method }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                                @error('payment_method')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="bank-transfer-fields" id="bankTransferFields">
-                                                    <label class="form-label">Bank Transfer To</label>
-                                                    <select class="form-select @error('bank_transfer') is-invalid @enderror" 
-                                                            id="bankTransfer" name="bank_transfer">
-                                                        <option value="">Select bank</option>
-                                                    </select>
-                                                    @error('bank_transfer')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                    
-                                                    <!-- Manual bank input when provider has no banks or user selects Other -->
-                                                    <input type="text" id="bankOther" name="bank_transfer_other" 
-                                                           class="form-control mt-2 @error('bank_transfer_other') is-invalid @enderror" 
-                                                           style="display:none;" placeholder="Enter bank name">
-                                                    @error('bank_transfer_other')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row mb-4">
-                                            <div class="col-md-6">
-                                                <label class="form-label">Freebie</label>
-                                                <select class="form-select @error('additional_freebie') is-invalid @enderror" name="additional_freebie">
-                                                    <option value="">Select freebie</option>
-                                                    @if(isset($freebies) && $freebies->count())
-                                                        @foreach($freebies as $f)
-                                                            <option value="{{ $f->name }}" {{ old('additional_freebie') == $f->name ? 'selected' : '' }}>{{ $f->name }}</option>
-                                                        @endforeach
-                                                    @else
-                                                        @foreach(['Undercoat', 'Buffing'] as $freebie)
-                                                            <option value="{{ $freebie }}" {{ old('additional_freebie') == $freebie ? 'selected' : '' }}>{{ $freebie }}</option>
-                                                        @endforeach
-                                                    @endif
-                                                </select>
-                                                @error('additional_freebie')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-
-                                            <div class="col-md-6">
-                                                <label class="form-label">Reference No.</label>
-                                                <input type="text" class="form-control @error('reference_number') is-invalid @enderror" 
-                                                       name="reference_number" value="{{ old('reference_number') }}" 
-                                                       placeholder="Enter reference number">
-                                                @error('reference_number')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Summary of Premium and Other Charges Section -->
+                                         <!-- Summary of Premium and Other Charges Section -->
                                 <div class="section-container mb-4">
                                     <div class="section-title">Summary of Premium and Other Charges</div>
                                     <div class="section-content">
@@ -656,6 +645,116 @@
                                         </div>
                                     </div>
                                 </div>
+                                        <!-- Additional Information -->
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Payment Terms</label>
+                                                <select class="form-select @error('payment_terms') is-invalid @enderror" name="payment_terms">
+                                                    <option value="">Choose payment method</option>
+                                                    @foreach(['Full payment', '30 days', '60 days', '90 days'] as $term)
+                                                        <option value="{{ $term }}" {{ old('payment_terms') == $term ? 'selected' : '' }}>
+                                                            {{ $term }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                @error('payment_terms')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Paid Amount</label>
+                                                <input type="text" class="form-control @error('paid_amount') is-invalid @enderror" 
+                                                       name="paid_amount" value="{{ old('paid_amount') }}" placeholder="Enter paid amount">
+                                                @error('paid_amount')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Payment Method</label>
+                                                <select class="form-select @error('payment_method') is-invalid @enderror" 
+                                                        id="paymentMethod" name="payment_method">
+                                                    <option value="">Select method</option>
+                                                    @foreach(['Cash', 'Transfer', 'PDC', 'Cancelled'] as $method)
+                                                        <option value="{{ $method }}" {{ old('payment_method') == $method ? 'selected' : '' }}>
+                                                            {{ $method }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                @error('payment_method')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="bank-transfer-fields" id="bankTransferFields">
+                                                    <label class="form-label">Bank Transfer To</label>
+                                                    <select class="form-select @error('bank_transfer') is-invalid @enderror" 
+                                                            id="bankTransfer" name="bank_transfer">
+                                                        <option value="">Select bank</option>
+                                                    </select>
+                                                    @error('bank_transfer')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                    
+                                                    <!-- Manual bank input when provider has no banks or user selects Other -->
+                                                    <input type="text" id="bankOther" name="bank_transfer_other" 
+                                                           class="form-control mt-2 @error('bank_transfer_other') is-invalid @enderror" 
+                                                           style="display:none;" placeholder="Enter bank name">
+                                                    @error('bank_transfer_other')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-4">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Freebie</label>
+                                                <div class="freebie-date-container">
+                                                    <div class="freebie-select">
+                                                        <select class="form-select @error('additional_freebie') is-invalid @enderror" name="additional_freebie" id="additionalFreebieSelect">
+                                                            <option value="">Select freebie</option>
+                                                            @if(isset($freebies) && $freebies->count())
+                                                                @foreach($freebies as $f)
+                                                                    <option value="{{ $f->name }}" {{ old('additional_freebie') == $f->name ? 'selected' : '' }}>{{ $f->name }}</option>
+                                                                @endforeach
+                                                            @else
+                                                                @foreach(['Undercoat', 'Buffing'] as $freebie)
+                                                                    <option value="{{ $freebie }}" {{ old('additional_freebie') == $freebie ? 'selected' : '' }}>{{ $freebie }}</option>
+                                                                @endforeach
+                                                            @endif
+                                                        </select>
+                                                        @error('additional_freebie')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+                                                    <div class="date-picker-container">
+                                                        <label class="form-label">Date Availed</label>
+                                                        <input type="date" class="form-control @error('additional_freebie_date') is-invalid @enderror" 
+                                                               name="additional_freebie_date" id="additionalFreebieDate" value="{{ old('additional_freebie_date') }}">
+                                                        @error('additional_freebie_date')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label class="form-label">Reference No.</label>
+                                                <input type="text" class="form-control @error('reference_number') is-invalid @enderror" 
+                                                       name="reference_number" value="{{ old('reference_number') }}" 
+                                                       placeholder="Enter reference number">
+                                                @error('reference_number')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                               
 
                                 <div class="text-end">
                                     <button type="reset" class="btn btn-secondary me-2">Reset</button>
@@ -708,6 +807,10 @@
             const bankTransfer = document.getElementById('bankTransfer');
             const sidebarToggle = document.getElementById('sidebarToggle');
             const pageContent = document.getElementById('pageContent');
+            const freebieSelect = document.getElementById('freebieSelect');
+            const freebieDate = document.getElementById('freebieDate');
+            const additionalFreebieSelect = document.getElementById('additionalFreebieSelect');
+            const additionalFreebieDate = document.getElementById('additionalFreebieDate');
 
             console.log('DOM loaded - initializing functionality');
 
@@ -786,6 +889,23 @@
                 });
             }
 
+            // Set current date as default for freebie date fields when a freebie is selected
+            if (freebieSelect) {
+                freebieSelect.addEventListener('change', function() {
+                    if (this.value && !freebieDate.value) {
+                        freebieDate.value = new Date().toISOString().split('T')[0];
+                    }
+                });
+            }
+
+            if (additionalFreebieSelect) {
+                additionalFreebieSelect.addEventListener('change', function() {
+                    if (this.value && !additionalFreebieDate.value) {
+                        additionalFreebieDate.value = new Date().toISOString().split('T')[0];
+                    }
+                });
+            }
+
             // Mobile sidebar toggle
             if (sidebarToggle) {
                 sidebarToggle.addEventListener('click', function() {
@@ -852,6 +972,104 @@
 
             // Initialize the form state
             updateBankOptions();
+
+            // Services selection functionality
+            const serviceDropdown = document.getElementById('serviceDropdown');
+            const servicesInputGroup = document.getElementById('servicesInputGroup');
+            let selectedServices = [];
+
+            // Load existing services from page load
+            document.querySelectorAll('#servicesInputGroup .services-badge').forEach(badge => {
+                const service = badge.dataset.service;
+                if (service) {
+                    selectedServices.push(service);
+                }
+            });
+
+            // Add service when dropdown selection changes
+            serviceDropdown.addEventListener('change', function() {
+                const selectedService = this.value;
+                
+                if (selectedService && !selectedServices.includes(selectedService)) {
+                    selectedServices.push(selectedService);
+                    renderServices();
+                    this.value = ''; // Reset dropdown
+                }
+            });
+
+            // Render the selected services as badges inside the input group
+            function renderServices() {
+                const dropdown = document.getElementById('serviceDropdown');
+                
+                // Clear existing badges but keep the dropdown
+                const existingBadges = servicesInputGroup.querySelectorAll('.services-badge');
+                existingBadges.forEach(badge => badge.remove());
+                
+                // Always keep dropdown visible
+                dropdown.style.display = 'block';
+                
+                // Hide/show placeholder text based on selections
+                const placeholderOption = dropdown.querySelector('option[value=""]');
+                if (selectedServices.length > 0) {
+                    placeholderOption.style.display = 'none';
+                } else {
+                    placeholderOption.style.display = 'block';
+                }
+                
+                // Add new badges before the dropdown
+                selectedServices.forEach(service => {
+                    const badge = document.createElement('div');
+                    badge.className = 'services-badge';
+                    badge.dataset.service = service;
+                    badge.innerHTML = `
+                        ${service}
+                        <button type="button" class="btn-remove" aria-label="Remove ${service}">×</button>
+                    `;
+                    servicesInputGroup.insertBefore(badge, dropdown);
+                    
+                    // Add remove handler
+                    badge.querySelector('.btn-remove').addEventListener('click', function(e) {
+                        e.preventDefault();
+                        selectedServices = selectedServices.filter(s => s !== service);
+                        renderServices();
+                    });
+                });
+
+                // Create hidden inputs for form submission
+                const container = document.createElement('div');
+                container.id = 'servicesContainer';
+                selectedServices.forEach(service => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'services[]';
+                    input.value = service;
+                    container.appendChild(input);
+                });
+                
+                // Replace old container if exists, otherwise add it
+                const oldContainer = document.getElementById('servicesContainer');
+                if (oldContainer) {
+                    oldContainer.replaceWith(container);
+                } else {
+                    servicesInputGroup.parentElement.appendChild(container);
+                }
+            }
+
+            // Initial render if there are old services
+            if (selectedServices.length > 0) {
+                renderServices();
+            }
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#services').select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Select services',
+                allowClear: true,
+                closeOnSelect: false
+            });
         });
     </script>
 </body>

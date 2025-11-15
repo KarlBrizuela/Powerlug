@@ -126,4 +126,12 @@ class Policy extends Model
     {
         return $query->where('billing_status', 'unpaid');
     }
+
+    /**
+     * Get installments for this policy.
+     */
+    public function installments()
+    {
+        return $this->hasMany(Installment::class);
+    }
 }

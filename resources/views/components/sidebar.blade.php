@@ -274,7 +274,7 @@
                    <li>
     <a href="{{ route('policy') }}" class="@if(request()->url() === route('policy')) active @endif">
         <i data-feather="file-text"></i>
-        <span data-key="t-pages">Policy Form</span>
+        <span data-key="t-pages">Client Form</span>
     </a>
 </li>
 

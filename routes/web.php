@@ -45,6 +45,9 @@ Route::middleware(['auth'])->group(function () {
     // Policy routes
     Route::resource('policies', PolicyController::class);
     Route::get('/policy', [PolicyController::class, 'create'])->name('policy');
+    Route::get('/policies/{policy}/installment', [PolicyController::class, 'installment'])->name('policies.installment');
+    Route::post('/policies/{policy}/installment', [PolicyController::class, 'storeInstallment'])->name('policies.storeInstallment');
+    Route::get('/policies/{policy}/installments', [PolicyController::class, 'listInstallments'])->name('policies.listInstallments');
 
     // Freebies
     // Explicit parameter name mapping to ensure route-model binding uses {freebie}

@@ -14,11 +14,20 @@ class PolicyController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $policies = Policy::with('client', 'insuranceProvider', 'createdBy')
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+        $query = Policy::with('client', 'insuranceProvider', 'createdBy');
+
+        // Apply date filters if provided
+        if ($request->has('start_date') && $request->start_date) {
+            $query->whereDate('start_date', '>=', $request->start_date);
+        }
+
+        if ($request->has('end_date') && $request->end_date) {
+            $query->whereDate('end_date', '<=', $request->end_date);
+        }
+
+        $policies = $query->orderBy('created_at', 'desc')->paginate(15);
 
         return view('pages.policies.index', compact('policies'));
     }
@@ -348,5 +357,80 @@ class PolicyController extends Controller
         $policy->delete();
 
         return redirect()->route('policies.index')->with('success', 'Policy deleted successfully');
+    }
+
+    /**
+     * Show the installment page for a policy.
+     *
+     * @param  \App\Models\Policy  $policy
+     * @return \Illuminate\Http\Response
+     */
+    public function installment(Policy $policy)
+    {
+        // Load installments for display
+        $installments = $policy->installments()->orderBy('payment_date', 'desc')->get();
+
+        return view('pages.policies.installment', compact('policy', 'installments'));
+    }
+
+    /**
+     * Display all installments for a policy.
+     *
+     * @param  \App\Models\Policy  $policy
+     * @return \Illuminate\Http\Response
+     */
+    public function listInstallments(Policy $policy)
+    {
+        $installments = $policy->installments()->orderBy('payment_date', 'desc')->paginate(20);
+
+        return view('pages.policies.installments-list', compact('policy', 'installments'));
+    }
+
+    /**
+     * Store installment payment records for a policy.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Policy  $policy
+     * @return \Illuminate\Http\Response
+     */
+    public function storeInstallment(Request $request, Policy $policy)
+    {
+        $validated = $request->validate([
+            'installments' => 'required|array|min:1',
+            'installments.*.amount' => 'required|numeric|min:0.01',
+            'installments.*.date' => 'required|date',
+            'installments.*.method' => 'required|in:Cash,Check,Transfer,Online',
+            'installments.*.reference' => 'nullable|string',
+            'installments.*.remarks' => 'nullable|string',
+        ]);
+        // Persist each installment and calculate total
+        $totalPaid = 0;
+        foreach ($validated['installments'] as $inst) {
+            $amount = $inst['amount'];
+            $totalPaid += $amount;
+
+            \App\Models\Installment::create([
+                'policy_id' => $policy->id,
+                'amount' => $amount,
+                'payment_date' => $inst['date'],
+                'payment_method' => $inst['method'],
+                'reference_number' => $inst['reference'] ?? null,
+                'remarks' => $inst['remarks'] ?? null,
+                'created_by' => auth()->id(),
+            ]);
+        }
+
+        // Update policy paid_amount and billing status
+        $policy->paid_amount = ($policy->paid_amount ?? 0) + $totalPaid;
+        if ($policy->paid_amount >= ($policy->amount_due ?? 0)) {
+            $policy->billing_status = 'paid';
+        } else {
+            $policy->billing_status = 'partial';
+        }
+        $policy->updated_by = auth()->id();
+        $policy->save();
+
+        return redirect()->route('policies.installment', $policy->id)
+                         ->with('success', 'Installment payment(s) recorded successfully. Total amount paid: ₱' . number_format($totalPaid, 2));
     }
 }

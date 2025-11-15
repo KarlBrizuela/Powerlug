@@ -63,6 +63,33 @@
                 </div>
             </div>
 
+            <!-- Date Filter Section -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Filter Policies</h5>
+                    <form method="GET" action="{{ route('policies.index') }}" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="start_date" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date" 
+                                   value="{{ request('start_date') }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="end_date" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date" 
+                                   value="{{ request('end_date') }}">
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-filter"></i> Apply Filters
+                            </button>
+                            <a href="{{ route('policies.index') }}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Clear Filters
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             @if ($message = Session::get('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="fas fa-check-circle"></i> {{ $message }}
@@ -140,6 +167,10 @@
                                                     <a href="{{ route('policies.edit', $policy->id) }}" 
                                                        class="btn btn-warning" title="Edit">
                                                         <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a href="{{ route('policies.installment', $policy->id) }}" 
+                                                       class="btn btn-primary" title="Installment">
+                                                        <i class="fas fa-credit-card"></i>
                                                     </a>
                                                     <form action="{{ route('policies.destroy', $policy->id) }}" 
                                                           method="POST" style="display:inline;">
