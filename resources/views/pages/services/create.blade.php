@@ -75,8 +75,7 @@
                                        name="name" 
                                        value="{{ old('name') }}" 
                                        class="form-control" 
-                                       required
-                                       placeholder="Enter service name">
+                                       required>
                                 <div class="form-text">The name of your service as it will appear to customers.</div>
                             </div>
 
@@ -89,8 +88,7 @@
                                            min="0"
                                            name="price" 
                                            value="{{ old('price') }}" 
-                                           class="form-control"
-                                           placeholder="0.00">
+                                           class="form-control">
                                 </div>
                                 <div class="form-text">Set the price for this service.</div>
                             </div>
@@ -102,8 +100,7 @@
                                 <input type="text" 
                                        name="duration" 
                                        value="{{ old('duration') }}" 
-                                       class="form-control" 
-                                       placeholder="e.g. 30 mins, 1 hour, Custom text">
+                                       class="form-control">
                                 <div class="form-text">Estimated time required for this service.</div>
                             </div>
                         </div>
@@ -112,8 +109,7 @@
                             <label class="form-label fw-semibold">Description</label>
                             <textarea name="description" 
                                       class="form-control" 
-                                      rows="4"
-                                      placeholder="Describe the service details, what's included, etc.">{{ old('description') }}</textarea>
+                                      rows="4">{{ old('description') }}</textarea>
                             <div class="form-text">Optional description of the service.</div>
                         </div>
 
