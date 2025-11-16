@@ -10,6 +10,7 @@ use App\Http\Controllers\AuditTrailController;
 use App\Http\Controllers\SalesReportController;
 use App\Http\Controllers\PolicyController;
 use App\Http\Controllers\FreebieController;
+use App\Http\Controllers\ServiceController;
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
@@ -60,6 +61,8 @@ Route::middleware(['auth'])->group(function () {
     
     // Insurance Provider routes
     Route::resource('insurance-providers', InsuranceProviderController::class);    // Claims routes
+    // Service routes
+    Route::resource('services', ServiceController::class);
     // Claims: use controller resource for create/index/store
     Route::get('/claims/create', function () {
         // Load distinct client names from policies for the claim form dropdown

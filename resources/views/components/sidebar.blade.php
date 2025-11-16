@@ -362,6 +362,14 @@
                         </a>
                     </li>
 
+                    <!-- Services -->
+                    <li>
+                        <a href="{{ route('services.index') }}" class="{{ request()->routeIs('services.*') ? 'active' : '' }}">
+                            <i data-feather="tool"></i>
+                            <span data-key="t-pages">Services</span>
+                        </a>
+                    </li>
+
                     <li>
                         <a href="{{ route('audit-trail.index') }}" class="{{ request()->routeIs('audit-trail.index') ? 'active' : '' }}">
                             <i data-feather="settings"></i>

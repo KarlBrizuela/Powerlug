@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Policy;
 use App\Models\Client;
 use App\Models\InsuranceProvider;
+use App\Models\Service;
 use Illuminate\Http\Request;
 
 class PolicyController extends Controller
@@ -45,7 +46,10 @@ class PolicyController extends Controller
         // Load active freebies for the freebie select
         $freebies = \App\Models\Freebie::where('is_active', true)->orderBy('name')->get();
 
-        return view('pages.policy', compact('insuranceProviders', 'freebies'));
+        // Load services to populate the Walk-in "Services Availed" dropdown/checkboxes
+        $services = Service::orderBy('name')->get();
+
+        return view('pages.policy', compact('insuranceProviders', 'freebies', 'services'));
     }
 
     /**
@@ -230,7 +234,10 @@ class PolicyController extends Controller
         // Load active freebies for the freebie select
         $freebies = \App\Models\Freebie::where('is_active', true)->orderBy('name')->get();
 
-        return view('pages.policies.edit', compact('policy', 'insuranceProviders', 'freebies'));
+        // Load services for the edit form
+        $services = Service::orderBy('name')->get();
+
+        return view('pages.policies.edit', compact('policy', 'insuranceProviders', 'freebies', 'services'));
     }
 
     /**

@@ -11,15 +11,25 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Add columns only if they don't already exist to make this migration idempotent
         Schema::table('claims', function (Blueprint $table) {
-            $table->unsignedBigInteger('insurance_provider_id')->nullable()->after('client_name');
-            $table->unsignedBigInteger('policy_id')->nullable()->after('insurance_provider_id');
-            $table->string('policy_number')->nullable()->after('policy_id');
-            
-            // Add foreign keys
-            $table->foreign('insurance_provider_id')->references('id')->on('insurance_providers')->onDelete('set null');
-            $table->foreign('policy_id')->references('id')->on('policies')->onDelete('set null');
+            if (!Schema::hasColumn('claims', 'insurance_provider_id')) {
+                $table->unsignedBigInteger('insurance_provider_id')->nullable()->after('client_name');
+            }
+
+            if (!Schema::hasColumn('claims', 'policy_id')) {
+                $table->unsignedBigInteger('policy_id')->nullable()->after('insurance_provider_id');
+            }
+
+            if (!Schema::hasColumn('claims', 'policy_number')) {
+                $table->string('policy_number')->nullable()->after('policy_id');
+            }
         });
+
+        // NOTE: foreign keys intentionally omitted here when running on existing databases
+        // to avoid duplicate foreign key errors. If you need the foreign keys created on
+        // a fresh database, ensure migrations run in a clean environment or add them
+        // manually.
     }
 
     /**

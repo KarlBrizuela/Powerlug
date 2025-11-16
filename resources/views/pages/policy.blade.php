@@ -538,9 +538,15 @@
                                                         <div class="services-input-wrapper" id="servicesInputGroup">
                                                             <select class="services-dropdown" id="serviceDropdown">
                                                                 <option value="">Select a service to add</option>
-                                                                <option value="Carwash">Carwash</option>
-                                                                <option value="Change Oil">Change Oil</option>
-                                                                <option value="Etc">Etc</option>
+                                                                @if(isset($services) && $services->count())
+                                                                    @foreach($services as $s)
+                                                                        <option value="{{ $s->name }}">{{ $s->name }}</option>
+                                                                    @endforeach
+                                                                @else
+                                                                    <option value="Carwash">Carwash</option>
+                                                                    <option value="Change Oil">Change Oil</option>
+                                                                    <option value="Etc">Etc</option>
+                                                                @endif
                                                             </select>
                                                         </div>
                                                         <input type="hidden" name="services[]" id="servicesInput">

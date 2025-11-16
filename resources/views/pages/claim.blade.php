@@ -145,6 +145,12 @@
                                                         data-provider="{{ $policy->insurance_provider_id }}"
                                                         data-policy-number="{{ $policy->policy_number }}"
                                                         data-client="{{ $policy->client_name }}"
+                                                        data-contact-number="{{ $policy->contact_number ?? '' }}"
+                                                        data-plate-number="{{ $policy->plate_number ?? '' }}"
+                                                        data-make-model="{{ $policy->make_model ?? '' }}"
+                                                        data-color="{{ $policy->color ?? '' }}"
+                                                        data-address="{{ $policy->address ?? '' }}"
+                                                        data-model-year="{{ $policy->model_year ?? '' }}"
                                                         {{ old('policy_id') == $policy->id ? 'selected' : '' }}>
                                                         {{ $policy->policy_number }} - {{ $policy->client_name }}
                                                     </option>
@@ -175,8 +181,59 @@
                                 <div class="row mb-3">
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold">Client</label>
-                                        <input type="text" name="client" id="client" class="form-control @error('client') is-invalid @enderror" placeholder="Auto-filled from policy">
+                                        <input type="text" name="client" id="client" value="{{ old('client') }}" class="form-control @error('client') is-invalid @enderror" placeholder="Auto-filled from policy">
                                         @error('client')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Cellphone</label>
+                                        <input type="text" name="client_cellphone" id="client_cellphone" value="{{ old('client_cellphone') }}" class="form-control @error('client_cellphone') is-invalid @enderror" placeholder="Client cellphone number">
+                                        @error('client_cellphone')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Plate Number</label>
+                                        <input type="text" name="plate_no" id="plate_no" value="{{ old('plate_no') }}" class="form-control @error('plate_no') is-invalid @enderror" placeholder="Vehicle plate number">
+                                        @error('plate_no')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Model</label>
+                                        <input type="text" name="vehicle_model" id="vehicle_model" value="{{ old('vehicle_model') }}" class="form-control @error('vehicle_model') is-invalid @enderror" placeholder="Vehicle model">
+                                        @error('vehicle_model')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Color</label>
+                                        <input type="text" name="vehicle_color" id="vehicle_color" value="{{ old('vehicle_color') }}" class="form-control @error('vehicle_color') is-invalid @enderror" placeholder="Vehicle color">
+                                        @error('vehicle_color')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Model Year</label>
+                                        <input type="number" name="model_year" id="model_year" value="{{ old('model_year') }}" class="form-control @error('model_year') is-invalid @enderror" placeholder="e.g. 2020" min="1900" max="2100">
+                                        @error('model_year')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <label class="form-label fw-semibold">Address</label>
+                                        <input type="text" name="address" id="address" value="{{ old('address') }}" class="form-control @error('address') is-invalid @enderror" placeholder="Client address">
+                                        @error('address')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
@@ -286,22 +343,41 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // Auto-fill policy number and client when policy is selected
+        // Auto-fill policy number and client when policy is selected (also fills new client/vehicle fields)
         document.getElementById('policy_id').addEventListener('change', function() {
             const selectedOption = this.options[this.selectedIndex];
             const providerId = selectedOption.getAttribute('data-provider');
             const policyNumber = selectedOption.getAttribute('data-policy-number');
             const clientName = selectedOption.getAttribute('data-client');
-            
+            // Prefer Policy model column names; keep older attribute names as fallback
+            const clientPhone = selectedOption.getAttribute('data-contact-number') || selectedOption.getAttribute('data-client-phone');
+            const plate = selectedOption.getAttribute('data-plate-number') || selectedOption.getAttribute('data-plate');
+            const vehicleModel = selectedOption.getAttribute('data-make-model') || selectedOption.getAttribute('data-vehicle-model');
+            const vehicleColor = selectedOption.getAttribute('data-color') || selectedOption.getAttribute('data-vehicle-color');
+            const address = selectedOption.getAttribute('data-address') || selectedOption.getAttribute('data-client-address');
+            const modelYear = selectedOption.getAttribute('data-model-year');
+
             if (this.value) {
                 // Fill in the fields
                 document.getElementById('insurance_provider_id').value = providerId || '';
                 document.getElementById('policy_number').value = policyNumber || '';
                 document.getElementById('client').value = clientName || '';
+                if (document.getElementById('client_cellphone')) document.getElementById('client_cellphone').value = clientPhone || '';
+                if (document.getElementById('plate_no')) document.getElementById('plate_no').value = plate || '';
+                if (document.getElementById('vehicle_model')) document.getElementById('vehicle_model').value = vehicleModel || '';
+                if (document.getElementById('vehicle_color')) document.getElementById('vehicle_color').value = vehicleColor || '';
+                if (document.getElementById('address')) document.getElementById('address').value = address || '';
+                if (document.getElementById('model_year')) document.getElementById('model_year').value = modelYear || '';
             } else {
                 // Clear fields if no policy selected
                 document.getElementById('policy_number').value = '';
                 document.getElementById('client').value = '';
+                if (document.getElementById('client_cellphone')) document.getElementById('client_cellphone').value = '';
+                if (document.getElementById('plate_no')) document.getElementById('plate_no').value = '';
+                if (document.getElementById('vehicle_model')) document.getElementById('vehicle_model').value = '';
+                if (document.getElementById('vehicle_color')) document.getElementById('vehicle_color').value = '';
+                if (document.getElementById('address')) document.getElementById('address').value = '';
+                if (document.getElementById('model_year')) document.getElementById('model_year').value = '';
             }
         });
 
@@ -329,6 +405,13 @@
             policySelect.value = '';
             document.getElementById('policy_number').value = '';
             document.getElementById('client').value = '';
+            // Also clear newly added client/vehicle fields
+            if (document.getElementById('client_cellphone')) document.getElementById('client_cellphone').value = '';
+            if (document.getElementById('plate_no')) document.getElementById('plate_no').value = '';
+            if (document.getElementById('vehicle_model')) document.getElementById('vehicle_model').value = '';
+            if (document.getElementById('vehicle_color')) document.getElementById('vehicle_color').value = '';
+            if (document.getElementById('address')) document.getElementById('address').value = '';
+            if (document.getElementById('model_year')) document.getElementById('model_year').value = '';
         });
 
         // Calculate VAT and Total Amount
@@ -345,9 +428,14 @@
             document.getElementById('totalAmount').textContent = total.toFixed(2);
         }
 
-        // Initialize totals on page load
+        // Initialize totals on page load and trigger policy autofill if a policy is preselected
         document.addEventListener('DOMContentLoaded', function() {
             calculateTotals();
+            var policySelect = document.getElementById('policy_id');
+            if (policySelect && policySelect.value) {
+                // dispatch a change event so the autofill runs for phone/model/color if policy preselected
+                policySelect.dispatchEvent(new Event('change'));
+            }
         });
     </script>
 </body>

@@ -12,8 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('claims', function (Blueprint $table) {
-            $table->enum('admin_status', ['billed', 'pending'])->default('pending')->after('total_amount');
-            $table->enum('superadmin_status', ['cleared', 'deposited'])->nullable()->after('admin_status');
+            if (!Schema::hasColumn('claims', 'admin_status')) {
+                $table->enum('admin_status', ['billed', 'pending'])->default('pending')->after('total_amount');
+            }
+
+            if (!Schema::hasColumn('claims', 'superadmin_status')) {
+                $table->enum('superadmin_status', ['cleared', 'deposited'])->nullable()->after('admin_status');
+            }
         });
     }
 

@@ -217,24 +217,37 @@
                 <div class="row mb-2">
                     <div class="col-md-12">
                         <label class="form-label">Services Availed</label>
-                        <div class="row">
-                            <div class="col-md-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="carwash" name="services[]" value="Carwash" {{ in_array('Carwash', old('services', optional($policy)->services ?? [])) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="carwash">Carwash</label>
+                        @if(isset($services) && $services->count())
+                            <div class="row">
+                                @foreach($services as $s)
+                                    <div class="col-md-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="service-{{ $s->id }}" name="services[]" value="{{ $s->name }}" {{ in_array($s->name, old('services', optional($policy)->services ?? [])) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="service-{{ $s->id }}">{{ $s->name }}</label>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="carwash" name="services[]" value="Carwash" {{ in_array('Carwash', old('services', optional($policy)->services ?? [])) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="carwash">Carwash</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="change-oil" name="services[]" value="Change Oil" {{ in_array('Change Oil', old('services', optional($policy)->services ?? [])) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="change-oil">Change Oil</label>
+                                    </div>
                                 </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="change-oil" name="services[]" value="Change Oil" {{ in_array('Change Oil', old('services', optional($policy)->services ?? [])) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="change-oil">Change Oil</label>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="tire-rotation" name="services[]" value="Etc" {{ in_array('Etc', old('services', optional($policy)->services ?? [])) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="tire-rotation">Etc</label>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="tire-rotation" name="services[]" value="Etc" {{ in_array('Etc', old('services', optional($policy)->services ?? [])) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="tire-rotation">Etc</label>
-                                </div>
-                            </div>
-                        </div>
+                        @endif
                     </div>
                 </div>
 
