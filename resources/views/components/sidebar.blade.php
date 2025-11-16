@@ -346,11 +346,13 @@
                                     New Collection
                                 </a>
                             </li>
+                            @if(auth()->user()->position === 'superadmin')
                             <li>
                                 <a href="{{ route('collections.index') }}" class="{{ request()->routeIs('collections.index') ? 'active' : '' }}">
                                     Collection List
                                 </a>
                             </li>
+                            @endif
                         </ul>
                     </li>
 

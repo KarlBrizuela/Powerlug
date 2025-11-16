@@ -17,7 +17,8 @@ class Collection extends Model
         'collection_status',
         'billing_status',
         'bank_name',
-        'collection_date'
+        'collection_date',
+        'loa'
     ];
 
     protected $casts = [

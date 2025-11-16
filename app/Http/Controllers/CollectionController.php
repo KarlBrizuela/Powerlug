@@ -39,6 +39,14 @@ class CollectionController extends Controller
     }
 
     /**
+     * Quick view for AJAX-loaded collection details used by the collection list modal.
+     */
+    public function quickView(Collection $collection)
+    {
+        return view('pages.partials.collection-details', compact('collection'));
+    }
+
+    /**
      * Create Client records for walk-in and claim names that don't have a matching client yet.
      * Returns the filtered list of clients to display in the dropdown (only those from walk-in/claims).
      */
@@ -147,6 +155,7 @@ class CollectionController extends Controller
             'client_id' => 'required|exists:clients,id',
             'invoice_number' => 'required|string|unique:collections,invoice_number,' . $collection->id,
             'collection_amount' => 'required|numeric|min:0',
+            'loa' => 'nullable|string|max:255',
             'payment_method' => 'required|in:cash,check,bank_transfer',
             'collection_status' => 'required|in:deposited,pending,cleared,bounced,cash',
             'billing_status' => 'required|in:billed,pending,overdue',
@@ -167,6 +176,7 @@ class CollectionController extends Controller
             'client_id' => 'required|exists:clients,id',
             'invoice_number' => 'required|string|unique:collections,invoice_number',
             'collection_amount' => 'required|numeric|min:0',
+            'loa' => 'nullable|string|max:255',
             'payment_method' => 'required|in:cash,check,bank_transfer',
             'collection_status' => 'required|in:deposited,pending,cleared,bounced,cash',
             'billing_status' => 'required|in:billed,pending,overdue',

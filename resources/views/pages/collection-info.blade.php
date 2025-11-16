@@ -164,9 +164,7 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-body">
-                            <div class="section-title">Collection Records</div>
-
-                            <!-- Simple Filters -->
+                            <div class="section-title">Collection Records</div>                            <!-- Simple Filters -->
                             <div class="row mb-3">
                                 <div class="col-md-3">
                                     <label class="form-label">Date Range</label>
@@ -238,6 +236,17 @@
                                         @endforelse
                                     </tbody>
                                 </table>
+                            </div>
+
+                            <!-- Total Amount Row -->
+                            <div class="row mt-3 pt-3 border-top">
+                                <div class="col-md-8 text-end">
+                                    <h6 class="text-muted mb-0">Total Collection Amount:</h6>
+                                </div>
+                                <div class="col-md-4">
+                                    <h5 class="mb-0"><strong id="totalAmount">₱0.00</strong></h5>
+                                    <small class="text-muted" id="totalCount">0 records</small>
+                                </div>
                             </div>
 
                             <!-- Pagination -->
@@ -355,6 +364,24 @@
                 ]
             });
 
+            // Function to calculate total from visible rows
+            function updateTotal() {
+                let total = 0;
+                table.rows({ search: 'applied' }).every(function() {
+                    const amount = parseFloat(this.data()[4].replace('₱', '').replace(/,/g, ''));
+                    if (!isNaN(amount)) {
+                        total += amount;
+                    }
+                });
+                
+                const count = table.rows({ search: 'applied' }).count();
+                $('#totalAmount').text('₱' + total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                $('#totalCount').text(count + ' ' + (count === 1 ? 'record' : 'records'));
+            }
+
+            // Update total on initial load
+            updateTotal();
+
             // Initialize tooltips
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -408,6 +435,12 @@
             // Filter functionality - only date filter remains
             $('#dateFilter').on('change', function() {
                 table.columns(7).search(this.value).draw();
+                updateTotal();
+            });
+
+            // Update total when search/filter changes (DataTables search event)
+            table.on('draw', function() {
+                updateTotal();
             });
 
             // Export to Excel functionality

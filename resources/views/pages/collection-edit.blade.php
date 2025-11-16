@@ -60,7 +60,7 @@
                                     <label for="invoice_number" class="form-label">Service Invoice Number <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control @error('invoice_number') is-invalid @enderror" 
                                         id="invoice_number" name="invoice_number" value="{{ old('invoice_number', $collection->invoice_number) }}" 
-                                        placeholder="Enter service invoice number" required>
+                                        placeholder="Enter invoice number" required>
                                     @error('invoice_number')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -155,6 +155,16 @@
                                         id="bank_name" name="bank_name" value="{{ old('bank_name', $collection->bank_name) }}" 
                                         placeholder="Bank (BDO, BPI, etc.)">
                                     @error('bank_name')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="loa" class="form-label">LOA (Authorization)</label>
+                                    <input type="text" class="form-control @error('loa') is-invalid @enderror"
+                                        id="loa" name="loa" value="{{ old('loa', $collection->loa) }}" placeholder="LOA reference or notes">
+                                    @error('loa')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>

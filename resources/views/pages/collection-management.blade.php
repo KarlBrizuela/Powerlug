@@ -120,7 +120,7 @@
                                             <label for="invoice_number" class="form-label">Service Invoice Number <span class="text-danger">*</span></label>
                                             <input type="text" class="form-control @error('invoice_number') is-invalid @enderror" 
                                                 id="invoice_number" name="invoice_number" value="{{ old('invoice_number') }}" 
-                                                placeholder="Auto-generated" readonly>
+                                                placeholder="Enter invoice number" required>
                                             @error('invoice_number')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -219,6 +219,16 @@
                                             @enderror
                                         </div>
                                     </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="loa" class="form-label">LOA (Authorization)</label>
+                                            <input type="text" class="form-control @error('loa') is-invalid @enderror"
+                                                id="loa" name="loa" value="{{ old('loa') }}" placeholder="LOA reference or notes">
+                                            @error('loa')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="text-end">
@@ -260,13 +270,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Auto-generate invoice number if empty
-            const invoiceInput = document.querySelector('input[name="invoice_number"]');
-            if (!invoiceInput.value) {
-                const timestamp = new Date().getTime();
-                invoiceInput.value = `SIN-${timestamp}`;
-            }
-
             // Initialize Feather Icons
             if (typeof feather !== 'undefined') {
                 feather.replace();

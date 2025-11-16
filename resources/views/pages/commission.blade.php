@@ -209,13 +209,9 @@
                                                 <th>INSURANCE PROVIDER</th>
                                                 <th>POLICY NUMBER</th>
                                                 <th>INSURED</th>
-                                                <th>TERM</th>
                                                 <th>GROSS</th>
                                                 <th>NET</th>
-                                                <th>30 DAYS</th>
-                                                <th>60 DAYS</th>
-                                                <th>90 DAYS</th>
-                                                <th>Last Date of PDC & Installment / Current Date of Full Payment</th>
+                                                <th>LOA</th>
                                                 <th>COMMISSION</th>
                                                 <th>Actions</th>
                                             </tr>
@@ -227,13 +223,9 @@
                                                         <td>{{ $commission->insuranceProvider->name ?? 'N/A' }}</td>
                                                         <td>{{ $commission->policy_number }}</td>
                                                         <td>{{ $commission->insured }}</td>
-                                                        <td>{{ $commission->term }}</td>
                                                         <td>₱{{ number_format($commission->gross_premium, 2) }}</td>
                                                         <td>₱{{ number_format($commission->net_premium, 2) }}</td>
-                                                        <td>₱{{ number_format($commission->days_30, 2) }}</td>
-                                                        <td>₱{{ number_format($commission->days_60, 2) }}</td>
-                                                        <td>₱{{ number_format($commission->days_90, 2) }}</td>
-                                                        <td>{{ $commission->last_pdc_date ? $commission->last_pdc_date->format('Y-m-d') : 'N/A' }}</td>
+                                                        <td>{{ $commission->loa ?? 'N/A' }}</td>
                                                         <td>₱{{ number_format($commission->commission_amount, 2) }}</td>
                                                         <td class="text-center">
                                                             <div class="btn-group" role="group">
@@ -413,10 +405,7 @@
                                             <td><strong>Insured:</strong></td>
                                             <td>${data.insured}</td>
                                         </tr>
-                                        <tr>
-                                            <td><strong>Term:</strong></td>
-                                            <td>${data.term}</td>
-                                        </tr>
+                                        
                                         <tr>
                                             <td><strong>Payment Status:</strong></td>
                                             <td><span class="badge bg-${data.payment_status === 'paid' ? 'success' : data.payment_status === 'partial' ? 'warning' : 'secondary'}">${data.payment_status.toUpperCase()}</span></td>
@@ -443,39 +432,13 @@
                                             <td class="text-success fw-bold">₱${parseFloat(data.commission_amount).toLocaleString('en-PH', {minimumFractionDigits: 2})}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Last PDC Date:</strong></td>
-                                            <td>${data.last_pdc_date || 'N/A'}</td>
+                                            <td><strong>LOA:</strong></td>
+                                            <td>${data.loa || 'N/A'}</td>
                                         </tr>
                                     </table>
                                 </div>
                             </div>
-                            <div class="row mt-3">
-                                <div class="col-12">
-                                    <h6>Payment Schedule</h6>
-                                    <table class="table table-sm table-bordered">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Period</th>
-                                                <th>Amount</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>30 Days</td>
-                                                <td>₱${parseFloat(data.days_30).toLocaleString('en-PH', {minimumFractionDigits: 2})}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>60 Days</td>
-                                                <td>₱${parseFloat(data.days_60).toLocaleString('en-PH', {minimumFractionDigits: 2})}</td>
-                                            </tr>
-                                            <tr>
-                                                <td>90 Days</td>
-                                                <td>₱${parseFloat(data.days_90).toLocaleString('en-PH', {minimumFractionDigits: 2})}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                            
                             ${data.remarks ? `
                             <div class="row mt-3">
                                 <div class="col-12">

@@ -103,7 +103,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/client-list', [ClientController::class, 'index'])->name('client-list.index');
 
     // Collection Management routes
-    Route::get('/collections', [CollectionController::class, 'index'])->name('collections.index');
+    // Only the list/index should be restricted to superadmin.
+    Route::get('/collections', [CollectionController::class, 'index'])
+        ->middleware('check.position:superadmin')
+        ->name('collections.index');
+
+    // Quick view route for AJAX details
+    Route::get('/collections/{collection}/quick-view', [CollectionController::class, 'quickView'])->name('collections.quick-view');
+
+    // The create/store/edit/update endpoints remain accessible to authenticated admins.
     Route::get('/collections/create', [CollectionController::class, 'create'])->name('collections.create');
     Route::post('/collections', [CollectionController::class, 'store'])->name('collections.store');
     Route::get('/collections/{collection}/edit', [CollectionController::class, 'edit'])->name('collections.edit');

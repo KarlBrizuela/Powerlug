@@ -83,7 +83,7 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-semibold">Price</label>
                                 <div class="input-group">
-                                    <span class="input-group-text">$</span>
+                                    <span class="input-group-text">₱</span>
                                     <input type="number" 
                                            step="0.01" 
                                            min="0"

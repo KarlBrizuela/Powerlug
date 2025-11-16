@@ -117,14 +117,6 @@
 
                                 <div class="row">
                                     <div class="col-md-4 mb-3">
-                                        <label for="term" class="form-label">Term <span class="text-danger">*</span></label>
-                                        <input type="text" name="term" id="term" class="form-control @error('term') is-invalid @enderror" placeholder="e.g., 12 Months" value="{{ old('term', $commission->term ?? '') }}" required>
-                                        @error('term')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-4 mb-3">
                                         <label for="gross_premium" class="form-label">Gross Premium <span class="text-danger">*</span></label>
                                         <input type="number" step="0.01" name="gross_premium" id="gross_premium" class="form-control @error('gross_premium') is-invalid @enderror" value="{{ old('gross_premium', $commission->gross_premium ?? '') }}" required>
                                         @error('gross_premium')
@@ -139,37 +131,11 @@
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
-                                </div>
 
-                                <div class="row">
-                                    <div class="col-md-3 mb-3">
-                                        <label for="days_30" class="form-label">30 Days</label>
-                                        <input type="number" step="0.01" name="days_30" id="days_30" class="form-control @error('days_30') is-invalid @enderror" value="{{ old('days_30', $commission->days_30 ?? '0') }}">
-                                        @error('days_30')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-3 mb-3">
-                                        <label for="days_60" class="form-label">60 Days</label>
-                                        <input type="number" step="0.01" name="days_60" id="days_60" class="form-control @error('days_60') is-invalid @enderror" value="{{ old('days_60', $commission->days_60 ?? '0') }}">
-                                        @error('days_60')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-3 mb-3">
-                                        <label for="days_90" class="form-label">90 Days</label>
-                                        <input type="number" step="0.01" name="days_90" id="days_90" class="form-control @error('days_90') is-invalid @enderror" value="{{ old('days_90', $commission->days_90 ?? '0') }}">
-                                        @error('days_90')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-3 mb-3">
-                                        <label for="last_pdc_date" class="form-label">Last PDC Date</label>
-                                        <input type="date" name="last_pdc_date" id="last_pdc_date" class="form-control @error('last_pdc_date') is-invalid @enderror" value="{{ old('last_pdc_date', isset($commission) && $commission->last_pdc_date ? $commission->last_pdc_date->format('Y-m-d') : '') }}">
-                                        @error('last_pdc_date')
+                                    <div class="col-md-4 mb-3">
+                                        <label for="loa" class="form-label">LOA (Authorization)</label>
+                                        <input type="text" name="loa" id="loa" class="form-control @error('loa') is-invalid @enderror" value="{{ old('loa', $commission->loa ?? '') }}" placeholder="LOA reference or notes">
+                                        @error('loa')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
@@ -270,14 +236,6 @@
                     $('#insured').val(client);
                     $('#gross_premium').val(premium);
                     $('#net_premium').val(premium);
-
-                    // Calculate term
-                    if (startDate && endDate) {
-                        const start = new Date(startDate);
-                        const end = new Date(endDate);
-                        const months = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
-                        $('#term').val(months + ' Months');
-                    }
 
                     // Trigger commission calculation
                     calculateCommission();

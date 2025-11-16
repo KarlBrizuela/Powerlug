@@ -15,13 +15,9 @@ class Commission extends Model
         'insurance_provider_id',
         'policy_number',
         'insured',
-        'term',
         'gross_premium',
         'net_premium',
-        'days_30',
-        'days_60',
-        'days_90',
-        'last_pdc_date',
+        'loa',
         'commission_amount',
         'commission_rate',
         'payment_status',
@@ -33,12 +29,9 @@ class Commission extends Model
     protected $casts = [
         'gross_premium' => 'decimal:2',
         'net_premium' => 'decimal:2',
-        'days_30' => 'decimal:2',
-        'days_60' => 'decimal:2',
-        'days_90' => 'decimal:2',
         'commission_amount' => 'decimal:2',
         'commission_rate' => 'decimal:2',
-        'last_pdc_date' => 'date',
+        
     ];
 
     /**
