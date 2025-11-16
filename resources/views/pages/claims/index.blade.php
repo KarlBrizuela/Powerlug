@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     <style>
         .main-content {
-            margin-left: 280px; /* Adjust based on your sidebar width */
+            margin-left: 280px;
             padding: 20px;
             transition: margin-left 0.3s ease;
         }
@@ -23,7 +23,106 @@
         }
         
         .sidebar-collapsed .main-content {
-            margin-left: 80px; /* Adjust for collapsed sidebar */
+            margin-left: 80px;
+        }
+
+        .page-header {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: none;
+        }
+
+        .table-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: none;
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead {
+            background: white;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .table thead th {
+            border: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            color: #495057;
+            padding: 1rem;
+        }
+
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            border: none;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .action-btn {
+            padding: 0.25rem 0.35rem;
+            border: none;
+            background: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .action-btn.view {
+            color: #0d6efd;
+        }
+
+        .action-btn.view:hover {
+            color: #0a58ca;
+        }
+
+        .action-btn.download {
+            color: #198754;
+        }
+
+        .action-btn.download:hover {
+            color: #146c43;
+        }
+
+        .action-btn.delete {
+            color: #dc3545;
+        }
+
+        .action-btn.delete:hover {
+            color: #b02a37;
+        }
+
+        .status-select {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.875rem;
+        }
+
+        .status-select:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.1);
         }
     </style>
 </head>
@@ -35,9 +134,11 @@
         <!-- Main content -->
         <div class="main-content flex-grow-1">
             <div class="container-fluid py-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="mb-0">Claims</h4>
-                    <a href="{{ route('claims.create') }}" class="btn btn-primary">New Claim</a>
+                <div class="page-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">Claims</h4>
+                        <a href="{{ route('claims.create') }}" class="btn btn-primary">New Claim</a>
+                    </div>
                 </div>
 
                 @if(session('success'))
@@ -66,7 +167,7 @@
                 @endif
 
                 <!-- Filters -->
-                <div class="card mb-3">
+                <div class="card filter-card mb-3">
                     <div class="card-body">
                         <form method="GET" action="{{ route('claims.index') }}">
                             <div class="row g-3">
@@ -92,11 +193,11 @@
                                     <label class="form-label">&nbsp;</label>
                                     <div class="d-flex gap-2">
                                         <button type="submit" class="btn btn-primary">
-                                            <i class="bi bi-funnel"></i> Filter
+                                            Filter
                                         </button>
                                         @if(request()->hasAny(['admin_status', 'superadmin_status']))
                                             <a href="{{ route('claims.index') }}" class="btn btn-outline-secondary">
-                                                <i class="bi bi-x-circle"></i> Clear
+                                                Clear
                                             </a>
                                         @endif
                                     </div>
@@ -106,7 +207,7 @@
                     </div>
                 </div>
 
-                <div class="card">
+                <div class="card table-card">
                     <div class="card-body">
                         <div class="table-responsive">
                             <table class="table table-sm table-hover">
@@ -160,15 +261,21 @@
                                                 </td>
                                             @endif
                                             <td>
-                                                <div class="btn-group" role="group" aria-label="actions">
-                                                    <a href="{{ route('claims.show', $claim) }}" class="btn btn-sm btn-outline-primary">View</a>
+                                                <div class="d-flex" style="gap: 0.25rem;">
+                                                    <a href="{{ route('claims.show', $claim) }}" class="action-btn view" title="View">
+                                                        <i class="bi bi-eye-fill"></i>
+                                                    </a>
                                                     @if($claim->file_path)
-                                                        <a href="{{ route('claims.download', $claim) }}" class="btn btn-sm btn-outline-secondary">Download</a>
+                                                        <a href="{{ route('claims.download', $claim) }}" class="action-btn download" title="Download">
+                                                            <i class="bi bi-download"></i>
+                                                        </a>
                                                     @endif
                                                     <form method="POST" action="{{ route('claims.destroy', $claim) }}" style="display:inline" onsubmit="return confirm('Delete this claim?');">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                                        <button type="submit" class="action-btn delete" title="Delete">
+                                                            <i class="bi bi-trash-fill"></i>
+                                                        </button>
                                                     </form>
                                                 </div>
                                             </td>

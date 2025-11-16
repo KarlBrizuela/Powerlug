@@ -11,6 +11,7 @@ use App\Http\Controllers\SalesReportController;
 use App\Http\Controllers\PolicyController;
 use App\Http\Controllers\FreebieController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
@@ -34,9 +35,19 @@ Route::get('/', function () {
 // Protected routes
 Route::middleware(['auth'])->group(function () {
     // Dashboard (Superadmin only)
-    Route::get('/dashboard', function () {
-        return view('pages.dashboard');
-    })->middleware('check.position:superadmin')->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->middleware('check.position:superadmin')
+        ->name('dashboard');
+    
+    // Insurance Expiration Reminders (Superadmin only)
+    Route::get('/expiration-reminders', [DashboardController::class, 'expirationReminders'])
+        ->middleware('check.position:superadmin')
+        ->name('expiration.reminders');
+    
+    // Mark policy as availed (Superadmin only)
+    Route::patch('/policies/{policy}/mark-availed', [PolicyController::class, 'markAsAvailed'])
+        ->middleware('check.position:superadmin')
+        ->name('policies.markAsAvailed');
 
     // Sales Report (Superadmin only)
     Route::get('/sales-report', [SalesReportController::class, 'index'])
@@ -49,6 +60,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/policies/{policy}/installment', [PolicyController::class, 'installment'])->name('policies.installment');
     Route::post('/policies/{policy}/installment', [PolicyController::class, 'storeInstallment'])->name('policies.storeInstallment');
     Route::get('/policies/{policy}/installments', [PolicyController::class, 'listInstallments'])->name('policies.listInstallments');
+    Route::get('/api/clients/{id}', [PolicyController::class, 'getClientDetails'])->name('clients.details');
 
     // Freebies
     // Explicit parameter name mapping to ensure route-model binding uses {freebie}
@@ -127,6 +139,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/commission', [App\Http\Controllers\CommissionController::class, 'index'])->name('commission.index');
     Route::get('/commission/create', [App\Http\Controllers\CommissionController::class, 'create'])->name('commission.create');
     Route::post('/commission', [App\Http\Controllers\CommissionController::class, 'store'])->name('commission.store');
+    Route::get('/commission/export', [App\Http\Controllers\CommissionController::class, 'export'])->name('commission.export');
     Route::get('/commission/{id}', [App\Http\Controllers\CommissionController::class, 'show'])->name('commission.show');
     Route::get('/commission/{id}/edit', [App\Http\Controllers\CommissionController::class, 'edit'])->name('commission.edit');
     Route::put('/commission/{id}', [App\Http\Controllers\CommissionController::class, 'update'])->name('commission.update');

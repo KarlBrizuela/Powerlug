@@ -12,6 +12,7 @@ class Commission extends Model
 
     protected $fillable = [
         'policy_id',
+        'claim_id',
         'insurance_provider_id',
         'policy_number',
         'insured',
@@ -40,6 +41,14 @@ class Commission extends Model
     public function policy()
     {
         return $this->belongsTo(Policy::class);
+    }
+
+    /**
+     * Get the claim associated with this commission.
+     */
+    public function claim()
+    {
+        return $this->belongsTo(Claim::class);
     }
 
     /**

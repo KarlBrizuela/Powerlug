@@ -11,6 +11,9 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    
     <!-- DataTables CSS -->
     <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap5.min.css" rel="stylesheet">
@@ -19,44 +22,161 @@
         body {
             background-color: #f8f9fa;
         }
+
         .main-content {
-            margin-left: 250px; /* Adjust based on your sidebar width */
+            margin-left: 250px;
             padding: 20px;
+            background-color: #f8f9fa;
             transition: all 0.3s;
         }
+
         @media (max-width: 768px) {
             .main-content {
                 margin-left: 0;
             }
         }
+
+        /* Page Header */
+        .page-title-box {
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+        
+        .page-title-box h4 {
+            margin: 0;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
         .page-content {
             padding: 20px 0;
         }
-        .section-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #495057;
-            border-bottom: 1px solid #e9ecef;
-            padding-bottom: 10px;
-        }
-        .table th {
-            font-weight: 600;
-            background-color: #f8f9fa;
+
+        /* Card Styling */
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            background: #fff;
         }
         
-        /* Table container with horizontal scroll */
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #007bff;
+            display: inline-block;
+        }
+
+        /* Form Controls */
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-control, .form-select {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 0.6rem 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+        }
+
+        /* Table Styling */
         .table-container {
             overflow-x: auto;
-            border: 1px solid #dee2e6;
-            border-radius: 0.375rem;
+            border-radius: 8px;
         }
         
-        /* Ensure table takes full width and doesn't wrap */
         .table-container table {
-            min-width: 1000px; /* Minimum width to ensure horizontal scroll */
+            min-width: 1000px;
             margin-bottom: 0;
+        }
+        
+        .table {
+            margin-bottom: 0;
+            border: none;
+        }
+        
+        .table thead th {
+            background-color: #fff;
+            color: #495057;
+            font-weight: 600;
+            border: none;
+            padding: 1rem;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             white-space: nowrap;
+        }
+        
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-top: 1px solid #f0f0f0;
+            color: #495057;
+            white-space: nowrap;
+        }
+        
+        .table tbody tr {
+            transition: background-color 0.2s;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 0.25rem;
+            align-items: center;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            padding: 0.25rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .action-btn i {
+            font-size: 1rem;
+        }
+        
+        .action-btn.view-btn i {
+            color: #007bff;
+        }
+        
+        .action-btn.edit-btn i {
+            color: #28a745;
+        }
+        
+        .action-btn.delete-btn i {
+            color: #dc3545;
         }
         
         /* Action column styling */
@@ -65,29 +185,97 @@
             right: 0;
             background-color: white;
             z-index: 5;
-            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
-            min-width: 180px;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.05);
+            min-width: 120px;
         }
         
         .table-container thead th.action-column {
+            background-color: #fff;
+        }
+        
+        .table tbody tr:hover .action-column {
             background-color: #f8f9fa;
         }
-        
-        /* Button group styling */
-        .btn-group {
-            display: flex;
-            flex-wrap: nowrap;
-            gap: 4px;
+
+        /* Badge Styling */
+        .badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.75rem;
         }
-        .btn-group .btn {
-            flex-shrink: 0;
+
+        /* Alert Styling */
+        .alert {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }
+
+        /* Button Styling */
+        .btn {
+            border-radius: 8px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            border: none;
         }
         
-        .card {
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-            border: 1px solid #e3e6f0;
+        .btn-primary {
+            background: #007bff;
         }
         
+        .btn-primary:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+        }
+        
+        .btn-success {
+            background: #28a745;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        /* Modal Styling */
+        .modal-content {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .modal-header {
+            border-bottom: 1px solid #f0f0f0;
+            padding: 1.5rem;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-footer {
+            border-top: 1px solid #f0f0f0;
+            padding: 1.5rem;
+        }
+
         /* Custom scrollbar styling */
         .table-container::-webkit-scrollbar {
             height: 8px;
@@ -112,12 +300,25 @@
             scrollbar-width: thin;
             scrollbar-color: #c1c1c1 #f1f1f1;
         }
+
+        /* DataTables Customization */
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_filter,
+        .dataTables_wrapper .dataTables_info,
+        .dataTables_wrapper .dataTables_paginate {
+            color: #495057;
+        }
         
-        /* Ensure table cells don't wrap */
-        .table-container td,
-        .table-container th {
-            white-space: nowrap;
-            vertical-align: middle;
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            border-radius: 6px;
+            margin: 0 2px;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #fff;
+            border-top: 1px solid #e9ecef;
+            padding: 1.5rem;
         }
     </style>
 </head>
@@ -173,8 +374,8 @@
                             </div>
 
                             <div class="table-container">
-                                <table id="collectionsTable" class="table table-bordered dt-responsive nowrap w-100">
-                                    <thead class="table-light">
+                                <table id="collectionsTable" class="table dt-responsive nowrap w-100">
+                                    <thead>
                                         <tr>
                                             <th>Collection #</th>
                                             <th>Client Name</th>
@@ -205,18 +406,18 @@
                                                 <td>{{ $collection->collection_date }}</td>
                                                 <td>{{ $collection->bank_name ?? 'N/A' }}</td>
                                                 <td class="action-column">
-                                                    <div class="btn-group" role="group">
-                                                        <button type="button" class="btn btn-sm btn-outline-primary view-collection" data-collection-id="{{ $collection->id }}" title="View">
-                                                            <i class="fas fa-eye"></i>
+                                                    <div class="action-buttons">
+                                                        <button type="button" class="action-btn view-btn view-collection" data-collection-id="{{ $collection->id }}" title="View">
+                                                            <i class="bi bi-eye-fill"></i>
                                                         </button>
-                                                        <a href="{{ route('collections.edit', $collection->id) }}" class="btn btn-sm btn-outline-warning" title="Edit">
-                                                            <i class="fas fa-edit"></i>
+                                                        <a href="{{ route('collections.edit', $collection->id) }}" class="action-btn edit-btn" title="Edit">
+                                                            <i class="bi bi-pencil-square"></i>
                                                         </a>
-                                                        <button type="button" class="btn btn-sm btn-outline-danger delete-collection" 
+                                                        <button type="button" class="action-btn delete-btn delete-collection" 
                                                                 data-collection-id="{{ $collection->id }}" 
                                                                 data-collection-number="{{ $collection->collection_number }}"
                                                                 title="Delete">
-                                                            <i class="fas fa-trash"></i>
+                                                            <i class="bi bi-trash-fill"></i>
                                                         </button>
                                                     </div>
                                                 </td>

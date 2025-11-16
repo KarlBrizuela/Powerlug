@@ -28,6 +28,7 @@ class Policy extends Model
         'start_date',
         'end_date',
         'status',
+        'expiration_status',
         'remarks',
         'payment_method',
         'billing_status',

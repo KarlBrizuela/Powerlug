@@ -25,13 +25,17 @@
         .sidebar-collapsed .page-content {
             margin-left: 0;
         }
-        .page-title-box {
-            padding: 20px 0;
+        .page-header {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
         .card {
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             border: 1px solid #e3e6f0;
-            border-radius: 0.35rem;
+            border-radius: 10px;
         }
         .card-body {
             padding: 2rem;
@@ -39,7 +43,8 @@
         .form-label {
             font-weight: 600;
             margin-bottom: 0.5rem;
-            color: #5a5c69;
+            color: #495057;
+            font-size: 0.9rem;
         }
         .text-danger {
             color: #e74a3b !important;
@@ -47,8 +52,9 @@
         .btn-primary {
             background-color: #4e73df;
             border-color: #4e73df;
-            padding: 0.5rem 1.5rem;
+            padding: 0.6rem 2rem;
             font-weight: 600;
+            border-radius: 8px;
         }
         .btn-primary:hover {
             background-color: #2e59d9;
@@ -57,36 +63,46 @@
         .btn-secondary {
             background-color: #858796;
             border-color: #858796;
-            padding: 0.5rem 1.5rem;
+            padding: 0.6rem 2rem;
             font-weight: 600;
+            border-radius: 8px;
         }
-        h5 {
-            color: #4e73df;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid #e3e6f0;
+        .section-title {
+            color: #333;
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #4e73df;
             font-weight: 600;
+            font-size: 1.1rem;
         }
         h4 {
-            color: #5a5c69;
+            color: #333;
             font-weight: 700;
         }
-        .form-control {
+        .form-control, .form-select {
             border: 1px solid #d1d3e2;
-            border-radius: 0.35rem;
-            padding: 0.75rem;
+            border-radius: 8px;
+            padding: 0.65rem 1rem;
+            transition: all 0.2s;
         }
-        .form-control:focus {
+        .form-control:focus, .form-select:focus {
             border-color: #4e73df;
-            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.15);
         }
         .invalid-feedback {
             font-size: 0.875rem;
+        }
+        .form-section {
+            background: #f8f9fc;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
         }
 
         /* Responsive adjustments */
         @media (min-width: 768px) {
             .page-content {
-                margin-left: 250px; /* Adjust this value based on your sidebar width */
+                margin-left: 250px;
             }
         }
 
@@ -98,8 +114,8 @@
             .card-body {
                 padding: 1.5rem;
             }
-            .page-title-box {
-                padding: 15px 0;
+            .form-section {
+                padding: 1rem;
             }
         }
     </style>
@@ -110,8 +126,15 @@
         
         <div class="page-content">
             <div class="container-fluid">
-              
-                <!-- end page title -->
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">New Client</h4>
+                        <a href="{{ route('clients.index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Clients
+                        </a>
+                    </div>
+                </div>
 
                 <div class="row">
                     <div class="col-12">
@@ -121,144 +144,148 @@
                                     @csrf
                                     
                                     <!-- Personal Information -->
-                                    <div class="row mb-4">
-                                        <h5 class="mb-3">Personal Information</h5>
-                                        
-                                        <div class="col-md-4">
-                                            <div class="mb-3">
-                                                <label for="firstName" class="form-label">First Name <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control @error('firstName') is-invalid @enderror" 
-                                                    id="firstName" name="firstName" value="{{ old('firstName') }}" required>
-                                                @error('firstName')
-                                                    <span class="invalid-feedback">{{ $message }}</span>
-                                                @enderror
+                                    <div class="form-section">
+                                        <h5 class="section-title">Personal Information</h5>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <label for="firstName" class="form-label">First Name <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control @error('firstName') is-invalid @enderror" 
+                                                        id="firstName" name="firstName" value="{{ old('firstName') }}" required>
+                                                    @error('firstName')
+                                                        <span class="invalid-feedback">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        <div class="col-md-4">
-                                            <div class="mb-3">
-                                                <label for="middleName" class="form-label">Middle Name</label>
-                                                <input type="text" class="form-control @error('middleName') is-invalid @enderror" 
-                                                    id="middleName" name="middleName" value="{{ old('middleName') }}">
-                                                @error('middleName')
-                                                    <span class="invalid-feedback">{{ $message }}</span>
-                                                @enderror
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <label for="middleName" class="form-label">Middle Name</label>
+                                                    <input type="text" class="form-control @error('middleName') is-invalid @enderror" 
+                                                        id="middleName" name="middleName" value="{{ old('middleName') }}">
+                                                    @error('middleName')
+                                                        <span class="invalid-feedback">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        <div class="col-md-4">
-                                            <div class="mb-3">
-                                                <label for="lastName" class="form-label">Last Name <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control @error('lastName') is-invalid @enderror" 
-                                                    id="lastName" name="lastName" value="{{ old('lastName') }}" required>
-                                                @error('lastName')
-                                                    <span class="invalid-feedback">{{ $message }}</span>
-                                                @enderror
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <label for="lastName" class="form-label">Last Name <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control @error('lastName') is-invalid @enderror" 
+                                                        id="lastName" name="lastName" value="{{ old('lastName') }}" required>
+                                                    @error('lastName')
+                                                        <span class="invalid-feedback">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
 
                                     <!-- Contact Information -->
-                                    <div class="row mb-4">
-                                        <h5 class="mb-3">Contact Information</h5>
-
-                                        <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
-                                                <input type="email" class="form-control @error('email') is-invalid @enderror" 
-                                                    id="email" name="email" value="{{ old('email') }}" required>
-                                                @error('email')
-                                                    <span class="invalid-feedback">{{ $message }}</span>
-                                                @enderror
+                                    <div class="form-section">
+                                        <h5 class="section-title">Contact Information</h5>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
+                                                    <input type="email" class="form-control @error('email') is-invalid @enderror" 
+                                                        id="email" name="email" value="{{ old('email') }}" required>
+                                                    @error('email')
+                                                        <span class="invalid-feedback">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label for="phone" class="form-label">Phone Number <span class="text-danger">*</span></label>
-                                                <input type="tel" class="form-control @error('phone') is-invalid @enderror" 
-                                                    id="phone" name="phone" value="{{ old('phone') }}" required
-                                                    pattern="[0-9]{11}" placeholder="09123456789">
-                                                @error('phone')
-                                                    <span class="invalid-feedback">{{ $message }}</span>
-                                                @enderror
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="phone" class="form-label">Phone Number <span class="text-danger">*</span></label>
+                                                    <input type="tel" class="form-control @error('phone') is-invalid @enderror" 
+                                                        id="phone" name="phone" value="{{ old('phone') }}" required
+                                                        pattern="[0-9]{11}" placeholder="09123456789">
+                                                    @error('phone')
+                                                        <span class="invalid-feedback">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
 
                                     <!-- Address Information -->
-                                    <div class="row mb-4">
-                                        <h5 class="mb-3">Address Information</h5>
-
-                                        <div class="col-md-12">
-                                            <div class="mb-3">
-                                                <label for="address" class="form-label">Street Address <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control @error('address') is-invalid @enderror" 
-                                                    id="address" name="address" value="{{ old('address') }}" required>
-                                                @error('address')
-                                                    <span class="invalid-feedback">{{ $message }}</span>
-                                                @enderror
+                                    <div class="form-section">
+                                        <h5 class="section-title">Address Information</h5>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="mb-3">
+                                                    <label for="address" class="form-label">Street Address <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control @error('address') is-invalid @enderror" 
+                                                        id="address" name="address" value="{{ old('address') }}" required>
+                                                    @error('address')
+                                                        <span class="invalid-feedback">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        <div class="col-md-4">
-                                            <div class="mb-3">
-                                                <label for="city" class="form-label">City <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control @error('city') is-invalid @enderror" 
-                                                    id="city" name="city" value="{{ old('city') }}" required>
-                                                @error('city')
-                                                    <span class="invalid-feedback">{{ $message }}</span>
-                                                @enderror
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <label for="city" class="form-label">City <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control @error('city') is-invalid @enderror" 
+                                                        id="city" name="city" value="{{ old('city') }}" required>
+                                                    @error('city')
+                                                        <span class="invalid-feedback">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        <div class="col-md-4">
-                                            <div class="mb-3">
-                                                <label for="province" class="form-label">Province <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control @error('province') is-invalid @enderror" 
-                                                    id="province" name="province" value="{{ old('province') }}" required>
-                                                @error('province')
-                                                    <span class="invalid-feedback">{{ $message }}</span>
-                                                @enderror
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <label for="province" class="form-label">Province <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control @error('province') is-invalid @enderror" 
+                                                        id="province" name="province" value="{{ old('province') }}" required>
+                                                    @error('province')
+                                                        <span class="invalid-feedback">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        <div class="col-md-4">
-                                            <div class="mb-3">
-                                                <label for="postalCode" class="form-label">Postal Code <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control @error('postalCode') is-invalid @enderror" 
-                                                    id="postalCode" name="postalCode" value="{{ old('postalCode') }}" 
-                                                    required pattern="[0-9]{4}">
-                                                @error('postalCode')
-                                                    <span class="invalid-feedback">{{ $message }}</span>
-                                                @enderror
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <label for="postalCode" class="form-label">Postal Code <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control @error('postalCode') is-invalid @enderror" 
+                                                        id="postalCode" name="postalCode" value="{{ old('postalCode') }}" 
+                                                        required pattern="[0-9]{4}">
+                                                    @error('postalCode')
+                                                        <span class="invalid-feedback">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
 
                                     <!-- Additional Information -->
-                                    <div class="row mb-4">
-                                        <h5 class="mb-3">Additional Information</h5>
-
-                                        <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label for="birthDate" class="form-label">Birth Date <span class="text-danger">*</span></label>
-                                                <input type="date" class="form-control @error('birthDate') is-invalid @enderror" 
-                                                    id="birthDate" name="birthDate" value="{{ old('birthDate') }}" required>
-                                                @error('birthDate')
-                                                    <span class="invalid-feedback">{{ $message }}</span>
-                                                @enderror
+                                    <div class="form-section">
+                                        <h5 class="section-title">Additional Information</h5>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="birthDate" class="form-label">Birth Date <span class="text-danger">*</span></label>
+                                                    <input type="date" class="form-control @error('birthDate') is-invalid @enderror" 
+                                                        id="birthDate" name="birthDate" value="{{ old('birthDate') }}" required>
+                                                    @error('birthDate')
+                                                        <span class="invalid-feedback">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label for="occupation" class="form-label">Occupation <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control @error('occupation') is-invalid @enderror" 
-                                                    id="occupation" name="occupation" value="{{ old('occupation') }}" required>
-                                                @error('occupation')
-                                                    <span class="invalid-feedback">{{ $message }}</span>
-                                                @enderror
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="occupation" class="form-label">Occupation <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control @error('occupation') is-invalid @enderror" 
+                                                        id="occupation" name="occupation" value="{{ old('occupation') }}" required>
+                                                    @error('occupation')
+                                                        <span class="invalid-feedback">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -267,8 +294,12 @@
                                     <div class="row mt-4">
                                         <div class="col-12">
                                             <div class="d-flex justify-content-end gap-2">
-                                                <a href="{{ route('clients.index') }}" class="btn btn-secondary">Cancel</a>
-                                                <button type="submit" class="btn btn-primary">Save Client</button>
+                                                <a href="{{ route('clients.index') }}" class="btn btn-secondary">
+                                                    <i class="fas fa-times me-2"></i>Cancel
+                                                </a>
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fas fa-check me-2"></i>Save Client
+                                                </button>
                                             </div>
                                         </div>
                                     </div>

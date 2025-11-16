@@ -12,13 +12,27 @@
         <div class="row mb-3">
             <div class="col-md-6">
                 <label class="form-label">Client Name</label>
-                <input type="text" class="form-control @error('client_name') is-invalid @enderror"
-                       name="client_name" value="{{ old('client_name', optional($policy)->client_name) }}" required>
+                <select class="form-select @error('client_id') is-invalid @enderror" id="clientSelect" name="client_id">
+                    <option value="">Select or type to search client...</option>
+                    @if(isset($clients))
+                        @foreach($clients as $client)
+                            <option value="{{ $client->id }}" 
+                                data-email="{{ $client->email }}" 
+                                data-phone="{{ $client->phone }}" 
+                                data-address="{{ $client->address }}"
+                                {{ old('client_id', optional($policy)->client_id) == $client->id ? 'selected' : '' }}>
+                                {{ $client->firstName }} {{ $client->middleName }} {{ $client->lastName }}
+                            </option>
+                        @endforeach
+                    @endif
+                </select>
+                <input type="hidden" name="client_name" id="clientNameHidden" value="{{ old('client_name', optional($policy)->client_name) }}">
+                @error('client_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 @error('client_name')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
             <div class="col-md-6">
                 <label class="form-label">Address</label>
-                <input type="text" class="form-control @error('address') is-invalid @enderror"
+                <input type="text" class="form-control @error('address') is-invalid @enderror" id="clientAddress"
                        name="address" value="{{ old('address', optional($policy)->address) }}" required>
                 @error('address')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
@@ -27,13 +41,13 @@
         <div class="row mb-3">
             <div class="col-md-6">
                 <label class="form-label">Email</label>
-                <input type="email" class="form-control @error('email') is-invalid @enderror"
+                <input type="email" class="form-control @error('email') is-invalid @enderror" id="clientEmail"
                        name="email" value="{{ old('email', optional($policy)->email) }}" required>
                 @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
             <div class="col-md-6">
                 <label class="form-label">Contact Number</label>
-                <input type="text" class="form-control @error('contact_number') is-invalid @enderror"
+                <input type="text" class="form-control @error('contact_number') is-invalid @enderror" id="clientPhone"
                        name="contact_number" value="{{ old('contact_number', optional($policy)->contact_number) }}" required>
                 @error('contact_number')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>

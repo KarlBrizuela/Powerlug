@@ -40,7 +40,10 @@ class PolicyController extends Controller
      */
     public function create()
     {
-        // Avoid loading all clients (can be large) — only load insurance providers needed by the form
+        // Load clients for the searchable dropdown
+        $clients = Client::orderBy('firstName')->orderBy('lastName')->get();
+        
+        // Load insurance providers needed by the form
         $insuranceProviders = InsuranceProvider::all();
 
         // Load active freebies for the freebie select
@@ -49,7 +52,7 @@ class PolicyController extends Controller
         // Load services to populate the Walk-in "Services Availed" dropdown/checkboxes
         $services = Service::orderBy('name')->get();
 
-        return view('pages.policy', compact('insuranceProviders', 'freebies', 'services'));
+        return view('pages.policy', compact('clients', 'insuranceProviders', 'freebies', 'services'));
     }
 
     /**
@@ -228,7 +231,10 @@ class PolicyController extends Controller
      */
     public function edit(Policy $policy)
     {
-        // Avoid loading all clients here to speed up the edit page
+        // Load clients for the searchable dropdown
+        $clients = Client::orderBy('firstName')->orderBy('lastName')->get();
+        
+        // Load insurance providers
         $insuranceProviders = InsuranceProvider::all();
 
         // Load active freebies for the freebie select
@@ -237,7 +243,7 @@ class PolicyController extends Controller
         // Load services for the edit form
         $services = Service::orderBy('name')->get();
 
-        return view('pages.policies.edit', compact('policy', 'insuranceProviders', 'freebies', 'services'));
+        return view('pages.policies.edit', compact('policy', 'clients', 'insuranceProviders', 'freebies', 'services'));
     }
 
     /**
@@ -346,6 +352,14 @@ class PolicyController extends Controller
             $validated['bank_transfer'] = $request->input('bank_transfer_other');
         }
 
+        // Map coverage_from/coverage_to to start_date/end_date for database compatibility
+        if (isset($validated['coverage_from'])) {
+            $validated['start_date'] = $validated['coverage_from'];
+        }
+        if (isset($validated['coverage_to'])) {
+            $validated['end_date'] = $validated['coverage_to'];
+        }
+
         $validated['updated_by'] = auth()->id();
 
         $policy->update($validated);
@@ -439,5 +453,26 @@ class PolicyController extends Controller
 
         return redirect()->route('policies.installment', $policy->id)
                          ->with('success', 'Installment payment(s) recorded successfully. Total amount paid: ₱' . number_format($totalPaid, 2));
+    }
+
+    /**
+     * Get client details by ID (for AJAX requests)
+     */
+    public function getClientDetails($id)
+    {
+        $client = Client::findOrFail($id);
+        return response()->json($client);
+    }
+
+    /**
+     * Mark policy as availed
+     */
+    public function markAsAvailed(Policy $policy)
+    {
+        $policy->expiration_status = 'availed';
+        $policy->updated_by = auth()->id();
+        $policy->save();
+
+        return redirect()->back()->with('success', 'Policy marked as availed successfully');
     }
 }

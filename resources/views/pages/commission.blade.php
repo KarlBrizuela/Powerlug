@@ -130,18 +130,15 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-12">
-                        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                        <div class="page-title-box d-sm-flex align-items-center justify-content-between mb-4">
                             <h4 class="mb-sm-0 font-size-18">Commission</h4>
                             <div>
                                 <a href="{{ route('commission.create') }}" class="btn btn-primary me-2">
-                                    <i class="fas fa-plus me-1"></i> Add Commission
+                                    Add Commission
                                 </a>
-                                <button class="btn btn-success me-2" onclick="exportToExcel()">
-                                    <i class="fas fa-file-excel me-1"></i> Export to Excel
-                                </button>
-                                <button class="btn btn-info" onclick="generateCommissionReport()">
-                                    <i class="fas fa-chart-bar me-1"></i> Generate Report
-                                </button>
+                                <a href="{{ route('commission.export') }}" class="btn btn-success">
+                                    Export to Excel
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -187,11 +184,11 @@
                                                 <label class="form-label">&nbsp;</label>
                                                 <div class="d-flex gap-1">
                                                     <button type="submit" class="btn btn-primary">
-                                                        <i class="fas fa-filter me-1"></i> Filter
+                                                        Filter
                                                     </button>
                                                     @if(request()->hasAny(['insurance_provider_id', 'payment_status', 'date_from', 'date_to']))
                                                         <a href="{{ route('commission.index') }}" class="btn btn-outline-secondary">
-                                                            <i class="fas fa-times"></i> Clear
+                                                            Clear
                                                         </a>
                                                     @endif
                                                 </div>
@@ -229,13 +226,13 @@
                                                         <td>₱{{ number_format($commission->commission_amount, 2) }}</td>
                                                         <td class="text-center">
                                                             <div class="btn-group" role="group">
-                                                                <button class="btn btn-sm btn-outline-primary view-commission" data-commission-id="{{ $commission->id }}" title="View Details">
+                                                                <button class="btn btn-sm btn-outline-primary border-0 view-commission" data-commission-id="{{ $commission->id }}" title="View Details">
                                                                     <i class="fas fa-eye"></i>
                                                                 </button>
-                                                                <a href="{{ route('commission.edit', $commission->id) }}" class="btn btn-sm btn-outline-warning" title="Edit">
+                                                                <a href="{{ route('commission.edit', $commission->id) }}" class="btn btn-sm btn-outline-warning border-0" title="Edit">
                                                                     <i class="fas fa-edit"></i>
                                                                 </a>
-                                                                <button class="btn btn-sm btn-outline-danger delete-commission" data-commission-id="{{ $commission->id }}" data-commission-number="{{ $commission->policy_number }}" title="Delete">
+                                                                <button class="btn btn-sm btn-outline-danger border-0 delete-commission" data-commission-id="{{ $commission->id }}" data-commission-number="{{ $commission->policy_number }}" title="Delete">
                                                                     <i class="fas fa-trash"></i>
                                                                 </button>
                                                             </div>
@@ -246,14 +243,13 @@
                                                 <tr>
                                                     <td colspan="12" class="text-center py-4">
                                                         <div class="text-muted">
-                                                            <i class="fas fa-dollar-sign fa-2x mb-3"></i>
                                                             <p>No commission records found.</p>
                                                             @if(request()->hasAny(['insurance_provider_id', 'payment_status', 'date_from', 'date_to']))
                                                                 <p class="small">Try adjusting your filters or <a href="{{ route('commission.index') }}">clear filters</a>.</p>
                                                             @else
                                                                 <p class="small">
                                                                     <a href="{{ route('commission.create') }}" class="btn btn-sm btn-primary">
-                                                                        <i class="fas fa-plus me-1"></i> Add your first commission
+                                                                        Add Commission
                                                                     </a>
                                                                 </p>
                                                             @endif
@@ -463,40 +459,6 @@
                 $('#deleteCommissionForm').attr('action', '/commission/' + commissionId);
                 $('#deleteCommissionModal').modal('show');
             });
-
-            // Export to Excel functionality
-            window.exportToExcel = function() {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Export to Excel',
-                    text: 'This feature will export commission data to Excel.',
-                    showCancelButton: true,
-                    confirmButtonText: 'Export',
-                    confirmButtonColor: '#28a745'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Implementation for Excel export
-                        Swal.fire('Coming Soon', 'Export functionality will be implemented', 'info');
-                    }
-                });
-            };
-
-            // Generate commission report
-            window.generateCommissionReport = function() {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Generate Report',
-                    text: 'This feature will generate a commission report.',
-                    showCancelButton: true,
-                    confirmButtonText: 'Generate',
-                    confirmButtonColor: '#17a2b8'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Implementation for report generation
-                        Swal.fire('Coming Soon', 'Report generation functionality will be implemented', 'info');
-                    }
-                });
-            };
         });
     </script>
 </body>

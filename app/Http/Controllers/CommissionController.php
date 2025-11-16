@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Commission;
 use App\Models\Policy;
 use App\Models\InsuranceProvider;
+use App\Models\Claim;
+use App\Exports\CommissionsExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CommissionController extends Controller
 {
@@ -55,8 +58,9 @@ class CommissionController extends Controller
     {
         $insuranceProviders = InsuranceProvider::orderBy('name')->get();
         $policies = Policy::with('insuranceProvider')->orderBy('policy_number')->get();
+        $claims = Claim::select('id', 'client_name', 'loa_amount', 'insurance_provider_id', 'policy_number')->orderBy('client_name')->get();
         
-        return view('pages.commission-form', compact('insuranceProviders', 'policies'));
+        return view('pages.commission-form', compact('insuranceProviders', 'policies', 'claims'));
     }
 
     /**
@@ -65,7 +69,8 @@ class CommissionController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'policy_id' => 'required|exists:policies,id',
+            'policy_id' => 'nullable|exists:policies,id',
+            'claim_id' => 'nullable|exists:claims,id',
             'insurance_provider_id' => 'required|exists:insurance_providers,id',
             'policy_number' => 'required|string|max:255',
             'insured' => 'required|string|max:255',
@@ -106,8 +111,9 @@ class CommissionController extends Controller
         $commission = Commission::findOrFail($id);
         $insuranceProviders = InsuranceProvider::orderBy('name')->get();
         $policies = Policy::with('insuranceProvider')->orderBy('policy_number')->get();
+        $claims = Claim::select('id', 'client_name', 'loa_amount', 'insurance_provider_id', 'policy_number')->orderBy('client_name')->get();
         
-        return view('pages.commission-form', compact('commission', 'insuranceProviders', 'policies'));
+        return view('pages.commission-form', compact('commission', 'insuranceProviders', 'policies', 'claims'));
     }
 
     /**
@@ -118,7 +124,8 @@ class CommissionController extends Controller
         $commission = Commission::findOrFail($id);
 
         $validated = $request->validate([
-            'policy_id' => 'required|exists:policies,id',
+            'policy_id' => 'nullable|exists:policies,id',
+            'claim_id' => 'nullable|exists:claims,id',
             'insurance_provider_id' => 'required|exists:insurance_providers,id',
             'policy_number' => 'required|string|max:255',
             'insured' => 'required|string|max:255',
@@ -193,5 +200,36 @@ class CommissionController extends Controller
         $months = $start->diffInMonths($end);
 
         return $months . ' Months';
+    }
+
+    /**
+     * Export commissions to Excel.
+     */
+    public function export(Request $request)
+    {
+        $query = Commission::with(['insuranceProvider', 'policy', 'claim'])->orderBy('created_at', 'desc');
+
+        // Apply same filters as index
+        if ($request->has('insurance_provider_id') && $request->insurance_provider_id) {
+            $query->where('insurance_provider_id', $request->insurance_provider_id);
+        }
+
+        if ($request->has('payment_status') && $request->payment_status) {
+            $query->where('payment_status', $request->payment_status);
+        }
+
+        if ($request->has('date_from') && $request->date_from) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->has('date_to') && $request->date_to) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $commissions = $query->get();
+
+        $filename = 'commissions_' . date('Y-m-d_His') . '.xlsx';
+
+        return Excel::download(new CommissionsExport($commissions), $filename);
     }
 }
