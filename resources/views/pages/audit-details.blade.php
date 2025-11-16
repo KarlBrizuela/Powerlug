@@ -11,69 +11,192 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    
     <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
         .page-content {
             padding: 20px 0;
             margin-left: 250px;
+            background-color: #f8f9fa;
         }
+
+        /* Page Header */
+        .page-title-box {
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+        
+        .page-title-box h4 {
+            margin: 0;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        /* Card Styling */
         .card {
             border: none;
-            box-shadow: 0 0.75rem 1.5rem rgba(18, 38, 63, 0.03);
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            background: #fff;
         }
+        
+        .card-body {
+            padding: 2rem;
+        }
+        
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #007bff;
+            display: inline-block;
+        }
+
         .info-label {
             font-weight: 600;
             color: #495057;
-            margin-bottom: 5px;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
         }
+
         .info-value {
-            margin-bottom: 15px;
+            margin-bottom: 1.25rem;
+            color: #6c757d;
         }
+
+        /* JSON Viewer */
         .json-viewer {
             background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
             padding: 15px;
             max-height: 400px;
             overflow-y: auto;
         }
+
+        /* Data Table */
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
         .data-table {
             margin-bottom: 0;
+            border: none;
         }
-        .data-table th {
-            background-color: #f8f9fa;
+
+        .data-table thead th {
+            background-color: #fff;
             font-weight: 600;
             text-transform: capitalize;
             width: 30%;
             color: #495057;
+            border: none;
+            padding: 1rem;
+            font-size: 0.875rem;
         }
-        .data-table td {
+
+        .data-table tbody td,
+        .data-table tbody th {
             word-break: break-word;
+            border-top: 1px solid #f0f0f0;
+            padding: 1rem;
+            color: #495057;
         }
+        
+        .data-table tbody tr {
+            transition: background-color 0.2s;
+        }
+        
+        .data-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Diff Styling */
         .diff-removed {
             background-color: #ffebe9;
             color: #d73a49;
-            padding: 2px 6px;
-            border-radius: 3px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 500;
         }
+
         .diff-added {
             background-color: #e6ffec;
             color: #22863a;
-            padding: 2px 6px;
-            border-radius: 3px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 500;
         }
+
         .null-value {
             color: #999;
             font-style: italic;
         }
+
         .json-string {
             color: #22863a;
         }
+
         .json-number {
             color: #005cc5;
         }
+
         .json-boolean {
             color: #d73a49;
         }
+
+        /* Badge Styling */
+        .badge {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        /* Button Styling */
+        .btn {
+            border-radius: 8px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        /* Divider */
+        hr {
+            margin: 2rem 0;
+            border-top: 2px solid #e9ecef;
+        }
+
         @media (max-width: 768px) {
             .page-content {
                 margin-left: 0;
@@ -178,7 +301,7 @@
                                 @endphp
                                 
                                 <div class="table-responsive">
-                                    <table class="table table-bordered data-table">
+                                    <table class="table data-table">
                                         <thead>
                                             <tr>
                                                 <th>Field</th>
@@ -236,7 +359,7 @@
                                 @endphp
                                 
                                 <div class="table-responsive">
-                                    <table class="table table-bordered data-table">
+                                    <table class="table data-table">
                                         <thead>
                                             <tr>
                                                 <th>Field</th>

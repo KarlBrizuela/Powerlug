@@ -33,76 +33,119 @@
                     <!-- Stats Cards -->
                     <div class="row mt-4">
                         <div class="col-xl-4 col-md-6 mb-4">
-                            <div class="card border-0 shadow-sm h-100">
-                                <div class="card-body text-center">
-                                    <div class="text-primary mb-3">
-                                        <i class="fas fa-users fa-2x"></i>
+                            <div class="card border-0 shadow-sm h-100 hover-card" style="transition: all 0.3s ease;">
+                                <div class="card-body text-center p-4">
+                                    <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                                        <i class="fas fa-users fa-2x text-primary"></i>
                                     </div>
-                                    <h5 class="card-title text-muted">Total Customers</h5>
-                                    <h2 class="fw-bold text-primary">1,234</h2>
-                                    
+                                    <h5 class="card-title text-muted text-uppercase fw-semibold mb-2" style="font-size: 0.9rem; letter-spacing: 0.5px;">Total Clients</h5>
+                                    <h2 class="fw-bold text-primary mb-0" style="font-size: 2.5rem;">{{ number_format($totalClients ?? 0) }}</h2>
+                                    <p class="text-muted small mb-0 mt-2">
+                                        <i class="fas fa-arrow-up text-success me-1"></i>
+                                        <span class="text-success">12%</span> from last month
+                                    </p>
                                 </div>
                             </div>
                         </div>
+
+                        <div class="col-xl-4 col-md-6 mb-4">
+                            <a href="/collections" class="text-decoration-none">
+                                <div class="card border-0 shadow-sm h-100 hover-card" style="transition: all 0.3s ease;">
+                                    <div class="card-body text-center p-4">
+                                        <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                                            <i class="fas fa-money-bill-wave fa-2x text-success"></i>
+                                        </div>
+                                        <h5 class="card-title text-muted text-uppercase fw-semibold mb-2" style="font-size: 0.9rem; letter-spacing: 0.5px;">Collection Count</h5>
+                                        <h2 class="fw-bold text-success mb-0" style="font-size: 2.5rem;">4</h2>
+                                        <p class="text-muted small mb-0 mt-2">
+                                            <i class=""></i>
+                                            Click to view all
+                                        </p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
                        
                         <div class="col-xl-4 col-md-6 mb-4">
-                            <div class="card border-0 bg-primary text-white shadow-sm h-100" data-bs-toggle="modal" data-bs-target="#pendingTasksModal" style="cursor: pointer;">
-                                <div class="card-body text-center">
-                                    <div class="mb-3">
-                                        <i class="fas fa-tasks fa-2x"></i>
+                            <div class="card border-0 shadow-sm h-100 hover-card" data-bs-toggle="modal" data-bs-target="#pendingTasksModal" style="cursor: pointer; transition: all 0.3s ease; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                <div class="card-body text-center text-white p-4">
+                                    <div class="rounded-circle bg-white bg-opacity-25 d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                                        <i class="fas fa-tasks fa-2x text-white"></i>
                                     </div>
-                                    <h5 class="card-title mb-3">Pending Tasks</h5>
-                                    <h2 class="fw-bold">15</h2>
-                                    <p>Click to view details</p>
+                                    <h5 class="card-title text-uppercase fw-semibold mb-2" style="font-size: 0.9rem; letter-spacing: 0.5px; opacity: 0.95;">Pending Tasks</h5>
+                                    <h2 class="fw-bold mb-0" style="font-size: 2.5rem;">15</h2>
+                                    <p class="small mb-0 mt-2" style="opacity: 0.9;">
+                                        <i class="fas fa-clock me-1"></i>
+                                        Click to view details
+                                    </p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
+                    <style>
+                        .hover-card {
+                            transform: translateY(0);
+                        }
+                        .hover-card:hover {
+                            transform: translateY(-5px);
+                            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15) !important;
+                        }
+                    </style>
+
                     <!-- Tables Section -->
                     <div class="row mt-4">
                         <div class="col-xl-6 mb-4">
-                            <div class="card border-0 shadow-sm">
-                                <div class="card-body">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-header bg-transparent border-0 pt-4 pb-0">
                                     <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <h5 class="card-title fw-bold mb-0">Insurance Expiration Reminder</h5>
-                                        <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+                                        <div>
+                                            <h5 class="card-title fw-bold mb-1">
+                                                <i class="fas fa-shield-alt text-warning me-2"></i>
+                                                Insurance Expiration Reminder
+                                            </h5>
+                                            <p class="text-muted small mb-0">Upcoming policy renewals</p>
+                                        </div>
+                                        <a href="{{ route('expiration.reminders') }}" class="btn btn-sm btn-outline-primary rounded-pill">
+                                            <i class="fas fa-list me-1"></i>View All
+                                        </a>
                                     </div>
+                                </div>
+                                <div class="card-body pt-2">
                                     <div class="table-responsive">
                                         <table class="table table-hover mb-0">
-                                            <thead class="table-primary">
-                                                <tr>
-                                                    <th>Name</th>
-                                                    <th>Due Date</th>
-                                                    <th>Contact No.</th>
+                                            <thead>
+                                                <tr class="border-bottom">
+                                                    <th class="border-0 text-uppercase text-muted small fw-semibold">Name</th>
+                                                    <th class="border-0 text-uppercase text-muted small fw-semibold">Due Date</th>
+                                                    <th class="border-0 text-uppercase text-muted small fw-semibold">Contact No.</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <tr>
-                                                    <td><a href="#" class="text-primary text-decoration-none fw-medium" data-bs-toggle="modal" data-bs-target="#insuranceModal" data-id="1">John Doe</a></td>
-                                                    <td>2024-02-15</td>
-                                                    <td>091234567891</td>
+                                                @forelse($expiringPolicies as $policy)
+                                                <tr class="align-middle">
+                                                    <td>
+                                                        <a href="#" class="text-decoration-none d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#insuranceModal" data-policy-id="{{ $policy['id'] }}">
+                                                            <div class="avatar-sm rounded-circle {{ $policy['avatar_class'] }} d-flex align-items-center justify-content-center me-2">
+                                                                <span class="{{ $policy['avatar_text_class'] }} fw-semibold">{{ $policy['initials'] }}</span>
+                                                            </div>
+                                                            <span class="fw-medium text-dark">{{ $policy['client_name'] }}</span>
+                                                        </a>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge {{ $policy['badge_class'] }}">
+                                                            <i class="far fa-calendar-alt me-1"></i>{{ $policy['due_date'] }}
+                                                        </span>
+                                                    </td>
+                                                    <td class="text-muted">{{ $policy['client_phone'] }}</td>
                                                 </tr>
+                                                @empty
                                                 <tr>
-                                                    <td><a href="#" class="text-primary text-decoration-none fw-medium" data-bs-toggle="modal" data-bs-target="#insuranceModal" data-id="2">Michael Johnson</a></td>
-                                                    <td>2024-02-10</td>
-                                                    <td>091234567891</td>
+                                                    <td colspan="3" class="text-center text-muted py-4">
+                                                        <i class="fas fa-info-circle me-2"></i>No upcoming policy expirations
+                                                    </td>
                                                 </tr>
-                                                <tr>
-                                                    <td><a href="#" class="text-primary text-decoration-none fw-medium" data-bs-toggle="modal" data-bs-target="#insuranceModal" data-id="3">Robert Brown</a></td>
-                                                    <td>2024-02-18</td>
-                                                    <td>091234567891</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><a href="#" class="text-primary text-decoration-none fw-medium" data-bs-toggle="modal" data-bs-target="#insuranceModal" data-id="4">Emily Davis</a></td>
-                                                    <td>2024-02-22</td>
-                                                    <td>091234567891</td>
-                                                </tr>
-                                                <tr>
-                                                    <td><a href="#" class="text-primary text-decoration-none fw-medium" data-bs-toggle="modal" data-bs-target="#insuranceModal" data-id="5">David Wilson</a></td>
-                                                    <td>2024-02-28</td>
-                                                    <td>091234567891</td>
-                                                </tr>
+                                                @endforelse
                                             </tbody>
                                         </table>
                                     </div>
@@ -110,46 +153,121 @@
                             </div>
                         </div>
                         <div class="col-xl-6 mb-4">
-                            <div class="card border-0 shadow-sm">
-                                <div class="card-body">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-header bg-transparent border-0 pt-4 pb-0">
                                     <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <h5 class="card-title fw-bold mb-0">Payment Reminders</h5>
-                                        <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+                                        <div>
+                                            <h5 class="card-title fw-bold mb-1">
+                                                <i class="fas fa-money-check-alt text-success me-2"></i>
+                                                Payment Reminders
+                                            </h5>
+                                            <p class="text-muted small mb-0">Outstanding payments due</p>
+                                        </div>
+                                        <a href="#" class="btn btn-sm btn-outline-success rounded-pill">
+                                            <i class="fas fa-list me-1"></i>View All
+                                        </a>
                                     </div>
+                                </div>
+                                <div class="card-body pt-2">
                                     <div class="table-responsive">
                                         <table class="table table-hover mb-0">
-                                            <thead class="table-primary">
-                                                <tr>
-                                                    <th>Name</th>
-                                                    <th>Due Date</th>
-                                                    <th>Amount</th>
+                                            <thead>
+                                                <tr class="border-bottom">
+                                                    <th class="border-0 text-uppercase text-muted small fw-semibold">Name</th>
+                                                    <th class="border-0 text-uppercase text-muted small fw-semibold">Due Date</th>
+                                                    <th class="border-0 text-uppercase text-muted small fw-semibold">Amount</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <tr>
-                                                    <td>Jane Smith</td>
-                                                    <td>2024-02-20</td>
-                                                    <td>₱8,900.00</td>
+                                                <tr class="align-middle">
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar-sm rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center me-2">
+                                                                <span class="text-primary fw-semibold">JS</span>
+                                                            </div>
+                                                            <span class="fw-medium">Jane Smith</span>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning">
+                                                            <i class="far fa-calendar-alt me-1"></i>2024-02-20
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="fw-bold text-success">₱8,900.00</span>
+                                                    </td>
                                                 </tr>
-                                                <tr>
-                                                    <td>Sarah Williams</td>
-                                                    <td>2024-02-25</td>
-                                                    <td>₱6,750.00</td>
+                                                <tr class="align-middle">
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar-sm rounded-circle bg-info bg-opacity-10 d-flex align-items-center justify-content-center me-2">
+                                                                <span class="text-info fw-semibold">SW</span>
+                                                            </div>
+                                                            <span class="fw-medium">Sarah Williams</span>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-info bg-opacity-10 text-info border border-info">
+                                                            <i class="far fa-calendar-alt me-1"></i>2024-02-25
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="fw-bold text-success">₱6,750.00</span>
+                                                    </td>
                                                 </tr>
-                                                <tr>
-                                                    <td>Christopher Lee</td>
-                                                    <td>2024-02-12</td>
-                                                    <td>₱12,300.00</td>
+                                                <tr class="align-middle">
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar-sm rounded-circle bg-danger bg-opacity-10 d-flex align-items-center justify-content-center me-2">
+                                                                <span class="text-danger fw-semibold">CL</span>
+                                                            </div>
+                                                            <span class="fw-medium">Christopher Lee</span>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger">
+                                                            <i class="far fa-calendar-alt me-1"></i>2024-02-12
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="fw-bold text-success">₱12,300.00</span>
+                                                    </td>
                                                 </tr>
-                                                <tr>
-                                                    <td>Amanda Taylor</td>
-                                                    <td>2024-02-16</td>
-                                                    <td>₱9,500.00</td>
+                                                <tr class="align-middle">
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar-sm rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center me-2">
+                                                                <span class="text-success fw-semibold">AT</span>
+                                                            </div>
+                                                            <span class="fw-medium">Amanda Taylor</span>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning">
+                                                            <i class="far fa-calendar-alt me-1"></i>2024-02-16
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="fw-bold text-success">₱9,500.00</span>
+                                                    </td>
                                                 </tr>
-                                                <tr>
-                                                    <td>James Martinez</td>
-                                                    <td>2024-02-24</td>
-                                                    <td>₱7,200.00</td>
+                                                <tr class="align-middle">
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="avatar-sm rounded-circle bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center me-2">
+                                                                <span class="text-secondary fw-semibold">JM</span>
+                                                            </div>
+                                                            <span class="fw-medium">James Martinez</span>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-info bg-opacity-10 text-info border border-info">
+                                                            <i class="far fa-calendar-alt me-1"></i>2024-02-24
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="fw-bold text-success">₱7,200.00</span>
+                                                    </td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -158,6 +276,33 @@
                             </div>
                         </div>
                     </div>
+
+                    <style>
+                        .avatar-sm {
+                            width: 40px;
+                            height: 40px;
+                            font-size: 0.85rem;
+                        }
+                        
+                        .table-responsive {
+                            overflow-x: visible !important;
+                            overflow-y: visible !important;
+                        }
+                        
+                        .table tbody tr {
+                            transition: all 0.2s ease;
+                        }
+                        
+                        .table tbody tr:hover {
+                            background-color: rgba(0, 0, 0, 0.02);
+                        }
+                        
+                        .badge {
+                            padding: 0.4rem 0.7rem;
+                            font-weight: 500;
+                            font-size: 0.75rem;
+                        }
+                    </style>
                 </div>
             </div>
 
@@ -183,103 +328,158 @@
 
     <!-- Insurance Details Modal -->
     <div class="modal fade" id="insuranceModal" tabindex="-1" aria-labelledby="insuranceModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="insuranceModalLabel">Insurance Details</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header border-0 bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem;">
+                    <div class="w-100 d-flex align-items-center justify-content-between">
+                        <h3 class="mb-0 fw-bold text-dark" id="clientName">John Doe</h3>
+                        <span id="insuranceStatus" class="badge bg-white text-dark px-4 py-2 shadow-sm ms-3" style="font-size: 0.9rem; white-space: nowrap;">Upcoming</span>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="row mb-4">
-                        <div class="col-12 text-center mb-4">
-                            <h4 id="clientName">John Doe</h4>
-                            <span id="insuranceStatus" class="badge bg-info">Upcoming</span>
+                <div class="modal-body p-4" style="background-color: #fafbfc;">
+                    <!-- Contact Information Section -->
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-2" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-address-card text-primary"></i>
+                            </div>
+                            <h6 class="text-dark fw-bold mb-0" style="font-size: 1rem;">Contact Information</h6>
                         </div>
-                        
-                        <div class="col-12">
-                            <div class="row mb-3">
-                                <div class="col-sm-6">
-                                    <p class="fw-semibold text-dark">Contact Number</p>
-                                    <p id="contactNumber" class="text-muted">091234567891</p>
-                                </div>
-                                <div class="col-sm-6">
-                                    <p class="fw-semibold text-dark">Email Address</p>
-                                    <p id="emailAddress" class="text-muted">johndoe@example.com</p>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Contact Number</label>
+                                    <p id="contactNumber" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">091234567891</p>
                                 </div>
                             </div>
-                            <div class="row mb-3">
-                                <div class="col-sm-6">
-                                    <p class="fw-semibold text-dark">Insurance Provider</p>
-                                    <p id="insuranceProvider" class="text-muted">Standard insurance</p>
-                                </div>
-                                <div class="col-sm-6">
-                                    <p class="fw-semibold text-dark">Policy Number</p>
-                                    <p id="policyNumber" class="text-muted">POL-2024-001</p>
+                            <div class="col-md-6">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Email Address</label>
+                                    <p id="emailAddress" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">johndoe@example.com</p>
                                 </div>
                             </div>
-                            <div class="row mb-3">
-                                <div class="col-sm-6">
-                                    <p class="fw-semibold text-dark">Due Date</p>
-                                    <p id="dueDate" class="text-muted">2024-02-15</p>
-                                </div>
-                                <div class="col-sm-6">
-                                    <p class="fw-semibold text-dark">Coverage Amount</p>
-                                    <p id="coverageAmount" class="text-muted">₱500,000.00</p>
-                                </div>
-                            </div>
-                            
-                            <!-- NEW FIELDS ADDED HERE -->
-                            <div class="row mb-3">
-                                <div class="col-sm-6">
-                                    <p class="fw-semibold text-dark">Address</p>
-                                    <p id="clientAddress" class="text-muted">123 Main Street, Quezon City</p>
-                                </div>
-                                <div class="col-sm-6">
-                                    <p class="fw-semibold text-dark">Plate No.</p>
-                                    <p id="plateNumber" class="text-muted">ABC 123</p>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-sm-6">
-                                    <p class="fw-semibold text-dark">Model Year</p>
-                                    <p id="modelYear" class="text-muted">2022</p>
-                                </div>
-                                <div class="col-sm-6">
-                                    <p class="fw-semibold text-dark">Color</p>
-                                    <p id="vehicleColor" class="text-muted">Red</p>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-sm-6">
-                                    <p class="fw-semibold text-dark">Amount Due</p>
-                                    <p id="amountDue" class="text-muted">₱8,500.00</p>
-                                </div>
-                                <div class="col-sm-6">
-                                    <p class="fw-semibold text-dark">Issue Date</p>
-                                    <p id="issueDate" class="text-muted">2024-01-15</p>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-sm-12">
-                                    <p class="fw-semibold text-dark">Freebie</p>
-                                    <p id="freebie" class="text-muted">Car Emergency Kit</p>
+                            <div class="col-12">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Address</label>
+                                    <p id="clientAddress" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">123 Main Street, Quezon City</p>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Insurance Details Section -->
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-warning bg-opacity-10 rounded-circle p-2 me-2" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-shield-alt text-warning"></i>
+                            </div>
+                            <h6 class="text-dark fw-bold mb-0" style="font-size: 1rem;">Insurance Details</h6>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Insurance Provider</label>
+                                    <p id="insuranceProvider" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">Standard Insurance</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Policy Number</label>
+                                    <p id="policyNumber" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">POL-2024-001</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Issue Date</label>
+                                    <p id="issueDate" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">2024-01-15</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Due Date</label>
+                                    <p id="dueDate" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">2024-02-15</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card p-3 rounded-3 border-0 shadow-sm" style="background: linear-gradient(135deg, #d4f4dd 0%, #e8f5e9 100%); transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Coverage Amount</label>
+                                    <p id="coverageAmount" class="mb-0 fw-bold text-success" style="font-size: 1.3rem;">₱500,000.00</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card p-3 rounded-3 border-0 shadow-sm" style="background: linear-gradient(135deg, #d4f4dd 0%, #e8f5e9 100%); transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Amount Due</label>
+                                    <p id="amountDue" class="mb-0 fw-bold text-success" style="font-size: 1.3rem;">₱8,500.00</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vehicle Details Section -->
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-info bg-opacity-10 rounded-circle p-2 me-2" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-car text-info"></i>
+                            </div>
+                            <h6 class="text-dark fw-bold mb-0" style="font-size: 1rem;">Vehicle Details</h6>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Plate No.</label>
+                                    <p id="plateNumber" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">ABC 123</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Model Year</label>
+                                    <p id="modelYear" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">2022</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Color</label>
+                                    <p id="vehicleColor" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">Red</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Freebie Section -->
+                    <div class="mb-2">
+                        <div class="rounded-3 p-4 border-0 shadow-sm d-flex align-items-center" style="background: linear-gradient(135deg, #fff9e6 0%, #fffbf0 100%);">
+                            <div class="bg-warning bg-opacity-25 rounded-circle p-3 me-3" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-gift fa-2x text-warning"></i>
+                            </div>
+                            <div>
+                                <label class="text-muted small mb-1 text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Freebie Included</label>
+                                <p id="freebie" class="mb-0 fw-bold text-dark" style="font-size: 1.1rem;">Car Emergency Kit</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">
-                        <i class="fas fa-phone me-1"></i> Contact Client
+                <div class="modal-footer border-0 bg-white p-4">
+                    <button type="button" class="btn btn-light border rounded-pill px-4 py-2" data-bs-dismiss="modal" style="font-weight: 500;">
+                        Close
                     </button>
-                    <button type="button" class="btn btn-success">
-                        <i class="fas fa-envelope me-1"></i> Send Reminder
+                    <button type="button" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm" style="font-weight: 500;">
+                        <i class="fas fa-phone me-2"></i>Contact Client
+                    </button>
+                    <button type="button" class="btn btn-success rounded-pill px-4 py-2 shadow-sm" style="font-weight: 500;">
+                        <i class="fas fa-envelope me-2"></i>Send Reminder
                     </button>
                 </div>
             </div>
         </div>
     </div>
+
+    <style>
+        .info-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+        }
+    </style>
 
     <!-- Pending Tasks Modal -->
     <div class="modal fade" id="pendingTasksModal" tabindex="-1" aria-labelledby="pendingTasksModalLabel" aria-hidden="true">
@@ -334,130 +534,66 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
 
     <script>
-        const insuranceData = {
-            1: {
-                name: "John Doe",
-                status: "Upcoming",
-                contactNumber: "091234567891",
-                emailAddress: "johndoe@example.com",
-                insuranceProvider: "Standard Insurance",
-                policyNumber: "POL-2024-001",
-                dueDate: "2024-02-15",
-                coverageAmount: "₱500,000.00",
-                clientAddress: "123 Main Street, Quezon City, Metro Manila",
-                plateNumber: "ABC 123",
-                modelYear: "2022",
-                vehicleColor: "Red",
-                amountDue: "₱8,500.00",
-                issueDate: "2024-01-15",
-                freebie: "Car Emergency Kit"
+        // Policy data from backend
+        const policyData = {
+            @foreach($expiringPolicies as $policy)
+            {{ $policy['id'] }}: {
+                name: "{{ $policy['client_name'] }}",
+                status: "{{ $policy['status'] }}",
+                contactNumber: "{{ $policy['client_phone'] }}",
+                emailAddress: "{{ $policy['client_email'] }}",
+                insuranceProvider: "{{ $policy['insurance_provider'] }}",
+                policyNumber: "{{ $policy['policy_number'] }}",
+                dueDate: "{{ $policy['date_end'] }}",
+                coverageAmount: "{{ $policy['coverage_amount'] }}",
+                clientAddress: "{{ $policy['client_address'] }}",
+                plateNumber: "{{ $policy['plate_number'] }}",
+                modelYear: "{{ $policy['model_year'] }}",
+                vehicleColor: "{{ $policy['color'] }}",
+                amountDue: "{{ $policy['amount_due'] }}",
+                issueDate: "{{ $policy['date_start'] }}",
+                freebie: "{{ $policy['freebie'] }}"
             },
-            2: {
-                name: "Michael Johnson",
-                status: "Overdue",
-                contactNumber: "091234567892",
-                emailAddress: "michaelj@example.com",
-                insuranceProvider: "Malayan Insurance Corporation",
-                policyNumber: "POL-2024-002",
-                dueDate: "2024-02-10",
-                coverageAmount: "₱750,000.00",
-                clientAddress: "456 Oak Avenue, Makati City, Metro Manila",
-                plateNumber: "XYZ 789",
-                modelYear: "2021",
-                vehicleColor: "Blue",
-                amountDue: "₱7,200.00",
-                issueDate: "2024-01-10",
-                freebie: "GPS Tracker"
-            },
-            3: {
-                name: "Robert Brown",
-                status: "Upcoming",
-                contactNumber: "091234567893",
-                emailAddress: "robertb@example.com",
-                insuranceProvider: "Cocogen Insurance",
-                policyNumber: "POL-2024-003",
-                dueDate: "2024-02-18",
-                coverageAmount: "₱2,000,000.00",
-                clientAddress: "789 Pine Road, Taguig City, Metro Manila",
-                plateNumber: "LMN 456",
-                modelYear: "2023",
-                vehicleColor: "White",
-                amountDue: "₱9,800.00",
-                issueDate: "2024-01-18",
-                freebie: "Car Cover"
-            },
-            4: {
-                name: "Emily Davis",
-                status: "Upcoming",
-                contactNumber: "091234567894",
-                emailAddress: "emilyd@example.com",
-                insuranceProvider: "FPG Insurance Corporation",
-                policyNumber: "POL-2024-004",
-                dueDate: "2024-02-22",
-                coverageAmount: "₱1,500,000.00",
-                clientAddress: "321 Elm Street, Mandaluyong City, Metro Manila",
-                plateNumber: "JKL 012",
-                modelYear: "2020",
-                vehicleColor: "Black",
-                amountDue: "₱6,500.00",
-                issueDate: "2024-01-22",
-                freebie: "First Aid Kit"
-            },
-            5: {
-                name: "David Wilson",
-                status: "Pending",
-                contactNumber: "091234567895",
-                emailAddress: "davidw@example.com",
-                insuranceProvider: "Standard Insurance",
-                policyNumber: "POL-2024-005",
-                dueDate: "2024-02-28",
-                coverageAmount: "₱250,000.00",
-                clientAddress: "654 Cedar Lane, Pasig City, Metro Manila",
-                plateNumber: "QRS 345",
-                modelYear: "2022",
-                vehicleColor: "Silver",
-                amountDue: "₱10,200.00",
-                issueDate: "2024-01-28",
-                freebie: "Dash Cam"
-            }
+            @endforeach
         };
 
         // Handle modal display when a name is clicked
         $(document).ready(function() {
             $('a[data-bs-target="#insuranceModal"]').click(function() {
-                const clientId = $(this).data('id');
-                const client = insuranceData[clientId];
+                const policyId = $(this).data('policy-id');
+                const policy = policyData[policyId];
                 
-                if (client) {
-                    $('#clientName').text(client.name);
-                    $('#contactNumber').text(client.contactNumber);
-                    $('#emailAddress').text(client.emailAddress);
-                    $('#insuranceProvider').text(client.insuranceProvider);
-                    $('#policyNumber').text(client.policyNumber);
-                    $('#dueDate').text(client.dueDate);
-                    $('#coverageAmount').text(client.coverageAmount);
-                    $('#clientAddress').text(client.clientAddress);
-                    $('#plateNumber').text(client.plateNumber);
-                    $('#modelYear').text(client.modelYear);
-                    $('#vehicleColor').text(client.vehicleColor);
-                    $('#amountDue').text(client.amountDue);
-                    $('#issueDate').text(client.issueDate);
-                    $('#freebie').text(client.freebie);
+                if (policy) {
+                    $('#clientName').text(policy.name);
+                    $('#contactNumber').text(policy.contactNumber);
+                    $('#emailAddress').text(policy.emailAddress);
+                    $('#insuranceProvider').text(policy.insuranceProvider);
+                    $('#policyNumber').text(policy.policyNumber);
+                    $('#dueDate').text(policy.dueDate);
+                    $('#coverageAmount').text(policy.coverageAmount);
+                    $('#clientAddress').text(policy.clientAddress);
+                    $('#plateNumber').text(policy.plateNumber);
+                    $('#modelYear').text(policy.modelYear);
+                    $('#vehicleColor').text(policy.vehicleColor);
+                    $('#amountDue').text(policy.amountDue);
+                    $('#issueDate').text(policy.issueDate);
+                    $('#freebie').text(policy.freebie);
                     
                     const statusBadge = $('#insuranceStatus');
-                    statusBadge.text(client.status);
+                    statusBadge.text(policy.status);
                     
                     // Update badge color based on status
-                    statusBadge.removeClass('bg-info bg-warning bg-danger');
-                    if (client.status === 'Pending') {
-                        statusBadge.addClass('bg-warning');
-                    } else if (client.status === 'Upcoming') {
-                        statusBadge.addClass('bg-info');
-                    } else if (client.status === 'Overdue') {
-                        statusBadge.addClass('bg-danger');
-                    }
+                    statusBadge.removeClass('bg-white bg-warning bg-danger bg-success bg-info text-dark text-white');
                     
-                    $('#insuranceModalLabel').text(`Insurance Details - ${client.name}`);
+                    if (policy.status === 'Overdue') {
+                        statusBadge.addClass('bg-danger text-white');
+                    } else if (policy.status === 'Critical') {
+                        statusBadge.addClass('bg-danger text-white');
+                    } else if (policy.status === 'Upcoming') {
+                        statusBadge.addClass('bg-white text-dark');
+                    } else {
+                        statusBadge.addClass('bg-white text-dark');
+                    }
                 }
             });
 

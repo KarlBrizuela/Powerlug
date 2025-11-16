@@ -271,17 +271,33 @@
                                     <div class="section-content">
                                         <div class="row mb-3">
                                             <div class="col-md-6">
-                              <label class="form-label">Client Name</label>
-                              <input type="text" class="form-control @error('client_name') is-invalid @enderror" 
-                                  name="client_name" value="{{ old('client_name') }}">
+                                                <label class="form-label">Client Name</label>
+                                                <select class="form-select @error('client_id') is-invalid @enderror" id="clientSelect" name="client_id">
+                                                    <option value="">Select or type to search client...</option>
+                                                    @if(isset($clients))
+                                                        @foreach($clients as $client)
+                                                            <option value="{{ $client->id }}" 
+                                                                data-email="{{ $client->email }}" 
+                                                                data-phone="{{ $client->phone }}" 
+                                                                data-address="{{ $client->address }}"
+                                                                {{ old('client_id') == $client->id ? 'selected' : '' }}>
+                                                                {{ $client->firstName }} {{ $client->middleName }} {{ $client->lastName }}
+                                                            </option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                                <input type="hidden" name="client_name" id="clientNameHidden" value="{{ old('client_name') }}">
+                                                @error('client_id')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
                                                 @error('client_name')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
                                             <div class="col-md-6">
-                              <label class="form-label">Address</label>
-                              <input type="text" class="form-control @error('address') is-invalid @enderror" 
-                                  name="address" value="{{ old('address') }}">
+                                                <label class="form-label">Address</label>
+                                                <input type="text" class="form-control @error('address') is-invalid @enderror" id="clientAddress"
+                                                    name="address" value="{{ old('address') }}">
                                                 @error('address')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
@@ -290,17 +306,17 @@
 
                                         <div class="row mb-3">
                                             <div class="col-md-6">
-                              <label class="form-label">Email</label>
-                              <input type="email" class="form-control @error('email') is-invalid @enderror" 
-                                  name="email" value="{{ old('email') }}">
+                                                <label class="form-label">Email</label>
+                                                <input type="email" class="form-control @error('email') is-invalid @enderror" id="clientEmail"
+                                                    name="email" value="{{ old('email') }}">
                                                 @error('email')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
                                             <div class="col-md-6">
-                              <label class="form-label">Contact Number</label>
-                              <input type="text" class="form-control @error('contact_number') is-invalid @enderror" 
-                                  name="contact_number" value="{{ old('contact_number') }}">
+                                                <label class="form-label">Contact Number</label>
+                                                <input type="text" class="form-control @error('contact_number') is-invalid @enderror" id="clientPhone"
+                                                    name="contact_number" value="{{ old('contact_number') }}">
                                                 @error('contact_number')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
@@ -670,10 +686,19 @@
                                             <div class="col-md-6">
                                                 <label class="form-label">Paid Amount</label>
                                                 <input type="text" class="form-control @error('paid_amount') is-invalid @enderror" 
-                                                       name="paid_amount" value="{{ old('paid_amount') }}" placeholder="Enter paid amount">
+                                                       name="paid_amount" id="paidAmount" value="{{ old('paid_amount') }}" placeholder="Enter paid amount">
                                                 @error('paid_amount')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Balance (Remaining Amount)</label>
+                                                <input type="text" class="form-control" id="balanceAmount" readonly 
+                                                       value="0.00" style="background-color: #e9ecef; font-weight: bold;">
+                                                <small class="text-muted">This is calculated automatically (Amount Due - Paid Amount)</small>
                                             </div>
                                         </div>
 
@@ -1067,15 +1092,106 @@
             }
         });
     </script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Select2 -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         $(document).ready(function() {
+            // Initialize Select2 for services
             $('#services').select2({
                 theme: 'bootstrap-5',
                 placeholder: 'Select services',
                 allowClear: true,
                 closeOnSelect: false
             });
+
+            // Initialize Select2 for client dropdown
+            $('#clientSelect').select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Select or type to search client...',
+                allowClear: true
+            });
+
+            // Handle client selection change
+            $('#clientSelect').on('change', function() {
+                const selectedOption = $(this).find(':selected');
+                const clientId = $(this).val();
+                
+                if (clientId) {
+                    // Get client data from option attributes
+                    const email = selectedOption.data('email') || '';
+                    const phone = selectedOption.data('phone') || '';
+                    const address = selectedOption.data('address') || '';
+                    const clientName = selectedOption.text().trim();
+                    
+                    // Fill the form fields
+                    $('#clientEmail').val(email);
+                    $('#clientPhone').val(phone);
+                    $('#clientAddress').val(address);
+                    $('#clientNameHidden').val(clientName);
+                } else {
+                    // Clear fields if no client selected
+                    $('#clientEmail').val('');
+                    $('#clientPhone').val('');
+                    $('#clientAddress').val('');
+                    $('#clientNameHidden').val('');
+                }
+            });
+
+            // Trigger change on page load if a client is already selected (for edit mode)
+            if ($('#clientSelect').val()) {
+                $('#clientSelect').trigger('change');
+            }
+
+            // Auto-calculate Amount Due
+            function calculateAmountDue() {
+                const premium = parseFloat($('input[name="premium"]').val()) || 0;
+                const vat = parseFloat($('input[name="vat"]').val()) || 0;
+                const docStampTax = parseFloat($('input[name="documentary_stamp_tax"]').val()) || 0;
+                const localGovTax = parseFloat($('input[name="local_gov_tax"]').val()) || 0;
+
+                const amountDue = premium + vat + docStampTax + localGovTax;
+                $('input[name="amount_due"]').val(amountDue.toFixed(2));
+                
+                // Also update balance when amount due changes
+                calculateBalance();
+            }
+
+            // Calculate Balance (Amount Due - Paid Amount)
+            function calculateBalance() {
+                const amountDue = parseFloat($('input[name="amount_due"]').val()) || 0;
+                const paidAmount = parseFloat($('#paidAmount').val()) || 0;
+                
+                const balance = amountDue - paidAmount;
+                $('#balanceAmount').val(balance.toFixed(2));
+                
+                // Change color based on balance
+                if (balance <= 0) {
+                    $('#balanceAmount').css({'color': '#198754', 'font-weight': 'bold'}); // Green for paid
+                } else {
+                    $('#balanceAmount').css({'color': '#dc3545', 'font-weight': 'bold'}); // Red for unpaid
+                }
+            }
+
+            // Attach event listeners to premium fields
+            $('input[name="premium"], input[name="vat"], input[name="documentary_stamp_tax"], input[name="local_gov_tax"]').on('input', function() {
+                calculateAmountDue();
+            });
+
+            // Attach event listener to paid amount
+            $('#paidAmount').on('input', function() {
+                calculateBalance();
+            });
+
+            // Also recalculate balance when amount due changes manually
+            $('input[name="amount_due"]').on('input', function() {
+                calculateBalance();
+            });
+
+            // Calculate on page load if values exist
+            calculateAmountDue();
+            calculateBalance();
         });
     </script>
 </body>

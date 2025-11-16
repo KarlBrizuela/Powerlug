@@ -9,16 +9,51 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .page-title {
-            font-size: 2rem;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 1rem;
+        body {
+            background-color: #f8f9fa;
         }
 
+        /* Page Header */
+        .page-header {
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        /* Card Styling */
         .card {
-            border: 1px solid #dee2e6;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            background: #fff;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            background: #fff !important;
+            border-bottom: 2px solid #007bff;
+            padding: 1.25rem;
+            border-radius: 10px 10px 0 0 !important;
+        }
+
+        .card-header h5, .card-header h6 {
+            color: #2c3e50;
+            font-weight: 600;
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
         }
 
         /* Sidebar compatibility styles */
@@ -34,30 +69,169 @@
             }
         }
 
+        /* Badge Styling */
         .badge {
-            font-size: 0.75em;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.75rem;
         }
 
+        /* Payment Summary */
         .policy-summary {
             background-color: #f8f9fa;
             padding: 1.5rem;
-            border-radius: 0.375rem;
-            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
         }
 
         .summary-item {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 0.75rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
         }
 
         .summary-item strong {
             color: #495057;
+            font-size: 0.9rem;
         }
 
         .summary-item .value {
             font-weight: 600;
-            color: #212529;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+
+        /* Form Controls */
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-control, .form-select {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 0.6rem 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+        }
+
+        /* Button Styling */
+        .btn {
+            border-radius: 8px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            border: none;
+        }
+
+        .btn-sm {
+            padding: 0.4rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background: #007bff;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+        }
+
+        .btn-info:hover {
+            background: #138496;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-outline-primary {
+            border: 2px solid #007bff;
+            color: #007bff;
+            background: transparent;
+        }
+
+        .btn-outline-primary:hover {
+            background: #007bff;
+            color: #fff;
+        }
+
+        /* Alert Styling */
+        .alert {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }
+
+        /* List Group */
+        .list-group-item {
+            border: none;
+            border-bottom: 1px solid #f0f0f0;
+            padding: 1rem;
+        }
+
+        .list-group-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Installment Row Card */
+        .installment-row {
+            border: 1px solid #e9ecef !important;
+        }
+
+        .installment-row .card-header {
+            background: #f8f9fa !important;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        /* Info Text */
+        .text-muted {
+            color: #6c757d !important;
+        }
+
+        /* Quick Info Card */
+        .card-body p {
+            margin-bottom: 0.75rem;
+            color: #495057;
+        }
+
+        .card-body p strong {
+            color: #2c3e50;
+        }
+
+        hr {
+            margin: 1rem 0;
+            border-top: 2px solid #e9ecef;
         }
     </style>
 </head>
@@ -65,42 +239,43 @@
     @include('components.sidebar')
     <div class="main-content">
         <div class="container-fluid">
-            <div class="row mb-4">
-                <div class="col-md-8">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="d-flex justify-content-between align-items-center">
                     <h2 class="page-title">Policy Installment</h2>
-                </div>
-                <div class="col-md-4 text-end">
-                    <a href="{{ route('policies.listInstallments', $policy->id) }}" class="btn btn-info">
-                        <i class="fas fa-list"></i> View All Installments
-                    </a>
-                    <a href="{{ route('policies.index') }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Back to Policies
-                    </a>
+                    <div>
+                        <a href="{{ route('policies.listInstallments', $policy->id) }}" class="btn btn-info btn-sm me-2">
+                            <i class="fas fa-list me-1"></i>View All Installments
+                        </a>
+                        <a href="{{ route('policies.index') }}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Policies
+                        </a>
+                    </div>
                 </div>
             </div>
 
             @if ($message = Session::get('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle"></i> {{ $message }}
+                    <i class="fas fa-check-circle me-2"></i>{{ $message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             @endif
 
             @if ($message = Session::get('error'))
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-circle"></i> {{ $message }}
+                    <i class="fas fa-exclamation-circle me-2"></i>{{ $message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             @endif
 
             <div class="row">
                 <div class="col-lg-8">
-                    <div class="card mb-4">
-                        <div class="card-header bg-light">
-                            <h5 class="mb-0">Policy Information</h5>
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Policy Information</h5>
                         </div>
                         <div class="card-body">
-                            <div class="row mb-3">
+                            <div class="row">
                                 <div class="col-md-6">
                                     <p><strong>Policy Number:</strong> {{ $policy->policy_number }}</p>
                                     <p><strong>Status:</strong> 
@@ -134,9 +309,9 @@
                         </div>
                     </div>
 
-                    <div class="card mb-4">
-                        <div class="card-header bg-light">
-                            <h5 class="mb-0">Payment Summary</h5>
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Payment Summary</h5>
                         </div>
                         <div class="card-body">
                             <div class="policy-summary">
@@ -178,10 +353,10 @@
                     </div>
 
                     <div class="card">
-                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Record Installment Payment</h5>
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5>Record Installment Payment</h5>
                             <button class="btn btn-primary btn-sm" id="toggleInstallmentForm" onclick="toggleInstallmentForm()">
-                                <i class="fas fa-plus"></i> Add Installment
+                                <i class="fas fa-plus me-1"></i>Add Installment
                             </button>
                         </div>
                         <div class="card-body" id="installmentFormContainer" style="display: none;">
@@ -194,13 +369,13 @@
 
                                 <div class="mb-3">
                                     <button type="button" class="btn btn-outline-primary btn-sm" onclick="addInstallmentRow()">
-                                        <i class="fas fa-plus"></i> Add Another Installment
+                                        <i class="fas fa-plus me-1"></i>Add Another Installment
                                     </button>
                                 </div>
 
                                 <div class="d-flex gap-2">
                                     <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-check"></i> Save All Payments
+                                        <i class="fas fa-check me-1"></i>Save All Payments
                                     </button>
                                     <button type="button" class="btn btn-secondary" onclick="toggleInstallmentForm()">
                                         Cancel
@@ -212,9 +387,9 @@
                 </div>
 
                 <div class="col-lg-4">
-                    <div class="card mb-3">
-                        <div class="card-header bg-light">
-                            <h5 class="mb-0">Installment History</h5>
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Installment History</h5>
                         </div>
                         <div class="card-body">
                             @if(isset($installments) && $installments->count() > 0)
@@ -236,14 +411,14 @@
                                     @endforeach
                                 </ul>
                             @else
-                                <div class="text-center text-muted">No installments recorded yet.</div>
+                                <div class="text-center text-muted py-4">No installments recorded yet.</div>
                             @endif
                         </div>
                     </div>
 
                     <div class="card">
-                        <div class="card-header bg-light">
-                            <h5 class="mb-0">Quick Info</h5>
+                        <div class="card-header">
+                            <h5>Quick Info</h5>
                         </div>
                         <div class="card-body">
                             <p><strong>Payment Terms:</strong> {{ $policy->payment_terms ?? 'N/A' }}</p>
@@ -257,7 +432,7 @@
                             <p><strong>Start Date:</strong> {{ optional($policy->start_date)->format('M d, Y') ?? 'N/A' }}</p>
                             <p><strong>End Date:</strong> {{ optional($policy->end_date)->format('M d, Y') ?? 'N/A' }}</p>
                             <hr>
-                            <p class="small text-muted"><i class="fas fa-info-circle"></i> This page allows you to record installment payments for this policy. The outstanding balance will be automatically calculated.</p>
+                            <p class="small text-muted mb-0"><i class="fas fa-info-circle me-1"></i>This page allows you to record installment payments for this policy. The outstanding balance will be automatically calculated.</p>
                         </div>
                     </div>
                 </div>
@@ -276,7 +451,7 @@
             
             if (formContainer.style.display === 'none') {
                 formContainer.style.display = 'block';
-                toggleButton.innerHTML = '<i class="fas fa-minus"></i> Hide Form';
+                toggleButton.innerHTML = '<i class="fas fa-minus me-1"></i>Hide Form';
                 toggleButton.classList.remove('btn-primary');
                 toggleButton.classList.add('btn-secondary');
                 
@@ -286,7 +461,7 @@
                 }
             } else {
                 formContainer.style.display = 'none';
-                toggleButton.innerHTML = '<i class="fas fa-plus"></i> Add Installment';
+                toggleButton.innerHTML = '<i class="fas fa-plus me-1"></i>Add Installment';
                 toggleButton.classList.remove('btn-secondary');
                 toggleButton.classList.add('btn-primary');
             }
@@ -297,10 +472,10 @@
             const rowIndex = installmentRowCount;
             
             const rowHtml = `
-                <div class="card mb-3 installment-row" id="row-${rowIndex}">
-                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0">Installment #${rowIndex + 1}</h6>
-                        ${rowIndex > 0 ? `<button type="button" class="btn btn-danger btn-sm" onclick="removeInstallmentRow(${rowIndex})"><i class="fas fa-trash"></i> Remove</button>` : ''}
+                <div class="card installment-row" id="row-${rowIndex}">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6>Installment #${rowIndex + 1}</h6>
+                        ${rowIndex > 0 ? `<button type="button" class="btn btn-danger btn-sm" onclick="removeInstallmentRow(${rowIndex})"><i class="fas fa-trash me-1"></i>Remove</button>` : ''}
                     </div>
                     <div class="card-body">
                         <div class="row">
@@ -345,7 +520,7 @@
                             </div>
                         </div>
 
-                        <div class="mb-3">
+                        <div class="mb-0">
                             <label for="remarks_${rowIndex}" class="form-label">Remarks</label>
                             <textarea class="form-control" id="remarks_${rowIndex}" name="installments[${rowIndex}][remarks]" 
                                       rows="2" placeholder="Additional notes"></textarea>

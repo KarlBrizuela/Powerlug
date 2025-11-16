@@ -45,6 +45,178 @@
         .badge {
             font-size: 0.75em;
         }
+
+        /* Action buttons styling */
+        .action-btn {
+            background: none;
+            border: none;
+            padding: 0.375rem 0.5rem;
+            margin: 0 0.125rem;
+            border-radius: 0.25rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .action-btn:hover {
+            background-color: #f8f9fa;
+        }
+
+        .action-btn i {
+            font-size: 0.875rem;
+        }
+
+        .action-btn.view-btn i {
+            color: #0dcaf0;
+        }
+
+        .action-btn.edit-btn i {
+            color: #ffc107;
+        }
+
+        .action-btn.installment-btn i {
+            color: #0d6efd;
+        }
+
+        .action-btn.delete-btn i {
+            color: #dc3545;
+        }
+
+        .action-btn:hover.view-btn i {
+            color: #0aa2c0;
+        }
+
+        .action-btn:hover.edit-btn i {
+            color: #cc9a06;
+        }
+
+        .action-btn:hover.installment-btn i {
+            color: #0a58ca;
+        }
+
+        .action-btn:hover.delete-btn i {
+            color: #b02a37;
+        }
+
+        /* Dropdown action menu styling */
+        .table-responsive {
+            overflow: visible !important;
+        }
+        
+        .table {
+            overflow: visible !important;
+        }
+        
+        .table tbody {
+            overflow: visible !important;
+        }
+        
+        .table tbody tr {
+            overflow: visible !important;
+        }
+        
+        .action-dropdown {
+            position: relative;
+        }
+        
+        /* Allow overflow for dropdown in table cells */
+        td {
+            overflow: visible !important;
+        }
+
+        .action-toggle {
+            background: none;
+            border: none;
+            padding: 0.375rem 0.5rem;
+            border-radius: 0.25rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .action-toggle:hover {
+            background-color: #f8f9fa;
+        }
+
+        .action-toggle i {
+            color: #6c757d;
+            font-size: 1.125rem;
+        }
+
+        .action-menu {
+            position: absolute;
+            right: 0;
+            bottom: 100%;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            min-width: 150px;
+            z-index: 1000;
+            display: none;
+            margin-bottom: 0.25rem;
+            overflow: visible;
+        }
+
+        .action-menu.show {
+            display: block;
+        }
+
+        .action-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.2s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .action-menu-item:first-child {
+            border-radius: 0 0 0.375rem 0.375rem;
+        }
+
+        .action-menu-item:last-child {
+            border-radius: 0.375rem 0.375rem 0 0;
+        }
+
+        .action-menu-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .action-menu-item i {
+            width: 1rem;
+            text-align: center;
+        }
+
+        .action-menu-item.view i {
+            color: #0dcaf0;
+        }
+
+        .action-menu-item.edit i {
+            color: #ffc107;
+        }
+
+        .action-menu-item.installment i {
+            color: #0d6efd;
+        }
+
+        .action-menu-item.delete {
+            color: #dc3545;
+        }
+
+        .action-menu-item.delete i {
+            color: #dc3545;
+        }
+
+        .action-menu-divider {
+            height: 1px;
+            background-color: #dee2e6;
+            margin: 0.25rem 0;
+        }
     </style>
 </head>
 <body>
@@ -114,7 +286,7 @@
                                         <th>Policy #</th>
                                         <th>Client</th>
                                         <th>Provider</th>
-                                        <th>Premium</th>
+                                        <th>Balance</th>
                                         <th>Amount Due</th>
                                         <th>Status</th>
                                         <th>Payment Terms</th>
@@ -137,7 +309,14 @@
                                                 @endif
                                             </td>
                                             <td>{{ $policy->insuranceProvider->name ?? $policy->insurance_provider ?? 'N/A' }}</td>
-                                            <td>₱ {{ number_format($policy->premium ?? 0, 2) }}</td>
+                                            <td>
+                                                @php
+                                                    $balance = ($policy->amount_due ?? 0) - ($policy->paid_amount ?? 0);
+                                                @endphp
+                                                <span class="{{ $balance > 0 ? 'text-danger fw-bold' : 'text-success' }}">
+                                                    ₱ {{ number_format($balance, 2) }}
+                                                </span>
+                                            </td>
                                             <td>₱ {{ number_format($policy->amount_due ?? 0, 2) }}</td>
                                             <td>
                                                 @switch($policy->status)
@@ -159,29 +338,38 @@
                                             <td>{{ optional($policy->start_date)->format('M d, Y') ?? '-' }}</td>
                                             <td>{{ optional($policy->end_date)->format('M d, Y') ?? '-' }}</td>
                                             <td>
-                                                <div class="btn-group btn-group-sm" role="group">
-                                                    <a href="{{ route('policies.show', $policy->id) }}" 
-                                                       class="btn btn-info" title="View">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                    <a href="{{ route('policies.edit', $policy->id) }}" 
-                                                       class="btn btn-warning" title="Edit">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                    <a href="{{ route('policies.installment', $policy->id) }}" 
-                                                       class="btn btn-primary" title="Installment">
-                                                        <i class="fas fa-credit-card"></i>
-                                                    </a>
-                                                    <form action="{{ route('policies.destroy', $policy->id) }}" 
-                                                          method="POST" style="display:inline;">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger btn-sm" 
-                                                                title="Delete"
-                                                                onclick="return confirm('Are you sure?')">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </form>
+                                                <div class="action-dropdown">
+                                                    <button class="action-toggle" type="button" onclick="toggleActionMenu(event, {{ $policy->id }})">
+                                                        <i class="fas fa-ellipsis-v"></i>
+                                                    </button>
+                                                    <div class="action-menu" id="action-menu-{{ $policy->id }}">
+                                                        <a href="{{ route('policies.show', $policy->id) }}" 
+                                                           class="action-menu-item view">
+                                                            <i class="fas fa-eye"></i>
+                                                            <span>View</span>
+                                                        </a>
+                                                        <a href="{{ route('policies.edit', $policy->id) }}" 
+                                                           class="action-menu-item edit">
+                                                            <i class="fas fa-edit"></i>
+                                                            <span>Edit</span>
+                                                        </a>
+                                                        <a href="{{ route('policies.installment', $policy->id) }}" 
+                                                           class="action-menu-item installment">
+                                                            <i class="fas fa-credit-card"></i>
+                                                            <span>Installment</span>
+                                                        </a>
+                                                        <div class="action-menu-divider"></div>
+                                                        <form action="{{ route('policies.destroy', $policy->id) }}" 
+                                                              method="POST" style="margin: 0;">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="action-menu-item delete"
+                                                                    onclick="return confirm('Are you sure you want to delete this policy?')">
+                                                                <i class="fas fa-trash"></i>
+                                                                <span>Delete</span>
+                                                            </button>
+                                                        </form>
+                                                    </div>
                                                 </div>
                                             </td>
                                         </tr>
@@ -207,5 +395,31 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        function toggleActionMenu(event, policyId) {
+            event.stopPropagation();
+            
+            // Close all other open menus
+            document.querySelectorAll('.action-menu.show').forEach(menu => {
+                if (menu.id !== 'action-menu-' + policyId) {
+                    menu.classList.remove('show');
+                }
+            });
+            
+            // Toggle current menu
+            const menu = document.getElementById('action-menu-' + policyId);
+            menu.classList.toggle('show');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.action-dropdown')) {
+                document.querySelectorAll('.action-menu.show').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+            }
+        });
+    </script>
 </body>
 </html>

@@ -59,6 +59,22 @@
 
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
+                                        <label for="claim_id" class="form-label">Claim</label>
+                                        <select name="claim_id" id="claim_id" class="form-select">
+                                            <option value="">Select Claim (Optional)</option>
+                                            @foreach($claims as $claim)
+                                                <option value="{{ $claim->id }}" 
+                                                    data-client="{{ $claim->client_name }}"
+                                                    data-loa="{{ $claim->loa_amount }}"
+                                                    data-provider="{{ $claim->insurance_provider_id }}"
+                                                    data-policy-number="{{ $claim->policy_number }}">
+                                                    {{ $claim->client_name }} - LOA: ₱{{ number_format($claim->loa_amount, 2) }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
                                         <label for="policy_id" class="form-label">Policy <span class="text-danger">*</span></label>
                                         <select name="policy_id" id="policy_id" class="form-select @error('policy_id') is-invalid @enderror" required>
                                             <option value="">Select Policy</option>
@@ -80,7 +96,9 @@
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
+                                </div>
 
+                                <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="insurance_provider_id" class="form-label">Insurance Provider <span class="text-danger">*</span></label>
                                         <select name="insurance_provider_id" id="insurance_provider_id" class="form-select @error('insurance_provider_id') is-invalid @enderror" required>
@@ -92,6 +110,14 @@
                                             @endforeach
                                         </select>
                                         @error('insurance_provider_id')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="insured" class="form-label">Insured <span class="text-danger">*</span></label>
+                                        <input type="text" name="insured" id="insured" class="form-control @error('insured') is-invalid @enderror" value="{{ old('insured', $commission->insured ?? '') }}" required>
+                                        @error('insured')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
@@ -107,16 +133,16 @@
                                     </div>
 
                                     <div class="col-md-6 mb-3">
-                                        <label for="insured" class="form-label">Insured <span class="text-danger">*</span></label>
-                                        <input type="text" name="insured" id="insured" class="form-control @error('insured') is-invalid @enderror" value="{{ old('insured', $commission->insured ?? '') }}" required>
-                                        @error('insured')
+                                        <label for="loa" class="form-label">LOA (Authorization)</label>
+                                        <input type="text" name="loa" id="loa" class="form-control @error('loa') is-invalid @enderror" value="{{ old('loa', $commission->loa ?? '') }}" placeholder="LOA reference or notes">
+                                        @error('loa')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
                                 </div>
 
                                 <div class="row">
-                                    <div class="col-md-4 mb-3">
+                                    <div class="col-md-6 mb-3">
                                         <label for="gross_premium" class="form-label">Gross Premium <span class="text-danger">*</span></label>
                                         <input type="number" step="0.01" name="gross_premium" id="gross_premium" class="form-control @error('gross_premium') is-invalid @enderror" value="{{ old('gross_premium', $commission->gross_premium ?? '') }}" required>
                                         @error('gross_premium')
@@ -124,18 +150,10 @@
                                         @enderror
                                     </div>
 
-                                    <div class="col-md-4 mb-3">
+                                    <div class="col-md-6 mb-3">
                                         <label for="net_premium" class="form-label">Net Premium <span class="text-danger">*</span></label>
                                         <input type="number" step="0.01" name="net_premium" id="net_premium" class="form-control @error('net_premium') is-invalid @enderror" value="{{ old('net_premium', $commission->net_premium ?? '') }}" required>
                                         @error('net_premium')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-4 mb-3">
-                                        <label for="loa" class="form-label">LOA (Authorization)</label>
-                                        <input type="text" name="loa" id="loa" class="form-control @error('loa') is-invalid @enderror" value="{{ old('loa', $commission->loa ?? '') }}" placeholder="LOA reference or notes">
-                                        @error('loa')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
@@ -208,14 +226,51 @@
     <script>
         $(document).ready(function() {
             // Initialize Select2
+            $('#claim_id').select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Select Claim (Optional)',
+                allowClear: true
+            });
+
             $('#policy_id').select2({
                 theme: 'bootstrap-5',
-                placeholder: 'Select Policy'
+                placeholder: 'Select Policy',
+                allowClear: true
             });
 
             $('#insurance_provider_id').select2({
                 theme: 'bootstrap-5',
                 placeholder: 'Select Insurance Provider'
+            });
+
+            // Auto-fill fields when claim is selected
+            $('#claim_id').on('change', function() {
+                const selectedOption = $(this).find(':selected');
+                
+                if (selectedOption.val()) {
+                    const clientName = selectedOption.data('client');
+                    const loaAmount = selectedOption.data('loa');
+                    const providerId = selectedOption.data('provider');
+                    const policyNumber = selectedOption.data('policy-number');
+
+                    // Fill in the fields
+                    $('#insured').val(clientName);
+                    $('#loa').val('₱' + parseFloat(loaAmount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                    $('#insurance_provider_id').val(providerId).trigger('change');
+                    $('#policy_number').val(policyNumber);
+                    
+                    // Disable policy dropdown
+                    $('#policy_id').prop('disabled', true).trigger('change.select2');
+                } else {
+                    // Clear fields when claim is unselected
+                    $('#insured').val('');
+                    $('#loa').val('');
+                    $('#insurance_provider_id').val('').trigger('change');
+                    $('#policy_number').val('');
+                    
+                    // Enable policy dropdown if no claim is selected
+                    $('#policy_id').prop('disabled', false).trigger('change.select2');
+                }
             });
 
             // Auto-fill fields when policy is selected
@@ -235,10 +290,23 @@
                     $('#policy_number').val(policyNumber);
                     $('#insured').val(client);
                     $('#gross_premium').val(premium);
-                    $('#net_premium').val(premium);
+                    // Do not auto-fill net premium, leave it empty for manual entry
 
                     // Trigger commission calculation
                     calculateCommission();
+                    
+                    // Disable claim dropdown
+                    $('#claim_id').prop('disabled', true).trigger('change.select2');
+                } else {
+                    // Clear fields when policy is unselected
+                    $('#insurance_provider_id').val('').trigger('change');
+                    $('#policy_number').val('');
+                    $('#insured').val('');
+                    $('#gross_premium').val('');
+                    $('#commission_amount_display').val('₱0.00');
+                    
+                    // Enable claim dropdown if no policy is selected
+                    $('#claim_id').prop('disabled', false).trigger('change.select2');
                 }
             });
 

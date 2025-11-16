@@ -11,38 +11,322 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    
     <!-- DataTables CSS -->
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css" rel="stylesheet">
     
     <style>
-        .page-content {
-            padding: 20px 0;
-            margin-left: 250px; /* Adjust based on your sidebar width */
-        }
-        .section-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #495057;
-        }
-        .table th {
-            border-top: none;
-            font-weight: 600;
-            color: #495057;
+        body {
             background-color: #f8f9fa;
         }
+
+        .page-content {
+            padding: 20px 0;
+            margin-left: 250px;
+            background-color: #f8f9fa;
+        }
+
+        /* Fix for oversized feather icons */
+        svg.feather,
+        svg[data-feather] {
+            width: 16px !important;
+            height: 16px !important;
+            max-width: 16px !important;
+            max-height: 16px !important;
+        }
+        
+        /* Hide any stray SVG elements that are too large */
+        body > svg {
+            display: none !important;
+        }
+        
+        .vertical-menu svg {
+            width: 16px !important;
+            height: 16px !important;
+        }
+
+        /* Pagination Styling */
+        .pagination {
+            margin: 0;
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .pagination .page-item {
+            margin: 0;
+        }
+        
+        .pagination .page-link {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 0.5rem 0.9rem;
+            color: #495057;
+            background: #fff;
+            font-weight: 500;
+            transition: all 0.2s;
+            min-width: 40px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .pagination .page-link:hover:not(.disabled) {
+            background: #f8f9fa;
+            border-color: #007bff;
+            color: #007bff;
+        }
+        
+        .pagination .page-item.active .page-link {
+            background: #007bff;
+            color: #fff;
+            border-color: #007bff;
+        }
+        
+        .pagination .page-item.disabled .page-link {
+            background: #f8f9fa;
+            color: #adb5bd;
+            border-color: #e0e0e0;
+            cursor: not-allowed;
+        }
+        
+        .pagination .page-link:focus {
+            box-shadow: none;
+        }
+
+        /* Page Header */
+        .page-title-box {
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+        
+        .page-title-box h4 {
+            margin: 0;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        /* Card Styling */
         .card {
             border: none;
-            box-shadow: 0 0.75rem 1.5rem rgba(18, 38, 63, 0.03);
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            background: #fff;
         }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #007bff;
+            display: inline-block;
+        }
+
+        /* Form Controls */
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-control, .form-select {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 0.6rem 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+        }
+
+        /* Table Styling */
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .table {
+            margin-bottom: 0;
+            border: none;
+        }
+        
+        .table thead th {
+            background-color: #fff;
+            color: #495057;
+            font-weight: 600;
+            border: none;
+            padding: 1rem;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-top: 1px solid #f0f0f0;
+            color: #495057;
+        }
+        
+        .table tbody tr {
+            transition: background-color 0.2s;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 0.25rem;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            padding: 0.25rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .action-btn i {
+            font-size: 1rem;
+        }
+        
+        .action-btn.view-btn i {
+            color: #007bff;
+        }
+        
+        .action-btn.delete-btn i {
+            color: #dc3545;
+        }
+
+        /* Badge Styling */
+        .badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.75rem;
+        }
+
+        /* Alert Styling */
+        .alert {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }
+
+        /* Button Styling */
+        .btn {
+            border-radius: 8px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+        }
+        
+        .btn-success {
+            background: #28a745;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .btn-outline-secondary {
+            border: 2px solid #6c757d;
+            color: #6c757d;
+            background: transparent;
+        }
+        
+        .btn-outline-secondary:hover {
+            background: #6c757d;
+            color: #fff;
+        }
+
+        /* Modal Styling */
+        .modal-content {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .modal-header {
+            border-bottom: 1px solid #f0f0f0;
+            padding: 1.5rem;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-footer {
+            border-top: 1px solid #f0f0f0;
+            padding: 1.5rem;
+        }
+
+        /* Footer */
         .footer {
-            background-color: transparent;
+            background-color: #fff;
             border-top: 1px solid #e9ecef;
-            padding: 20px 0;
+            padding: 1.5rem;
             margin-top: 20px;
-            margin-left: 250px; /* Adjust based on your sidebar width */
+            margin-left: 250px;
         }
+
         @media (max-width: 768px) {
             .page-content,
             .footer {
@@ -148,8 +432,8 @@
                             </div>
 
                             <div class="table-responsive">
-                                <table id="auditTable" class="table table-bordered dt-responsive nowrap w-100">
-                                    <thead class="table-light">
+                                <table id="auditTable" class="table dt-responsive nowrap w-100">
+                                    <thead>
                                         <tr>
                                             <th>User</th>
                                             <th>Action</th>
@@ -173,12 +457,14 @@
                                                     <td>{{ $audit->ip_address ?? '-' }}</td>
                                                     <td>{{ $audit->created_at->format('F d, Y h:i A') }}</td>
                                                     <td class="text-center">
-                                                        <a href="{{ route('audit-trail.show', $audit->id) }}" class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="tooltip" title="View Details">
-                                                            <i class="fas fa-eye"></i>
-                                                        </a>
-                                                        <button class="btn btn-sm btn-outline-danger delete-activity" data-activity-id="{{ $audit->id }}" data-activity-description="{{ $audit->description }}">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
+                                                        <div class="action-buttons">
+                                                            <a href="{{ route('audit-trail.show', $audit->id) }}" class="action-btn view-btn" data-bs-toggle="tooltip" title="View Details">
+                                                                <i class="bi bi-eye-fill"></i>
+                                                            </a>
+                                                            <button class="action-btn delete-btn delete-activity" data-activity-id="{{ $audit->id }}" data-activity-description="{{ $audit->description }}" title="Delete">
+                                                                <i class="bi bi-trash-fill"></i>
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -363,6 +649,21 @@
                     }
                 });
             };
+
+            // Fix any oversized SVG icons
+            setTimeout(function() {
+                document.querySelectorAll('svg').forEach(function(svg) {
+                    // Remove any stray large SVGs not inside the sidebar
+                    if (!svg.closest('.vertical-menu') && (svg.offsetWidth > 50 || svg.offsetHeight > 50)) {
+                        svg.remove();
+                    }
+                    // Ensure all SVGs have proper size
+                    svg.style.width = '16px';
+                    svg.style.height = '16px';
+                    svg.style.maxWidth = '16px';
+                    svg.style.maxHeight = '16px';
+                });
+            }, 100);
         });
     </script>
 </body>

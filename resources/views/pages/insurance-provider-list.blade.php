@@ -8,9 +8,15 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     <!-- DataTables CSS -->
     <link href="https://cdn.datatables.net/v/bs5/dt-1.13.4/datatables.min.css" rel="stylesheet">
     <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
         .page-content {
             margin-left: 250px;
             padding: 20px;
@@ -18,18 +24,219 @@
             min-height: 100vh;
         }
         
-        .section-title {
-            font-size: 16px;
+        /* Page Header */
+        .page-title-box {
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+        
+        .page-title-box h4 {
+            margin: 0;
+            color: #2c3e50;
             font-weight: 600;
-            margin-bottom: 20px;
+        }
+        
+        /* Card Styling */
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            background: #fff;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #007bff;
+            display: inline-block;
+        }
+        
+        /* Search and Filter */
+        .input-group .form-control {
+            border: 1px solid #dee2e6;
+            border-radius: 8px 0 0 8px;
+        }
+        
+        .input-group .btn {
+            border-radius: 0 8px 8px 0;
+            border: 1px solid #dee2e6;
+            background: #fff;
+            color: #6c757d;
+        }
+        
+        .input-group .btn:hover {
+            background: #f8f9fa;
             color: #495057;
         }
         
+        .form-select {
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        
+        /* Table Styling */
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .table {
+            margin-bottom: 0;
+            border: none;
+        }
+        
+        .table thead th {
+            background-color: #fff;
+            color: #495057;
+            font-weight: 600;
+            border: none;
+            padding: 1rem;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-top: 1px solid #f0f0f0;
+            color: #495057;
+        }
+        
+        .table tbody tr {
+            transition: background-color 0.2s;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 0.25rem;
+            align-items: center;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            padding: 0.25rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .action-btn i {
+            font-size: 1rem;
+        }
+        
+        .action-btn.edit-btn i {
+            color: #28a745;
+        }
+        
+        .action-btn.delete-btn i {
+            color: #dc3545;
+        }
+        
+        /* Badge Styling */
+        .badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.75rem;
+        }
+        
+        /* Alert Styling */
+        .alert {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }
+        
+        /* Button Styling */
+        .btn-primary {
+            background: #007bff;
+            border: none;
+            border-radius: 8px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+        }
+        
+        .btn-secondary {
+            border-radius: 8px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 500;
+        }
+        
+        .btn-danger {
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        /* Modal Styling */
+        .modal-content {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .modal-header {
+            border-bottom: 1px solid #f0f0f0;
+            padding: 1.5rem;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-footer {
+            border-top: 1px solid #f0f0f0;
+            padding: 1.5rem;
+        }
+        
+        /* DataTables Customization */
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_filter,
+        .dataTables_wrapper .dataTables_info,
+        .dataTables_wrapper .dataTables_paginate {
+            color: #495057;
+        }
+        
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            border-radius: 6px;
+            margin: 0 2px;
+        }
+        
+        /* Footer */
         .footer {
             margin-left: 250px;
-            background-color: white;
+            background-color: #fff;
             border-top: 1px solid #e9ecef;
-            padding: 20px;
+            padding: 1.5rem;
         }
         
         @media (max-width: 768px) {
@@ -103,8 +310,8 @@
                             </div>
 
                             <div class="table-responsive">
-                                <table id="providersTable" class="table table-bordered dt-responsive nowrap w-100">
-                                    <thead class="table-light">
+                                <table id="providersTable" class="table dt-responsive nowrap w-100">
+                                    <thead>
                                         <tr>
                                             <th>Provider Code</th>
                                             <th>Provider Name</th>
@@ -123,20 +330,20 @@
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <div class="btn-group btn-group-sm">
+                                                    <div class="action-buttons">
                                                         <a href="{{ route('insurance-providers.edit', $provider) }}" 
-                                                           class="btn btn-primary" 
+                                                           class="action-btn edit-btn" 
                                                            data-bs-toggle="tooltip" 
                                                            title="Edit Provider">
-                                                            <i class="fas fa-edit"></i>
+                                                            <i class="bi bi-pencil-square"></i>
                                                         </a>
                                                         <button type="button" 
-                                                                class="btn btn-danger delete-provider" 
+                                                                class="action-btn delete-btn delete-provider" 
                                                                 data-provider-id="{{ $provider->id }}"
                                                                 data-provider-name="{{ $provider->name }}"
                                                                 data-bs-toggle="tooltip" 
                                                                 title="Delete Provider">
-                                                            <i class="fas fa-trash"></i>
+                                                            <i class="bi bi-trash-fill"></i>
                                                         </button>
                                                     </div>
                                                 </td>

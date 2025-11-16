@@ -6,11 +6,18 @@
     <title>Edit Policy - Policy Management</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        
         .main-content {
             margin-left: 280px;
             padding: 20px;
@@ -24,26 +31,113 @@
             }
         }
 
+        /* Page Header */
+        .page-header {
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+
         .page-title {
-            font-size: 2rem;
+            font-size: 1.5rem;
             font-weight: 600;
-            color: #333;
-            margin-bottom: 1rem;
+            color: #2c3e50;
+            margin: 0;
         }
 
+        /* Card Styling */
         .card {
-            border: 1px solid #dee2e6;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            background: #fff;
+        }
+        
+        .card-body {
+            padding: 2rem;
         }
 
+        /* Form Controls */
         .form-label {
             font-weight: 600;
             color: #495057;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
         }
 
-        .form-control:focus {
+        .form-control, .form-select {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 0.6rem 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .form-control:focus, .form-select:focus {
             border-color: #007bff;
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+        }
+
+        /* Button Styling */
+        .btn {
+            border-radius: 8px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            border: none;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-outline-primary {
+            border: 2px solid #007bff;
+            color: #007bff;
+        }
+
+        .btn-outline-primary:hover {
+            background: #007bff;
+            color: #fff;
+        }
+
+        /* Alert Styling */
+        .alert {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Select2 Customization */
+        .select2-container--bootstrap-5 .select2-selection {
+            border-radius: 8px !important;
+            border: 1px solid #dee2e6 !important;
+            min-height: 42px !important;
+        }
+
+        .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+            padding: 0.6rem 0.75rem !important;
         }
     </style>
 </head>
@@ -55,20 +149,19 @@
         <!-- Main content -->
         <main class="main-content flex-grow-1">
             <div class="container-fluid">
-                <div class="row mb-4">
-                    <div class="col-md-8">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div class="d-flex justify-content-between align-items-center">
                         <h2 class="page-title">Edit Policy</h2>
-                    </div>
-                    <div class="col-md-4 text-end">
                         <a href="{{ route('policies.index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Back
+                            <i class="fas fa-arrow-left me-2"></i>Back
                         </a>
                     </div>
                 </div>
 
                 @if ($errors->any())
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <h6 class="alert-heading">Validation Errors</h6>
+                        <h6 class="alert-heading mb-2"><i class="fas fa-exclamation-triangle me-2"></i>Validation Errors</h6>
                         <ul class="mb-0">
                             @foreach ($errors->all() as $error)
                                 <li>{{ $error }}</li>
@@ -94,6 +187,10 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     
     <!-- Custom Scripts -->
     <script>
@@ -260,6 +357,98 @@
                 initPolicyForm();
             }
         })();
+    </script>
+    
+    <!-- Client Select2 and Auto-fill Script -->
+    <script>
+        $(document).ready(function() {
+            // Initialize Select2 for client dropdown
+            $('#clientSelect').select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Select or type to search client...',
+                allowClear: true
+            });
+
+            // Handle client selection change
+            $('#clientSelect').on('change', function() {
+                const selectedOption = $(this).find(':selected');
+                const clientId = $(this).val();
+                
+                if (clientId) {
+                    // Get client data from option attributes
+                    const email = selectedOption.data('email') || '';
+                    const phone = selectedOption.data('phone') || '';
+                    const address = selectedOption.data('address') || '';
+                    const clientName = selectedOption.text().trim();
+                    
+                    // Fill the form fields
+                    $('#clientEmail').val(email);
+                    $('#clientPhone').val(phone);
+                    $('#clientAddress').val(address);
+                    $('#clientNameHidden').val(clientName);
+                } else {
+                    // Clear fields if no client selected
+                    $('#clientEmail').val('');
+                    $('#clientPhone').val('');
+                    $('#clientAddress').val('');
+                    $('#clientNameHidden').val('');
+                }
+            });
+
+            // Trigger change on page load if a client is already selected (for edit mode)
+            if ($('#clientSelect').val()) {
+                $('#clientSelect').trigger('change');
+            }
+
+            // Auto-calculate Amount Due
+            function calculateAmountDue() {
+                const premium = parseFloat($('input[name="premium"]').val()) || 0;
+                const vat = parseFloat($('input[name="vat"]').val()) || 0;
+                const docStampTax = parseFloat($('input[name="documentary_stamp_tax"]').val()) || 0;
+                const localGovTax = parseFloat($('input[name="local_gov_tax"]').val()) || 0;
+
+                const amountDue = premium + vat + docStampTax + localGovTax;
+                $('input[name="amount_due"]').val(amountDue.toFixed(2));
+                
+                // Also update balance when amount due changes
+                calculateBalance();
+            }
+
+            // Calculate Balance (Amount Due - Paid Amount)
+            function calculateBalance() {
+                const amountDue = parseFloat($('input[name="amount_due"]').val()) || 0;
+                const paidAmount = parseFloat($('#paidAmount').val()) || 0;
+                
+                const balance = amountDue - paidAmount;
+                $('#balanceAmount').val(balance.toFixed(2));
+                
+                // Change color based on balance
+                if (balance <= 0) {
+                    $('#balanceAmount').css({'color': '#198754', 'font-weight': 'bold'}); // Green for paid
+                } else {
+                    $('#balanceAmount').css({'color': '#dc3545', 'font-weight': 'bold'}); // Red for unpaid
+                }
+            }
+
+            // Attach event listeners to premium fields
+            $('input[name="premium"], input[name="vat"], input[name="documentary_stamp_tax"], input[name="local_gov_tax"]').on('input', function() {
+                calculateAmountDue();
+            });
+
+            // Attach event listener to paid amount
+            $('#paidAmount').on('input', function() {
+                calculateBalance();
+            });
+
+            // Also recalculate balance when amount due changes manually
+            $('input[name="amount_due"]').on('input', function() {
+                calculateBalance();
+            });
+
+            // Calculate on page load if values exist
+            calculateAmountDue();
+            calculateBalance();
+        });
     </script>
 </body>
 </html>
