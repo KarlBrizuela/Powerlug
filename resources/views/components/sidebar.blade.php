@@ -253,7 +253,7 @@
     <!-- ========== Left Sidebar Start ========== -->
     <div class="vertical-menu">
         <div class="sidebar-logo">
-            <img src="{{ asset('images/logs.jpg') }}" alt="logo" class="img-fluid">
+            <img src="public/images/logs.jpg" alt="logo" class="img-fluid">
         </div>
         <div data-simplebar class="h-100">
             <!--- Sidemenu -->
