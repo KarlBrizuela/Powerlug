@@ -81,4 +81,12 @@ class ClientController extends Controller
         return redirect()->route('clients.index')
                         ->with('success', 'Client updated successfully');
     }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Client $client)
+    {
+        return view('pages.client-show', compact('client'));
+    }
 }

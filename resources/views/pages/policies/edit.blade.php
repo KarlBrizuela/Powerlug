@@ -139,6 +139,73 @@
         .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
             padding: 0.6rem 0.75rem !important;
         }
+
+        /* Services Availed UI Styling */
+        .services-input-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 8px 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            background-color: #fff;
+            min-height: 42px;
+            align-items: center;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .services-input-wrapper:focus-within {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        .services-dropdown {
+            border: none !important;
+            padding: 0 !important;
+            flex: 1;
+            min-width: 150px;
+            background: transparent !important;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .services-dropdown:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .services-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background-color: #0d6efd;
+            color: white;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .services-badge .btn-remove {
+            background: none;
+            border: none;
+            color: white;
+            padding: 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        .services-badge .btn-remove:hover {
+            opacity: 0.8;
+        }
+        }
     </style>
 </head>
 <body>
@@ -349,6 +416,86 @@
 
                 // Initialize on load
                 updateBankOptions();
+            }
+
+            // Services selection functionality (matching policy.blade.php create)
+            const serviceDropdown = document.getElementById('serviceDropdown');
+            const servicesInputGroup = document.getElementById('servicesInputGroup');
+            let selectedServices = [];
+
+            // Load existing services from server-side rendered badges
+            if (servicesInputGroup) {
+                document.querySelectorAll('#servicesInputGroup .services-badge').forEach(badge => {
+                    const service = badge.dataset.service;
+                    if (service) {
+                        selectedServices.push(service);
+                    }
+                });
+            }
+
+            if (serviceDropdown) {
+                serviceDropdown.addEventListener('change', function() {
+                    const selectedService = this.value;
+                    if (selectedService && !selectedServices.includes(selectedService)) {
+                        selectedServices.push(selectedService);
+                        renderServices();
+                        this.value = '';
+                    }
+                });
+            }
+
+            function renderServices() {
+                const dropdown = document.getElementById('serviceDropdown');
+                if (!dropdown || !servicesInputGroup) return;
+
+                const existingBadges = servicesInputGroup.querySelectorAll('.services-badge');
+                existingBadges.forEach(badge => badge.remove());
+                dropdown.style.display = 'block';
+
+                const placeholderOption = dropdown.querySelector('option[value=""]');
+                if (selectedServices.length > 0) {
+                    if (placeholderOption) placeholderOption.style.display = 'none';
+                } else {
+                    if (placeholderOption) placeholderOption.style.display = 'block';
+                }
+
+                selectedServices.forEach(service => {
+                    const badge = document.createElement('div');
+                    badge.className = 'services-badge';
+                    badge.dataset.service = service;
+                    badge.innerHTML = `
+                        ${service}
+                        <button type="button" class="btn-remove" aria-label="Remove ${service}">×</button>
+                    `;
+                    servicesInputGroup.insertBefore(badge, dropdown);
+
+                    badge.querySelector('.btn-remove').addEventListener('click', function(e) {
+                        e.preventDefault();
+                        selectedServices = selectedServices.filter(s => s !== service);
+                        renderServices();
+                    });
+                });
+
+                const container = document.createElement('div');
+                container.id = 'servicesContainer';
+                selectedServices.forEach(service => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'services[]';
+                    input.value = service;
+                    container.appendChild(input);
+                });
+
+                const oldContainer = document.getElementById('servicesContainer');
+                if (oldContainer) {
+                    oldContainer.replaceWith(container);
+                } else {
+                    servicesInputGroup.parentElement.appendChild(container);
+                }
+            }
+
+            if (selectedServices.length > 0) {
+                renderServices();
             }
 
             if (document.readyState === 'loading') {
