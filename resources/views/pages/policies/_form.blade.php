@@ -167,6 +167,13 @@
                                name="mortgage" value="{{ old('mortgage', optional($policy)->mortgage ?? 'BANK OF THE PHILIPPINE ISLANDS') }}" placeholder="BANK OF THE PHILIPPINE ISLANDS">
                         @error('mortgage')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">File Upload</label>
+                        <input type="file" class="form-control @error('policy_file') is-invalid @enderror"
+                               name="policy_file">
+                        @error('policy_file')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
                 </div>
 
                 <div class="row mb-2">

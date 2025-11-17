@@ -14,10 +14,13 @@ class DashboardController extends Controller
         // Get total clients count
         $totalClients = Client::count();
 
+        // Get total policies count
+        $totalPolicies = Policy::count();
+
         // Get insurance expiration reminders (policies expiring within 2 months)
         $expiringPolicies = $this->getExpiringPolicies();
 
-        return view('pages.dashboard', compact('totalClients', 'expiringPolicies'));
+        return view('pages.dashboard', compact('totalClients', 'totalPolicies', 'expiringPolicies'));
     }
 
     private function getExpiringPolicies()

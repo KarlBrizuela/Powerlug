@@ -67,16 +67,16 @@
                         </div>
                        
                         <div class="col-xl-4 col-md-6 mb-4">
-                            <div class="card border-0 shadow-sm h-100 hover-card" data-bs-toggle="modal" data-bs-target="#pendingTasksModal" style="cursor: pointer; transition: all 0.3s ease; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <div class="card border-0 shadow-sm h-100 hover-card" style="cursor: pointer; transition: all 0.3s ease; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                                 <div class="card-body text-center text-white p-4">
                                     <div class="rounded-circle bg-white bg-opacity-25 d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
                                         <i class="fas fa-tasks fa-2x text-white"></i>
                                     </div>
-                                    <h5 class="card-title text-uppercase fw-semibold mb-2" style="font-size: 0.9rem; letter-spacing: 0.5px; opacity: 0.95;">Pending Tasks</h5>
-                                    <h2 class="fw-bold mb-0" style="font-size: 2.5rem;">15</h2>
+                                    <h5 class="card-title text-uppercase fw-semibold mb-2" style="font-size: 0.9rem; letter-spacing: 0.5px; opacity: 0.95;">Total Policies</h5>
+                                    <h2 class="fw-bold mb-0" style="font-size: 2.5rem;">{{ $totalPolicies }}</h2>
                                     <p class="small mb-0 mt-2" style="opacity: 0.9;">
-                                        <i class="fas fa-clock me-1"></i>
-                                        Click to view details
+                                        <i class="fas fa-file-contract me-1"></i>
+                                        Active policies
                                     </p>
                                 </div>
                             </div>
@@ -480,52 +480,6 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
         }
     </style>
-
-    <!-- Pending Tasks Modal -->
-    <div class="modal fade" id="pendingTasksModal" tabindex="-1" aria-labelledby="pendingTasksModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="pendingTasksModalLabel">Pending Tasks Details</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row text-center">
-                        <div class="col-md-6 mb-4">
-                            <div class="p-3 border rounded bg-light">
-                                <i class="fas fa-file-contract fa-3x text-primary mb-3"></i>
-                                <h4>Insurance Policies</h4>
-                                <h2 class="text-primary fw-bold" id="insurancePolicyCount">8</h2>
-                                <p class="text-muted">Pending for review</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-4">
-                            <div class="p-3 border rounded bg-light">
-                                <i class="fas fa-walking fa-3x text-success mb-3"></i>
-                                <h4>Walk-ins</h4>
-                                <h2 class="text-success fw-bold" id="walkInCount">7</h2>
-                                <p class="text-muted">Waiting for processing</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle me-2"></i>
-                                <strong>Total Pending Tasks:</strong> <span id="totalTasksCount">15</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">
-                        <i class="fas fa-list me-1"></i> View All Tasks
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Bootstrap & jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

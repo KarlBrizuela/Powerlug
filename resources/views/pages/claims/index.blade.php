@@ -269,6 +269,13 @@
                                                         <a href="{{ route('claims.download', $claim) }}" class="action-btn download" title="Download">
                                                             <i class="bi bi-download"></i>
                                                         </a>
+                                                        <form method="POST" action="{{ route('claims.deleteFile', $claim->id) }}" style="display:inline" onsubmit="return confirm('Delete this file?');">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="action-btn delete" title="Delete File">
+                                                                <i class="bi bi-file-x"></i>
+                                                            </button>
+                                                        </form>
                                                     @endif
                                                     <form method="POST" action="{{ route('claims.destroy', $claim) }}" style="display:inline" onsubmit="return confirm('Delete this claim?');">
                                                         @csrf

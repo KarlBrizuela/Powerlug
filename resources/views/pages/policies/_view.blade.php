@@ -233,6 +233,32 @@
             </div>
         </div>
 
+        <div class="row">
+            <div class="col-md-12">
+                <div class="policy-info-row">
+                    <p class="policy-info-label">Policy File:</p>
+                    <p class="policy-info-value">
+                        @if($policy->policy_file)
+                            <div class="d-flex gap-2 align-items-center">
+                                <a href="{{ asset('storage/' . $policy->policy_file) }}" target="_blank" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-download"></i> Download File
+                                </a>
+                                <form action="{{ route('policies.deleteFile', $policy->id) }}" method="POST" style="display: inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this file?')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </form>
+                            </div>
+                        @else
+                            <span class="text-muted">No file uploaded</span>
+                        @endif
+                    </p>
+                </div>
+            </div>
+        </div>
+
         @if($policy->remarks)
             <div class="row mt-2">
                 <div class="col-12">
@@ -258,7 +284,24 @@
             <div class="col-md-6">
                 <div class="policy-info-row">
                     <p class="policy-info-label">File Upload:</p>
-                    <p class="policy-info-value">{{ $display($policy->walkin_file) }}</p>
+                    <p class="policy-info-value">
+                        @if($policy->walkin_file)
+                            <div class="d-flex gap-2 align-items-center">
+                                <a href="{{ asset('storage/' . $policy->walkin_file) }}" target="_blank" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                                <form action="{{ route('policies.deleteWalkinFile', $policy->id) }}" method="POST" style="display: inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this file?')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </form>
+                            </div>
+                        @else
+                            <span class="text-muted">No file uploaded</span>
+                        @endif
+                    </p>
                 </div>
             </div>
         </div>

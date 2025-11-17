@@ -85,7 +85,18 @@
                         <dt class="col-sm-3">File</dt>
                         <dd class="col-sm-9">
                             @if($claim->file_path)
-                                <a href="{{ route('claims.download', $claim) }}">Download file</a>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <a href="{{ route('claims.download', $claim) }}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-download"></i> Download file
+                                    </a>
+                                    <form action="{{ route('claims.deleteFile', $claim->id) }}" method="POST" style="display: inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this file?')">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </form>
+                                </div>
                             @else
                                 <span class="text-muted">No file uploaded</span>
                             @endif

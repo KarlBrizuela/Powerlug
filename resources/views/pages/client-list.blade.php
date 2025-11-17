@@ -364,13 +364,47 @@
                                 </div>
 
                                 <!-- Pagination -->
-                                <div class="row mt-3">
+                                <div class="row mt-4">
                                     <div class="col-md-12">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div class="text-muted">
+                                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                            <div class="text-muted small">
                                                 Showing {{ $clients->firstItem() ?? 0 }} to {{ $clients->lastItem() ?? 0 }} of {{ $clients->total() ?? 0 }} entries
                                             </div>
-                                            {{ $clients->links() }}
+                                            <nav aria-label="Page navigation">
+                                                <ul class="pagination pagination-sm mb-0">
+                                                    @if ($clients->onFirstPage())
+                                                        <li class="page-item disabled">
+                                                            <span class="page-link">← Previous</span>
+                                                        </li>
+                                                    @else
+                                                        <li class="page-item">
+                                                            <a class="page-link" href="{{ $clients->previousPageUrl() }}">← Previous</a>
+                                                        </li>
+                                                    @endif
+
+                                                    @foreach ($clients->getUrlRange(1, $clients->lastPage()) as $page => $url)
+                                                        @if ($page == $clients->currentPage())
+                                                            <li class="page-item active">
+                                                                <span class="page-link">{{ $page }}</span>
+                                                            </li>
+                                                        @else
+                                                            <li class="page-item">
+                                                                <a class="page-link" href="{{ $url }}">{{ $page }}</a>
+                                                            </li>
+                                                        @endif
+                                                    @endforeach
+
+                                                    @if ($clients->hasMorePages())
+                                                        <li class="page-item">
+                                                            <a class="page-link" href="{{ $clients->nextPageUrl() }}">Next →</a>
+                                                        </li>
+                                                    @else
+                                                        <li class="page-item disabled">
+                                                            <span class="page-link">Next →</span>
+                                                        </li>
+                                                    @endif
+                                                </ul>
+                                            </nav>
                                         </div>
                                     </div>
                                 </div>

@@ -487,8 +487,49 @@
                                 </table>
 
                                 @if(isset($audits) && $audits->hasPages())
-                                    <div class="mt-3">
-                                        {{ $audits->links() }}
+                                    <div class="row mt-4">
+                                        <div class="col-md-12">
+                                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                                <div class="text-muted small">
+                                                    Showing {{ $audits->firstItem() ?? 0 }} to {{ $audits->lastItem() ?? 0 }} of {{ $audits->total() ?? 0 }} entries
+                                                </div>
+                                                <nav aria-label="Page navigation">
+                                                    <ul class="pagination pagination-sm mb-0">
+                                                        @if ($audits->onFirstPage())
+                                                            <li class="page-item disabled">
+                                                                <span class="page-link">← Previous</span>
+                                                            </li>
+                                                        @else
+                                                            <li class="page-item">
+                                                                <a class="page-link" href="{{ $audits->previousPageUrl() }}">← Previous</a>
+                                                            </li>
+                                                        @endif
+
+                                                        @foreach ($audits->getUrlRange(1, $audits->lastPage()) as $page => $url)
+                                                            @if ($page == $audits->currentPage())
+                                                                <li class="page-item active">
+                                                                    <span class="page-link">{{ $page }}</span>
+                                                                </li>
+                                                            @else
+                                                                <li class="page-item">
+                                                                    <a class="page-link" href="{{ $url }}">{{ $page }}</a>
+                                                                </li>
+                                                            @endif
+                                                        @endforeach
+
+                                                        @if ($audits->hasMorePages())
+                                                            <li class="page-item">
+                                                                <a class="page-link" href="{{ $audits->nextPageUrl() }}">Next →</a>
+                                                            </li>
+                                                        @else
+                                                            <li class="page-item disabled">
+                                                                <span class="page-link">Next →</span>
+                                                            </li>
+                                                        @endif
+                                                    </ul>
+                                                </nav>
+                                            </div>
+                                        </div>
                                     </div>
                                 @endif
                             </div>

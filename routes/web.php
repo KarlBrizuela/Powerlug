@@ -60,6 +60,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/policies/{policy}/installment', [PolicyController::class, 'installment'])->name('policies.installment');
     Route::post('/policies/{policy}/installment', [PolicyController::class, 'storeInstallment'])->name('policies.storeInstallment');
     Route::get('/policies/{policy}/installments', [PolicyController::class, 'listInstallments'])->name('policies.listInstallments');
+    Route::delete('/policies/{policy}/file', [PolicyController::class, 'deleteFile'])->name('policies.deleteFile');
+    Route::delete('/policies/{policy}/walkin-file', [PolicyController::class, 'deleteWalkinFile'])->name('policies.deleteWalkinFile');
     Route::get('/api/clients/{id}', [PolicyController::class, 'getClientDetails'])->name('clients.details');
 
     // Freebies
@@ -97,6 +99,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/claims', [App\Http\Controllers\ClaimController::class, 'store'])->name('claims.store');
     Route::get('/claims/{claim}', [App\Http\Controllers\ClaimController::class, 'show'])->name('claims.show');
     Route::get('/claims/{claim}/download', [App\Http\Controllers\ClaimController::class, 'download'])->name('claims.download');
+    Route::delete('/claims/{claim}/file', [App\Http\Controllers\ClaimController::class, 'deleteFile'])->name('claims.deleteFile');
     Route::delete('/claims/{claim}', [App\Http\Controllers\ClaimController::class, 'destroy'])->name('claims.destroy');
     Route::patch('/claims/{claim}/admin-status', [App\Http\Controllers\ClaimController::class, 'updateAdminStatus'])->name('claims.update-admin-status');
     Route::patch('/claims/{claim}/superadmin-status', [App\Http\Controllers\ClaimController::class, 'updateSuperadminStatus'])->name('claims.update-superadmin-status');

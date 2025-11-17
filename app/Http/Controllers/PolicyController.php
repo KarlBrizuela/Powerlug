@@ -7,6 +7,7 @@ use App\Models\Client;
 use App\Models\InsuranceProvider;
 use App\Models\Service;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class PolicyController extends Controller
 {
@@ -103,6 +104,7 @@ class PolicyController extends Controller
             'mv_file_number' => 'nullable|string',
             'mortgage' => 'nullable|string',
             'freebie' => 'nullable|string',
+            'policy_file' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png',
             
             // Walk-in Details - At least one is required if walk-in type is selected
             'walkin_date' => 'nullable|date',
@@ -196,6 +198,11 @@ class PolicyController extends Controller
         }
         if (empty($validated['end_date'])) {
             $validated['end_date'] = $validated['coverage_to'] ?? $validated['start_date'] ?? $today;
+        }
+
+        // Handle file upload if provided
+        if ($request->hasFile('policy_file')) {
+            $validated['policy_file'] = $request->file('policy_file')->store('policies', 'public');
         }
 
         $policy = Policy::create($validated);
@@ -295,6 +302,7 @@ class PolicyController extends Controller
             'mv_file_number' => 'nullable|string',
             'mortgage' => 'nullable|string',
             'freebie' => 'nullable|string',
+            'policy_file' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png',
             
             // Walk-in Details
             'walkin_date' => 'nullable|date',
@@ -361,6 +369,15 @@ class PolicyController extends Controller
         }
 
         $validated['updated_by'] = auth()->id();
+
+        // Handle file upload if provided
+        if ($request->hasFile('policy_file')) {
+            // Delete old file if it exists
+            if ($policy->policy_file) {
+                Storage::disk('public')->delete($policy->policy_file);
+            }
+            $validated['policy_file'] = $request->file('policy_file')->store('policies', 'public');
+        }
 
         $policy->update($validated);
 
@@ -474,5 +491,45 @@ class PolicyController extends Controller
         $policy->save();
 
         return redirect()->back()->with('success', 'Policy marked as availed successfully');
+    }
+
+    /**
+     * Delete the policy file
+     */
+    public function deleteFile(Policy $policy)
+    {
+        if ($policy->policy_file) {
+            // Delete the file from storage
+            Storage::disk('public')->delete($policy->policy_file);
+            
+            // Update the policy to remove the file reference
+            $policy->policy_file = null;
+            $policy->updated_by = auth()->id();
+            $policy->save();
+
+            return redirect()->back()->with('success', 'Policy file deleted successfully');
+        }
+
+        return redirect()->back()->with('error', 'No file to delete');
+    }
+
+    /**
+     * Delete the walkin file
+     */
+    public function deleteWalkinFile(Policy $policy)
+    {
+        if ($policy->walkin_file) {
+            // Delete the file from storage
+            Storage::disk('public')->delete($policy->walkin_file);
+            
+            // Update the policy to remove the file reference
+            $policy->walkin_file = null;
+            $policy->updated_by = auth()->id();
+            $policy->save();
+
+            return redirect()->back()->with('success', 'Walk-in file deleted successfully');
+        }
+
+        return redirect()->back()->with('error', 'No file to delete');
     }
 }

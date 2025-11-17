@@ -61,6 +61,7 @@ class Policy extends Model
         'amount_due',
         'coc_vp',
         'premium_remarks',
+        'policy_file',
     ];
 
     protected $casts = [

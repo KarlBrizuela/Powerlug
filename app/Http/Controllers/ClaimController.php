@@ -204,4 +204,23 @@ class ClaimController extends Controller
 
         return redirect()->back()->with('success', 'Super admin status updated successfully');
     }
+
+    /**
+     * Delete the claim file
+     */
+    public function deleteFile(Claim $claim)
+    {
+        if ($claim->file_path) {
+            // Delete the file from storage
+            Storage::disk('public')->delete($claim->file_path);
+            
+            // Update the claim to remove the file reference
+            $claim->file_path = null;
+            $claim->save();
+
+            return redirect()->back()->with('success', 'Claim file deleted successfully');
+        }
+
+        return redirect()->back()->with('error', 'No file to delete');
+    }
 }
