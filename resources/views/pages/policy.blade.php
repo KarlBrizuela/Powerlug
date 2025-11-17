@@ -556,12 +556,12 @@
                                                                 <option value="">Select a service to add</option>
                                                                 @if(isset($services) && $services->count())
                                                                     @foreach($services as $s)
-                                                                        <option value="{{ $s->name }}">{{ $s->name }}</option>
+                                                                        <option value="{{ $s->name }}" data-price="{{ number_format((float)$s->price, 2, '.', '') }}">{{ $s->name }} - ₱ {{ number_format((float)$s->price, 2) }}</option>
                                                                     @endforeach
                                                                 @else
-                                                                    <option value="Carwash">Carwash</option>
-                                                                    <option value="Change Oil">Change Oil</option>
-                                                                    <option value="Etc">Etc</option>
+                                                                    <option value="Carwash" data-price="0.00">Carwash</option>
+                                                                    <option value="Change Oil" data-price="0.00">Change Oil</option>
+                                                                    <option value="Etc" data-price="0.00">Etc</option>
                                                                 @endif
                                                             </select>
                                                         </div>
@@ -635,10 +635,15 @@
                                                             <div class="invalid-feedback">{{ $message }}</div>
                                                         @enderror
                                                     </div>
+                                                    <div class="premium-row">
+                                                        <span>Services Subtotal</span>
+                                                        <input type="text" class="form-control form-control-sm" 
+                                                               style="width: 150px;" id="servicesSubtotalCreate" value="0.00" readonly>
+                                                    </div>
                                                     <div class="premium-row total-row">
                                                         <span>AMOUNT DUE</span>
                                                         <input type="text" class="form-control form-control-sm fw-bold @error('amount_due') is-invalid @enderror" 
-                                                               style="width: 150px;" name="amount_due" value="{{ old('amount_due') }}" placeholder="PHP">
+                                                               style="width: 150px;" name="amount_due" value="{{ old('amount_due') }}" placeholder="PHP" readonly>
                                                         @error('amount_due')
                                                             <div class="invalid-feedback">{{ $message }}</div>
                                                         @enderror
@@ -1009,20 +1014,22 @@
             const servicesInputGroup = document.getElementById('servicesInputGroup');
             let selectedServices = [];
 
-            // Load existing services from page load
+            // Load existing services from page load (badges may be server-rendered in edit)
             document.querySelectorAll('#servicesInputGroup .services-badge').forEach(badge => {
                 const service = badge.dataset.service;
+                const price = parseFloat(badge.dataset.price) || 0;
                 if (service) {
-                    selectedServices.push(service);
+                    selectedServices.push({ name: service, price: price });
                 }
             });
 
             // Add service when dropdown selection changes
             serviceDropdown.addEventListener('change', function() {
-                const selectedService = this.value;
-                
-                if (selectedService && !selectedServices.includes(selectedService)) {
-                    selectedServices.push(selectedService);
+                const selectedValue = this.value;
+                const opt = this.selectedOptions && this.selectedOptions[0] ? this.selectedOptions[0] : null;
+                const price = opt && opt.dataset && opt.dataset.price ? parseFloat(opt.dataset.price) || 0 : 0;
+                if (selectedValue && !selectedServices.some(s => s.name === selectedValue)) {
+                    selectedServices.push({ name: selectedValue, price: price });
                     renderServices();
                     this.value = ''; // Reset dropdown
                 }
@@ -1047,21 +1054,22 @@
                     placeholderOption.style.display = 'block';
                 }
                 
-                // Add new badges before the dropdown
-                selectedServices.forEach(service => {
+                // Add new badges before the dropdown (show name and price)
+                selectedServices.forEach(svc => {
                     const badge = document.createElement('div');
                     badge.className = 'services-badge';
-                    badge.dataset.service = service;
+                    badge.dataset.service = svc.name;
+                    badge.dataset.price = svc.price || 0;
                     badge.innerHTML = `
-                        ${service}
-                        <button type="button" class="btn-remove" aria-label="Remove ${service}">×</button>
+                        ${svc.name} - ₱ ${Number(svc.price || 0).toFixed(2)}
+                        <button type="button" class="btn-remove" aria-label="Remove ${svc.name}">×</button>
                     `;
                     servicesInputGroup.insertBefore(badge, dropdown);
-                    
+
                     // Add remove handler
                     badge.querySelector('.btn-remove').addEventListener('click', function(e) {
                         e.preventDefault();
-                        selectedServices = selectedServices.filter(s => s !== service);
+                        selectedServices = selectedServices.filter(x => x.name !== svc.name);
                         renderServices();
                     });
                 });
@@ -1069,11 +1077,11 @@
                 // Create hidden inputs for form submission
                 const container = document.createElement('div');
                 container.id = 'servicesContainer';
-                selectedServices.forEach(service => {
+                selectedServices.forEach(svc => {
                     const input = document.createElement('input');
                     input.type = 'hidden';
                     input.name = 'services[]';
-                    input.value = service;
+                    input.value = svc.name; // keep storing names for backwards compatibility
                     container.appendChild(input);
                 });
                 
@@ -1084,11 +1092,63 @@
                 } else {
                     servicesInputGroup.parentElement.appendChild(container);
                 }
+                // Keep global reference updated so amount calculation can read latest services
+                window.selectedServices = selectedServices;
+                
+                // Update services subtotal directly
+                const servicesTotal = selectedServices.reduce((sum, s) => sum + (parseFloat(s.price) || 0), 0);
+                const servicesSubtotalEl = document.getElementById('servicesSubtotalCreate');
+                if (servicesSubtotalEl) {
+                    servicesSubtotalEl.value = servicesTotal.toFixed(2);
+                }
+                
+                // Force direct calculation of amount due without relying on jQuery
+                const premium = parseFloat(document.querySelector('input[name="premium"]')?.value) || 0;
+                const vat = parseFloat(document.querySelector('input[name="vat"]')?.value) || 0;
+                const docStampTax = parseFloat(document.querySelector('input[name="documentary_stamp_tax"]')?.value) || 0;
+                const localGovTax = parseFloat(document.querySelector('input[name="local_gov_tax"]')?.value) || 0;
+                const totalAmountDue = premium + vat + docStampTax + localGovTax + servicesTotal;
+                const amountDueInput = document.querySelector('input[name="amount_due"]');
+                if (amountDueInput) {
+                    amountDueInput.value = totalAmountDue.toFixed(2);
+                }
+                
+                // Recalculate balance
+                const paidAmountEl = document.getElementById('paidAmount');
+                if (paidAmountEl) {
+                    const paidAmount = parseFloat(paidAmountEl.value) || 0;
+                    const balance = totalAmountDue - paidAmount;
+                    const balanceEl = document.getElementById('balanceAmount');
+                    if (balanceEl) {
+                        balanceEl.value = balance.toFixed(2);
+                        if (balance <= 0) {
+                            balanceEl.style.color = '#198754';
+                            balanceEl.style.fontWeight = 'bold';
+                        } else {
+                            balanceEl.style.color = '#dc3545';
+                            balanceEl.style.fontWeight = 'bold';
+                        }
+                    }
+                }
+                
+                if (typeof calculateAmountDue === 'function') {
+                    calculateAmountDue();
+                }
             }
 
             // Initial render if there are old services
             if (selectedServices.length > 0) {
-                renderServices();
+                // Delay initial render until jQuery ready to ensure calculateAmountDue is available
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', renderServices);
+                } else {
+                    setTimeout(renderServices, 100);
+                }
+            }
+
+            // Trigger initial calculation on page load
+            if (typeof calculateAmountDue === 'function') {
+                calculateAmountDue();
             }
         });
     </script>
@@ -1151,7 +1211,14 @@
                 const docStampTax = parseFloat($('input[name="documentary_stamp_tax"]').val()) || 0;
                 const localGovTax = parseFloat($('input[name="local_gov_tax"]').val()) || 0;
 
-                const amountDue = premium + vat + docStampTax + localGovTax;
+                // Sum selected services prices (if any)
+                const services = window.selectedServices || [];
+                const servicesTotal = services.reduce((sum, s) => sum + (parseFloat(s.price) || 0), 0);
+
+                // Update services subtotal field
+                $('#servicesSubtotalCreate').val(servicesTotal.toFixed(2));
+
+                const amountDue = premium + vat + docStampTax + localGovTax + servicesTotal;
                 $('input[name="amount_due"]').val(amountDue.toFixed(2));
                 
                 // Also update balance when amount due changes

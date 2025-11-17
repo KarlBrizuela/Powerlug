@@ -423,21 +423,24 @@
             const servicesInputGroup = document.getElementById('servicesInputGroup');
             let selectedServices = [];
 
-            // Load existing services from server-side rendered badges
+            // Load existing services from server-side rendered badges (if any) with prices
             if (servicesInputGroup) {
                 document.querySelectorAll('#servicesInputGroup .services-badge').forEach(badge => {
                     const service = badge.dataset.service;
+                    const price = parseFloat(badge.dataset.price) || 0;
                     if (service) {
-                        selectedServices.push(service);
+                        selectedServices.push({ name: service, price: price });
                     }
                 });
             }
 
             if (serviceDropdown) {
                 serviceDropdown.addEventListener('change', function() {
-                    const selectedService = this.value;
-                    if (selectedService && !selectedServices.includes(selectedService)) {
-                        selectedServices.push(selectedService);
+                    const selectedValue = this.value;
+                    const opt = this.selectedOptions && this.selectedOptions[0] ? this.selectedOptions[0] : null;
+                    const price = opt && opt.dataset && opt.dataset.price ? parseFloat(opt.dataset.price) || 0 : 0;
+                    if (selectedValue && !selectedServices.some(s => s.name === selectedValue)) {
+                        selectedServices.push({ name: selectedValue, price: price });
                         renderServices();
                         this.value = '';
                     }
@@ -459,30 +462,31 @@
                     if (placeholderOption) placeholderOption.style.display = 'block';
                 }
 
-                selectedServices.forEach(service => {
+                selectedServices.forEach(svc => {
                     const badge = document.createElement('div');
                     badge.className = 'services-badge';
-                    badge.dataset.service = service;
+                    badge.dataset.service = svc.name;
+                    badge.dataset.price = svc.price || 0;
                     badge.innerHTML = `
-                        ${service}
-                        <button type="button" class="btn-remove" aria-label="Remove ${service}">×</button>
+                        ${svc.name} - ₱ ${Number(svc.price || 0).toFixed(2)}
+                        <button type="button" class="btn-remove" aria-label="Remove ${svc.name}">×</button>
                     `;
                     servicesInputGroup.insertBefore(badge, dropdown);
 
                     badge.querySelector('.btn-remove').addEventListener('click', function(e) {
                         e.preventDefault();
-                        selectedServices = selectedServices.filter(s => s !== service);
+                        selectedServices = selectedServices.filter(x => x.name !== svc.name);
                         renderServices();
                     });
                 });
 
                 const container = document.createElement('div');
                 container.id = 'servicesContainer';
-                selectedServices.forEach(service => {
+                selectedServices.forEach(svc => {
                     const input = document.createElement('input');
                     input.type = 'hidden';
                     input.name = 'services[]';
-                    input.value = service;
+                    input.value = svc.name;
                     container.appendChild(input);
                 });
 
@@ -492,10 +496,59 @@
                 } else {
                     servicesInputGroup.parentElement.appendChild(container);
                 }
+
+                // Expose selected services globally so amount calculation can include prices
+                window.selectedServices = selectedServices;
+                
+                // Update services subtotal directly
+                const servicesTotal = selectedServices.reduce((sum, s) => sum + (parseFloat(s.price) || 0), 0);
+                const servicesSubtotalEl = document.getElementById('servicesSubtotal');
+                if (servicesSubtotalEl) {
+                    servicesSubtotalEl.value = servicesTotal.toFixed(2);
+                }
+                
+                // Force direct calculation of amount due without relying on jQuery
+                const premium = parseFloat(document.querySelector('input[name="premium"]')?.value) || 0;
+                const vat = parseFloat(document.querySelector('input[name="vat"]')?.value) || 0;
+                const docStampTax = parseFloat(document.querySelector('input[name="documentary_stamp_tax"]')?.value) || 0;
+                const localGovTax = parseFloat(document.querySelector('input[name="local_gov_tax"]')?.value) || 0;
+                const totalAmountDue = premium + vat + docStampTax + localGovTax + servicesTotal;
+                const amountDueInput = document.querySelector('input[name="amount_due"]');
+                if (amountDueInput) {
+                    amountDueInput.value = totalAmountDue.toFixed(2);
+                }
+                
+                // Recalculate balance
+                const paidAmountEl = document.getElementById('paidAmount');
+                if (paidAmountEl) {
+                    const paidAmount = parseFloat(paidAmountEl.value) || 0;
+                    const balance = totalAmountDue - paidAmount;
+                    const balanceEl = document.getElementById('balanceAmount');
+                    if (balanceEl) {
+                        balanceEl.value = balance.toFixed(2);
+                        if (balance <= 0) {
+                            balanceEl.style.color = '#198754';
+                            balanceEl.style.fontWeight = 'bold';
+                        } else {
+                            balanceEl.style.color = '#dc3545';
+                            balanceEl.style.fontWeight = 'bold';
+                        }
+                    }
+                }
+                
+                // Recalculate amount due (if the page script uses it)
+                if (typeof calculateAmountDue === 'function') {
+                    calculateAmountDue();
+                }
             }
 
             if (selectedServices.length > 0) {
-                renderServices();
+                // Delay initial render until jQuery ready to ensure calculateAmountDue is available
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', renderServices);
+                } else {
+                    setTimeout(renderServices, 100);
+                }
             }
 
             if (document.readyState === 'loading') {
@@ -554,7 +607,14 @@
                 const docStampTax = parseFloat($('input[name="documentary_stamp_tax"]').val()) || 0;
                 const localGovTax = parseFloat($('input[name="local_gov_tax"]').val()) || 0;
 
-                const amountDue = premium + vat + docStampTax + localGovTax;
+                // Include services total if available
+                const services = (window.selectedServices || []);
+                const servicesTotal = services.reduce((sum, s) => sum + (parseFloat(s.price) || 0), 0);
+
+                // Update services subtotal display
+                $('#servicesSubtotal').val(servicesTotal.toFixed(2));
+
+                const amountDue = premium + vat + docStampTax + localGovTax + servicesTotal;
                 $('input[name="amount_due"]').val(amountDue.toFixed(2));
                 
                 // Also update balance when amount due changes

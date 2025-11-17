@@ -232,16 +232,30 @@
                     <div class="col-md-12">
                         <label class="form-label">Services Availed</label>
                         <div class="services-input-wrapper" id="servicesInputGroup">
+                            {{-- If editing and there are existing services, render them as badges (with data-price) so JS can pick them up on load --}}
+                            @if(!empty(optional($policy)->services) && is_array(optional($policy)->services))
+                                @foreach(optional($policy)->services as $existingService)
+                                    @php
+                                        $svc = isset($services) ? collect($services)->firstWhere('name', $existingService) : null;
+                                        $svcPrice = $svc ? number_format((float)$svc->price, 2, '.', '') : '0.00';
+                                    @endphp
+                                    <div class="services-badge" data-service="{{ $existingService }}" data-price="{{ $svcPrice }}">
+                                        {{ $existingService }} - ₱ {{ number_format((float)$svcPrice, 2) }}
+                                        <button type="button" class="btn-remove">&times;</button>
+                                    </div>
+                                @endforeach
+                            @endif
+
                             <select class="services-dropdown" id="serviceDropdown">
                                 <option value="">Select a service to add</option>
                                 @if(isset($services) && $services->count())
                                     @foreach($services as $s)
-                                        <option value="{{ $s->name }}">{{ $s->name }}</option>
+                                        <option value="{{ $s->name }}" data-price="{{ number_format((float)$s->price, 2, '.', '') }}">{{ $s->name }} - ₱ {{ number_format((float)$s->price, 2) }}</option>
                                     @endforeach
                                 @else
-                                    <option value="Carwash">Carwash</option>
-                                    <option value="Change Oil">Change Oil</option>
-                                    <option value="Etc">Etc</option>
+                                    <option value="Carwash" data-price="0.00">Carwash</option>
+                                    <option value="Change Oil" data-price="0.00">Change Oil</option>
+                                    <option value="Etc" data-price="0.00">Etc</option>
                                 @endif
                             </select>
                         </div>
@@ -387,13 +401,22 @@
             </div>
 
             <hr />
+            <!-- Services subtotal (auto-filled) -->
+            <div class="row g-2 align-items-center mb-2">
+                <div class="col-8">
+                    <label class="form-label mb-0">Services Subtotal</label>
+                </div>
+                <div class="col-4">
+                    <input type="text" id="servicesSubtotal" class="form-control form-control-sm text-end" value="0.00" readonly style="background-color: #f1f3f5;">
+                </div>
+            </div>
 
             <div class="row g-2 align-items-center mb-3">
                 <div class="col-8">
                     <label class="form-label mb-0 fw-bold">Amount Due</label>
                 </div>
                 <div class="col-4">
-                    <input type="text" class="form-control form-control-sm fw-bold text-end @error('amount_due') is-invalid @enderror" name="amount_due" value="{{ old('amount_due', optional($policy)->amount_due) }}" placeholder="PHP">
+                    <input type="text" class="form-control form-control-sm fw-bold text-end @error('amount_due') is-invalid @enderror" name="amount_due" value="{{ old('amount_due', optional($policy)->amount_due) }}" placeholder="PHP" id="amountDueInput" readonly style="background-color: #f1f3f5;">
                     @error('amount_due')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
             </div>
