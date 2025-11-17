@@ -746,36 +746,7 @@
                                         </div>
 
                                         <div class="row mb-4">
-                                            <div class="col-md-6">
-                                                <label class="form-label">Freebie</label>
-                                                <div class="freebie-date-container">
-                                                    <div class="freebie-select">
-                                                        <select class="form-select @error('additional_freebie') is-invalid @enderror" name="additional_freebie" id="additionalFreebieSelect">
-                                                            <option value="">Select freebie</option>
-                                                            @if(isset($freebies) && $freebies->count())
-                                                                @foreach($freebies as $f)
-                                                                    <option value="{{ $f->name }}" {{ old('additional_freebie') == $f->name ? 'selected' : '' }}>{{ $f->name }}</option>
-                                                                @endforeach
-                                                            @else
-                                                                @foreach(['Undercoat', 'Buffing'] as $freebie)
-                                                                    <option value="{{ $freebie }}" {{ old('additional_freebie') == $freebie ? 'selected' : '' }}>{{ $freebie }}</option>
-                                                                @endforeach
-                                                            @endif
-                                                        </select>
-                                                        @error('additional_freebie')
-                                                            <div class="invalid-feedback">{{ $message }}</div>
-                                                        @enderror
-                                                    </div>
-                                                    <div class="date-picker-container">
-                                                        <label class="form-label">Date Availed</label>
-                                                        <input type="date" class="form-control @error('additional_freebie_date') is-invalid @enderror" 
-                                                               name="additional_freebie_date" id="additionalFreebieDate" value="{{ old('additional_freebie_date') }}">
-                                                        @error('additional_freebie_date')
-                                                            <div class="invalid-feedback">{{ $message }}</div>
-                                                        @enderror
-                                                    </div>
-                                                </div>
-                                            </div>
+                                           
 
                                             <div class="col-md-6">
                                                 <label class="form-label">Reference No.</label>
