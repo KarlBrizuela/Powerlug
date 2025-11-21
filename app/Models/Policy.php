@@ -48,6 +48,7 @@ class Policy extends Model
         'estimate_amount',
         'size',
         'services',
+        'service_payment_dues',
         'rate',
         'walkin_payment',
         'payment_terms',
@@ -62,6 +63,7 @@ class Policy extends Model
         'coc_vp',
         'premium_remarks',
         'policy_file',
+        'paid_services',
     ];
 
     protected $casts = [
@@ -71,6 +73,8 @@ class Policy extends Model
         'premium' => 'decimal:2',
         // Cast services (checkbox array) to array so it's stored as JSON in DB safely
         'services' => 'array',
+        'service_payment_dues' => 'array',
+        'paid_services' => 'array',
     ];
 
     /**

@@ -239,16 +239,32 @@
                     <div class="col-md-12">
                         <label class="form-label">Services Availed</label>
                         <div class="services-input-wrapper" id="servicesInputGroup">
-                            {{-- If editing and there are existing services, render them as badges (with data-price) so JS can pick them up on load --}}
+                            {{-- If editing and there are existing services, render them as service-with-due (with data-price and data-dueDate) so JS can pick them up on load --}}
                             @if(!empty(optional($policy)->services) && is_array(optional($policy)->services))
-                                @foreach(optional($policy)->services as $existingService)
+                                @php
+                                    $policyServices = optional($policy)->services;
+                                    $paymentDues = is_array(optional($policy)->service_payment_dues) ? optional($policy)->service_payment_dues : [];
+                                    // Ensure paymentDues is the same length as services, pad with empty strings if needed
+                                    while (count($paymentDues) < count($policyServices)) {
+                                        $paymentDues[] = '';
+                                    }
+                                @endphp
+                                @foreach($policyServices as $index => $existingService)
                                     @php
                                         $svc = isset($services) ? collect($services)->firstWhere('name', $existingService) : null;
                                         $svcPrice = $svc ? number_format((float)$svc->price, 2, '.', '') : '0.00';
+                                        $paymentDue = isset($paymentDues[$index]) ? $paymentDues[$index] : '';
                                     @endphp
-                                    <div class="services-badge" data-service="{{ $existingService }}" data-price="{{ $svcPrice }}">
-                                        {{ $existingService }} - ₱ {{ number_format((float)$svcPrice, 2) }}
-                                        <button type="button" class="btn-remove">&times;</button>
+                                    <div class="service-with-due" data-service="{{ $existingService }}" data-price="{{ $svcPrice }}" data-due-date="{{ $paymentDue }}">
+                                        <div class="service-info">
+                                            <span class="service-badge-small">{{ $existingService }} - ₱ {{ number_format((float)$svcPrice, 2) }}</span>
+                                        </div>
+                                        <div class="service-due-date-input">
+                                            <input type="date" class="form-control form-control-sm service-due-date" 
+                                                   value="{{ $paymentDue }}" 
+                                                   placeholder="Payment due date">
+                                        </div>
+                                        <button type="button" class="service-remove-btn" aria-label="Remove {{ $existingService }}">Remove</button>
                                     </div>
                                 @endforeach
                             @endif
@@ -266,7 +282,7 @@
                                 @endif
                             </select>
                         </div>
-                        <input type="hidden" name="services[]" id="servicesInput">
+                        <div id="servicesContainer"></div>
                         @error('services')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror

@@ -163,7 +163,7 @@
                                             </h5>
                                             <p class="text-muted small mb-0">Outstanding payments due</p>
                                         </div>
-                                        <a href="#" class="btn btn-sm btn-outline-success rounded-pill">
+                                        <a href="{{ route('payment.reminders') }}" class="btn btn-sm btn-outline-success rounded-pill">
                                             <i class="fas fa-list me-1"></i>View All
                                         </a>
                                     </div>
@@ -174,101 +174,42 @@
                                             <thead>
                                                 <tr class="border-bottom">
                                                     <th class="border-0 text-uppercase text-muted small fw-semibold">Name</th>
+                                                    <th class="border-0 text-uppercase text-muted small fw-semibold">Service</th>
                                                     <th class="border-0 text-uppercase text-muted small fw-semibold">Due Date</th>
                                                     <th class="border-0 text-uppercase text-muted small fw-semibold">Amount</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <tr class="align-middle">
+                                                @forelse($paymentReminders as $reminder)
+                                                <tr class="align-middle payment-reminder-row" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#paymentReminderModal" 
+                                                    data-reminder='@json($reminder)'>
                                                     <td>
                                                         <div class="d-flex align-items-center">
-                                                            <div class="avatar-sm rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center me-2">
-                                                                <span class="text-primary fw-semibold">JS</span>
+                                                            <div class="avatar-sm rounded-circle {{ $reminder['avatar_class'] }} d-flex align-items-center justify-content-center me-2">
+                                                                <span class="fw-semibold {{ $reminder['avatar_text_class'] }}">{{ $reminder['initials'] }}</span>
                                                             </div>
-                                                            <span class="fw-medium">Jane Smith</span>
+                                                            <span class="fw-medium">{{ $reminder['client_name'] }}</span>
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning">
-                                                            <i class="far fa-calendar-alt me-1"></i>2024-02-20
+                                                        <small class="text-muted">{{ $reminder['service_name'] }}</small>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge {{ $reminder['badge_class'] }}">
+                                                            <i class="far fa-calendar-alt me-1"></i>{{ $reminder['due_date'] }}
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <span class="fw-bold text-success">₱8,900.00</span>
+                                                        <span class="fw-bold text-success">{{ $reminder['amount'] }}</span>
                                                     </td>
                                                 </tr>
-                                                <tr class="align-middle">
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <div class="avatar-sm rounded-circle bg-info bg-opacity-10 d-flex align-items-center justify-content-center me-2">
-                                                                <span class="text-info fw-semibold">SW</span>
-                                                            </div>
-                                                            <span class="fw-medium">Sarah Williams</span>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <span class="badge bg-info bg-opacity-10 text-info border border-info">
-                                                            <i class="far fa-calendar-alt me-1"></i>2024-02-25
-                                                        </span>
-                                                    </td>
-                                                    <td>
-                                                        <span class="fw-bold text-success">₱6,750.00</span>
+                                                @empty
+                                                <tr>
+                                                    <td colspan="4" class="text-center text-muted py-4">
+                                                        <i class="fas fa-inbox me-2"></i>No payment reminders
                                                     </td>
                                                 </tr>
-                                                <tr class="align-middle">
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <div class="avatar-sm rounded-circle bg-danger bg-opacity-10 d-flex align-items-center justify-content-center me-2">
-                                                                <span class="text-danger fw-semibold">CL</span>
-                                                            </div>
-                                                            <span class="fw-medium">Christopher Lee</span>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger">
-                                                            <i class="far fa-calendar-alt me-1"></i>2024-02-12
-                                                        </span>
-                                                    </td>
-                                                    <td>
-                                                        <span class="fw-bold text-success">₱12,300.00</span>
-                                                    </td>
-                                                </tr>
-                                                <tr class="align-middle">
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <div class="avatar-sm rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center me-2">
-                                                                <span class="text-success fw-semibold">AT</span>
-                                                            </div>
-                                                            <span class="fw-medium">Amanda Taylor</span>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning">
-                                                            <i class="far fa-calendar-alt me-1"></i>2024-02-16
-                                                        </span>
-                                                    </td>
-                                                    <td>
-                                                        <span class="fw-bold text-success">₱9,500.00</span>
-                                                    </td>
-                                                </tr>
-                                                <tr class="align-middle">
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <div class="avatar-sm rounded-circle bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center me-2">
-                                                                <span class="text-secondary fw-semibold">JM</span>
-                                                            </div>
-                                                            <span class="fw-medium">James Martinez</span>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <span class="badge bg-info bg-opacity-10 text-info border border-info">
-                                                            <i class="far fa-calendar-alt me-1"></i>2024-02-24
-                                                        </span>
-                                                    </td>
-                                                    <td>
-                                                        <span class="fw-bold text-success">₱7,200.00</span>
-                                                    </td>
-                                                </tr>
+                                                @endforelse
                                             </tbody>
                                         </table>
                                     </div>
@@ -474,10 +415,160 @@
         </div>
     </div>
 
+    <!-- Payment Reminder Details Modal -->
+    <div class="modal fade" id="paymentReminderModal" tabindex="-1" aria-labelledby="paymentReminderModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header border-0 bg-gradient" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); padding: 2rem;">
+                    <div class="w-100 d-flex align-items-center justify-content-between">
+                        <h3 class="mb-0 fw-bold text-dark" id="paymentClientName">Client Name</h3>
+                        <span id="paymentStatus" class="badge bg-white text-dark px-4 py-2 shadow-sm ms-3" style="font-size: 0.9rem; white-space: nowrap;">Payment Due</span>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4" style="background-color: #fafbfc;">
+                    <!-- Client Information Section -->
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-success bg-opacity-10 rounded-circle p-2 me-2" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-user text-success"></i>
+                            </div>
+                            <h6 class="text-dark fw-bold mb-0" style="font-size: 1rem;">Client Information</h6>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Client Name</label>
+                                    <p id="paymentClientNameDetail" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">N/A</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Phone Number</label>
+                                    <p id="paymentClientPhone" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">N/A</p>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Email Address</label>
+                                    <p id="paymentClientEmail" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">N/A</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Details Section -->
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-info bg-opacity-10 rounded-circle p-2 me-2" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-receipt text-info"></i>
+                            </div>
+                            <h6 class="text-dark fw-bold mb-0" style="font-size: 1rem;">Payment Details</h6>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Policy Number</label>
+                                    <p id="paymentPolicyNumber" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">N/A</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Service</label>
+                                    <p id="paymentServiceName" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">N/A</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card p-3 rounded-3 border-0 shadow-sm" style="background: linear-gradient(135deg, #d4f4dd 0%, #e8f5e9 100%); transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Service Amount</label>
+                                    <p id="paymentServiceAmount" class="mb-0 fw-bold text-success" style="font-size: 1.2rem;">₱0.00</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Due Date</label>
+                                    <p id="paymentDueDate" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">N/A</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Payment Status</label>
+                                    <p id="paymentStatusBadge" class="mb-0">
+                                        <span class="badge bg-danger" style="font-size: 0.85rem;">Unpaid</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Policy Amount Due</label>
+                                    <p id="paymentAmountDue" class="mb-0 fw-semibold text-danger" style="font-size: 1rem;">₱0.00</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Policy Paid Amount</label>
+                                    <p id="paymentPaidAmount" class="mb-0 fw-semibold text-success" style="font-size: 1rem;">₱0.00</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vehicle Details Section -->
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-danger bg-opacity-10 rounded-circle p-2 me-2" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-car text-danger"></i>
+                            </div>
+                            <h6 class="text-dark fw-bold mb-0" style="font-size: 1rem;">Vehicle Details</h6>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Plate No.</label>
+                                    <p id="paymentPlateNumber" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">N/A</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Model Year</label>
+                                    <p id="paymentModelYear" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">N/A</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Color</label>
+                                    <p id="paymentVehicleColor" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">N/A</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 bg-white p-4">
+                    <button type="button" class="btn btn-light border rounded-pill px-4 py-2" data-bs-dismiss="modal" style="font-weight: 500;">
+                        Close
+                    </button>
+                    <a href="#" id="viewPolicyLink" class="btn btn-info rounded-pill px-4 py-2 shadow-sm" style="font-weight: 500; color: white;">
+                        <i class="fas fa-eye me-2"></i>View Full Policy
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <style>
         .info-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+        }
+
+        .payment-reminder-row {
+            transition: all 0.3s ease;
+        }
+
+        .payment-reminder-row:hover {
+            background-color: #f8f9fa;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
         }
     </style>
 
@@ -562,6 +653,46 @@
                 $('#insurancePolicyCount').text(pendingTasksData.insurancePolicies);
                 $('#walkInCount').text(pendingTasksData.walkIns);
                 $('#totalTasksCount').text(pendingTasksData.insurancePolicies + pendingTasksData.walkIns);
+            });
+
+            // Payment Reminder Modal Handler
+            $('#paymentReminderModal').on('show.bs.modal', function (e) {
+                const triggerButton = $(e.relatedTarget); // Button that triggered the modal
+                const reminderData = triggerButton.data('reminder'); // Extract info from data-reminder attribute
+                
+                if (reminderData) {
+                    // Populate client information
+                    $('#paymentClientName').text(reminderData.client_name);
+                    $('#paymentClientNameDetail').text(reminderData.client_name);
+                    $('#paymentClientPhone').text(reminderData.client_phone);
+                    $('#paymentClientEmail').text(reminderData.client_email);
+                    
+                    // Populate payment details
+                    $('#paymentPolicyNumber').text(reminderData.policy_number);
+                    $('#paymentServiceName').text(reminderData.service_name);
+                    $('#paymentServiceAmount').text(reminderData.service_amount);
+                    $('#paymentAmountDue').text(reminderData.amount_due);
+                    $('#paymentPaidAmount').text(reminderData.paid_amount);
+                    $('#paymentDueDate').text(reminderData.due_date);
+                    
+                    // Populate vehicle details
+                    $('#paymentPlateNumber').text(reminderData.plate_number);
+                    $('#paymentModelYear').text(reminderData.model_year);
+                    $('#paymentVehicleColor').text(reminderData.color);
+                    
+                    // Update payment status badge
+                    const statusBadgeHtml = reminderData.is_service_paid ? 
+                        '<span class="badge bg-success" style="font-size: 0.85rem;"><i class="fas fa-check me-1"></i>Paid</span>' :
+                        '<span class="badge bg-danger" style="font-size: 0.85rem;"><i class="fas fa-clock me-1"></i>Unpaid</span>';
+                    $('#paymentStatusBadge').html(statusBadgeHtml);
+                    
+                    // Update status badge
+                    const statusBadge = $('#paymentStatus');
+                    statusBadge.text(reminderData.service_name);
+                    
+                    // Update View Full Policy link
+                    $('#viewPolicyLink').attr('href', '/policies/' + reminderData.id);
+                }
             });
         });
     </script>

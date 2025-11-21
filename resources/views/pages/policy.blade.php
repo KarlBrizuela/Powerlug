@@ -229,6 +229,54 @@
         .date-picker-container {
             flex: 1;
         }
+
+        /* Service payment due styles */
+        .service-with-due {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            width: 100%;
+        }
+
+        .service-info {
+            flex: 1;
+        }
+
+        .service-badge-small {
+            display: inline-block;
+            padding: 4px 8px;
+            background-color: #0d6efd;
+            color: white;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .service-due-date-input {
+            flex: 0 0 auto;
+            width: 150px;
+        }
+
+        .service-remove-btn {
+            flex: 0 0 auto;
+            background: #dc3545;
+            border: none;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .service-remove-btn:hover {
+            background: #bb2d3b;
+        }
     </style>
 </head>
 <body>
@@ -573,7 +621,7 @@
                                                                 @endif
                                                             </select>
                                                         </div>
-                                                        <input type="hidden" name="services[]" id="servicesInput">
+                                                        <div id="servicesContainer"></div>
                                                         @error('services')
                                                             <div class="invalid-feedback d-block">{{ $message }}</div>
                                                         @enderror
@@ -997,8 +1045,9 @@
             document.querySelectorAll('#servicesInputGroup .services-badge').forEach(badge => {
                 const service = badge.dataset.service;
                 const price = parseFloat(badge.dataset.price) || 0;
+                const dueDate = badge.dataset.dueDate || '';
                 if (service) {
-                    selectedServices.push({ name: service, price: price });
+                    selectedServices.push({ name: service, price: price, paymentDue: dueDate });
                 }
             });
 
@@ -1008,7 +1057,9 @@
                 const opt = this.selectedOptions && this.selectedOptions[0] ? this.selectedOptions[0] : null;
                 const price = opt && opt.dataset && opt.dataset.price ? parseFloat(opt.dataset.price) || 0 : 0;
                 if (selectedValue && !selectedServices.some(s => s.name === selectedValue)) {
-                    selectedServices.push({ name: selectedValue, price: price });
+                    // Prompt user for payment due date
+                    const dueDate = prompt(`When is the payment due for "${selectedValue}"? (Enter date as YYYY-MM-DD or leave blank)`);
+                    selectedServices.push({ name: selectedValue, price: price, paymentDue: dueDate || '' });
                     renderServices();
                     this.value = ''; // Reset dropdown
                 }
@@ -1018,8 +1069,8 @@
             function renderServices() {
                 const dropdown = document.getElementById('serviceDropdown');
                 
-                // Clear existing badges but keep the dropdown
-                const existingBadges = servicesInputGroup.querySelectorAll('.services-badge');
+                // Clear existing service elements (both badges and new format)
+                const existingBadges = servicesInputGroup.querySelectorAll('.services-badge, .service-with-due');
                 existingBadges.forEach(badge => badge.remove());
                 
                 // Always keep dropdown visible
@@ -1033,20 +1084,38 @@
                     placeholderOption.style.display = 'block';
                 }
                 
-                // Add new badges before the dropdown (show name and price)
+                // Add new service elements before the dropdown (show name, price, and due date)
                 selectedServices.forEach(svc => {
-                    const badge = document.createElement('div');
-                    badge.className = 'services-badge';
-                    badge.dataset.service = svc.name;
-                    badge.dataset.price = svc.price || 0;
-                    badge.innerHTML = `
-                        ${svc.name} - ₱ ${Number(svc.price || 0).toFixed(2)}
-                        <button type="button" class="btn-remove" aria-label="Remove ${svc.name}">×</button>
+                    const serviceContainer = document.createElement('div');
+                    serviceContainer.className = 'service-with-due';
+                    serviceContainer.dataset.service = svc.name;
+                    serviceContainer.dataset.price = svc.price || 0;
+                    serviceContainer.dataset.dueDate = svc.paymentDue || '';
+                    
+                    serviceContainer.innerHTML = `
+                        <div class="service-info">
+                            <span class="service-badge-small">${svc.name} - ₱ ${Number(svc.price || 0).toFixed(2)}</span>
+                        </div>
+                        <div class="service-due-date-input">
+                            <input type="date" class="form-control form-control-sm service-due-date" 
+                                   value="${svc.paymentDue || ''}" 
+                                   placeholder="Payment due date">
+                        </div>
+                        <button type="button" class="service-remove-btn" aria-label="Remove ${svc.name}">Remove</button>
                     `;
-                    servicesInputGroup.insertBefore(badge, dropdown);
+                    servicesInputGroup.insertBefore(serviceContainer, dropdown);
+
+                    // Add event listener to update payment due when date changes
+                    const dateInput = serviceContainer.querySelector('.service-due-date');
+                    dateInput.addEventListener('change', function() {
+                        const serviceIndex = selectedServices.findIndex(x => x.name === svc.name);
+                        if (serviceIndex !== -1) {
+                            selectedServices[serviceIndex].paymentDue = this.value;
+                        }
+                    });
 
                     // Add remove handler
-                    badge.querySelector('.btn-remove').addEventListener('click', function(e) {
+                    serviceContainer.querySelector('.service-remove-btn').addEventListener('click', function(e) {
                         e.preventDefault();
                         selectedServices = selectedServices.filter(x => x.name !== svc.name);
                         renderServices();
@@ -1056,13 +1125,23 @@
                 // Create hidden inputs for form submission
                 const container = document.createElement('div');
                 container.id = 'servicesContainer';
-                selectedServices.forEach(svc => {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'services[]';
-                    input.value = svc.name; // keep storing names for backwards compatibility
-                    container.appendChild(input);
+                selectedServices.forEach((svc, index) => {
+                    const serviceInput = document.createElement('input');
+                    serviceInput.type = 'hidden';
+                    serviceInput.name = 'services[]';
+                    serviceInput.value = svc.name;
+                    container.appendChild(serviceInput);
+
+                    const dueInput = document.createElement('input');
+                    dueInput.type = 'hidden';
+                    dueInput.name = 'service_payment_dues[]';
+                    dueInput.value = svc.paymentDue || '';
+                    container.appendChild(dueInput);
                 });
+                
+                // Log services data for debugging
+                console.log('Selected Services:', selectedServices);
+                console.log('Service Payment Dues Inputs:', Array.from(container.querySelectorAll('input[name="service_payment_dues[]"]')).map(el => el.value));
                 
                 // Replace old container if exists, otherwise add it
                 const oldContainer = document.getElementById('servicesContainer');

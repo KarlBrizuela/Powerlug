@@ -205,6 +205,53 @@
         .services-badge .btn-remove:hover {
             opacity: 0.8;
         }
+
+        /* Service payment due styles */
+        .service-with-due {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            width: 100%;
+        }
+
+        .service-info {
+            flex: 1;
+        }
+
+        .service-badge-small {
+            display: inline-block;
+            padding: 4px 8px;
+            background-color: #0d6efd;
+            color: white;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .service-due-date-input {
+            flex: 0 0 auto;
+            width: 150px;
+        }
+
+        .service-remove-btn {
+            flex: 0 0 auto;
+            background: #dc3545;
+            border: none;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .service-remove-btn:hover {
+            background: #bb2d3b;
         }
     </style>
 </head>
@@ -423,15 +470,25 @@
             const servicesInputGroup = document.getElementById('servicesInputGroup');
             let selectedServices = [];
 
-            // Load existing services from server-side rendered badges (if any) with prices
+            // Load existing services from server-side rendered elements (service-with-due)
             if (servicesInputGroup) {
-                document.querySelectorAll('#servicesInputGroup .services-badge').forEach(badge => {
-                    const service = badge.dataset.service;
-                    const price = parseFloat(badge.dataset.price) || 0;
+                document.querySelectorAll('#servicesInputGroup .service-with-due').forEach(container => {
+                    const service = container.dataset.service;
+                    const price = parseFloat(container.dataset.price) || 0;
+                    const dueDate = container.dataset.dueDate || '';
                     if (service) {
-                        selectedServices.push({ name: service, price: price });
+                        selectedServices.push({ name: service, price: price, paymentDue: dueDate });
                     }
                 });
+            }
+
+            // Initialize the services container if it doesn't exist
+            if (!document.getElementById('servicesContainer')) {
+                const container = document.createElement('div');
+                container.id = 'servicesContainer';
+                if (servicesInputGroup && servicesInputGroup.parentElement) {
+                    servicesInputGroup.parentElement.appendChild(container);
+                }
             }
 
             if (serviceDropdown) {
@@ -440,7 +497,9 @@
                     const opt = this.selectedOptions && this.selectedOptions[0] ? this.selectedOptions[0] : null;
                     const price = opt && opt.dataset && opt.dataset.price ? parseFloat(opt.dataset.price) || 0 : 0;
                     if (selectedValue && !selectedServices.some(s => s.name === selectedValue)) {
-                        selectedServices.push({ name: selectedValue, price: price });
+                        // Prompt user for payment due date
+                        const dueDate = prompt(`When is the payment due for "${selectedValue}"? (Enter date as YYYY-MM-DD or leave blank)`);
+                        selectedServices.push({ name: selectedValue, price: price, paymentDue: dueDate || '' });
                         renderServices();
                         this.value = '';
                     }
@@ -451,8 +510,8 @@
                 const dropdown = document.getElementById('serviceDropdown');
                 if (!dropdown || !servicesInputGroup) return;
 
-                const existingBadges = servicesInputGroup.querySelectorAll('.services-badge');
-                existingBadges.forEach(badge => badge.remove());
+                const existingElements = servicesInputGroup.querySelectorAll('.services-badge, .service-with-due');
+                existingElements.forEach(el => el.remove());
                 dropdown.style.display = 'block';
 
                 const placeholderOption = dropdown.querySelector('option[value=""]');
@@ -463,17 +522,37 @@
                 }
 
                 selectedServices.forEach(svc => {
-                    const badge = document.createElement('div');
-                    badge.className = 'services-badge';
-                    badge.dataset.service = svc.name;
-                    badge.dataset.price = svc.price || 0;
-                    badge.innerHTML = `
-                        ${svc.name} - ₱ ${Number(svc.price || 0).toFixed(2)}
-                        <button type="button" class="btn-remove" aria-label="Remove ${svc.name}">×</button>
+                    const serviceContainer = document.createElement('div');
+                    serviceContainer.className = 'service-with-due';
+                    serviceContainer.dataset.service = svc.name;
+                    serviceContainer.dataset.price = svc.price || 0;
+                    // Ensure payment due date is in the correct format (YYYY-MM-DD)
+                    const formattedDueDate = svc.paymentDue && svc.paymentDue.trim() ? svc.paymentDue : '';
+                    serviceContainer.dataset.dueDate = formattedDueDate;
+                    
+                    serviceContainer.innerHTML = `
+                        <div class="service-info">
+                            <span class="service-badge-small">${svc.name} - ₱ ${Number(svc.price || 0).toFixed(2)}</span>
+                        </div>
+                        <div class="service-due-date-input">
+                            <input type="date" class="form-control form-control-sm service-due-date" 
+                                   value="${formattedDueDate}" 
+                                   placeholder="Payment due date">
+                        </div>
+                        <button type="button" class="service-remove-btn" aria-label="Remove ${svc.name}">Remove</button>
                     `;
-                    servicesInputGroup.insertBefore(badge, dropdown);
+                    servicesInputGroup.insertBefore(serviceContainer, dropdown);
 
-                    badge.querySelector('.btn-remove').addEventListener('click', function(e) {
+                    // Add event listener to update payment due when date changes
+                    const dateInput = serviceContainer.querySelector('.service-due-date');
+                    dateInput.addEventListener('change', function() {
+                        const serviceIndex = selectedServices.findIndex(x => x.name === svc.name);
+                        if (serviceIndex !== -1) {
+                            selectedServices[serviceIndex].paymentDue = this.value;
+                        }
+                    });
+
+                    serviceContainer.querySelector('.service-remove-btn').addEventListener('click', function(e) {
                         e.preventDefault();
                         selectedServices = selectedServices.filter(x => x.name !== svc.name);
                         renderServices();
@@ -483,11 +562,17 @@
                 const container = document.createElement('div');
                 container.id = 'servicesContainer';
                 selectedServices.forEach(svc => {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'services[]';
-                    input.value = svc.name;
-                    container.appendChild(input);
+                    const serviceInput = document.createElement('input');
+                    serviceInput.type = 'hidden';
+                    serviceInput.name = 'services[]';
+                    serviceInput.value = svc.name;
+                    container.appendChild(serviceInput);
+
+                    const dueInput = document.createElement('input');
+                    dueInput.type = 'hidden';
+                    dueInput.name = 'service_payment_dues[]';
+                    dueInput.value = svc.paymentDue || '';
+                    container.appendChild(dueInput);
                 });
 
                 const oldContainer = document.getElementById('servicesContainer');
@@ -545,7 +630,10 @@
             if (selectedServices.length > 0) {
                 // Delay initial render until jQuery ready to ensure calculateAmountDue is available
                 if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', renderServices);
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // Ensure existing services are rendered with the new format
+                        renderServices();
+                    });
                 } else {
                     setTimeout(renderServices, 100);
                 }

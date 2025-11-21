@@ -8,6 +8,7 @@ use App\Models\InsuranceProvider;
 use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class PolicyController extends Controller
 {
@@ -112,6 +113,7 @@ class PolicyController extends Controller
             'estimate_amount' => 'nullable|numeric|min:0',
             'size' => 'nullable|string',
             'services' => 'nullable|array',
+            'service_payment_dues' => 'nullable|array',
             'rate' => 'nullable|numeric|min:0',
             'walkin_payment' => 'nullable|numeric|min:0',
             
@@ -310,6 +312,7 @@ class PolicyController extends Controller
             'estimate_amount' => 'nullable|numeric|min:0',
             'size' => 'nullable|string',
             'services' => 'nullable|array',
+            'service_payment_dues' => 'nullable|array',
             'rate' => 'nullable|numeric|min:0',
             'walkin_payment' => 'nullable|numeric|min:0',
             

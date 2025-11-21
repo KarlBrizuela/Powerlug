@@ -325,7 +325,32 @@
             <div class="col-12">
                 <div class="policy-info-row">
                     <p class="policy-info-label">Services Availed:</p>
-                    <p class="policy-info-value">{{ is_array($policy->services ?? null) ? implode(', ', $policy->services) : $display($policy->services) }}</p>
+                    <p class="policy-info-value">
+                        @if(is_array($policy->services ?? null) && count($policy->services) > 0)
+                            <div style="display: flex; flex-direction: column; gap: 8px; text-align: left;">
+                                @php
+                                    $paymentDuesArray = is_array($policy->service_payment_dues ?? null) ? $policy->service_payment_dues : [];
+                                    // Ensure the array is long enough to match services
+                                    while (count($paymentDuesArray) < count($policy->services)) {
+                                        $paymentDuesArray[] = null;
+                                    }
+                                @endphp
+                                @foreach($policy->services as $index => $service)
+                                    @php
+                                        $dueDate = $paymentDuesArray[$index] ?? null;
+                                    @endphp
+                                    <div style="padding: 8px; background: #f8f9fa; border-radius: 4px; border-left: 3px solid #007bff;">
+                                        <strong>{{ $service }}</strong>
+                                        @if($dueDate)
+                                            <br><small style="color: #6c757d;">Payment Due: {{ \Carbon\Carbon::parse($dueDate)->format('F d, Y') }}</small>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            {{ $display($policy->services) }}
+                        @endif
+                    </p>
                 </div>
             </div>
         </div>

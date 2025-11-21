@@ -44,6 +44,16 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('check.position:superadmin')
         ->name('expiration.reminders');
     
+    // Payment Reminders (Superadmin only)
+    Route::get('/payment-reminders', [DashboardController::class, 'paymentReminders'])
+        ->middleware('check.position:superadmin')
+        ->name('payment.reminders');
+    
+    // Mark payment as paid API
+    Route::post('/api/mark-payment-paid', [DashboardController::class, 'markPaymentPaid'])
+        ->middleware('check.position:superadmin')
+        ->name('api.mark-payment-paid');
+    
     // Mark policy as availed (Superadmin only)
     Route::patch('/policies/{policy}/mark-availed', [PolicyController::class, 'markAsAvailed'])
         ->middleware('check.position:superadmin')
