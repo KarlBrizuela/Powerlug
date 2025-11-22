@@ -57,12 +57,8 @@
 </head>
 
 <body>
+    @include('components.sidebar')
     <div class="d-flex" id="wrapper">
-        <!-- Sidebar -->
-        <div class="sidebar-wrapper">
-            @include('components.sidebar')
-        </div>
-
         <!-- Page content -->
         <div id="page-content-wrapper" class="page-content-wrapper">
             <!-- Header -->

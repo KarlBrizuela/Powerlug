@@ -11,7 +11,7 @@
 </head>
 <body class="bg-light">
     <!-- Main Layout Wrapper - assuming your sidebar component handles the flex layout -->
-    @include('components.Sidebar')
+    @include('components.sidebar')
     
     <!-- Main Content Area - this will be positioned by your sidebar component -->
     <div class="main-content">
