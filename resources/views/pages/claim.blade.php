@@ -11,6 +11,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
     <style>
         body {
             background-color: #f8f9fa;
@@ -168,9 +171,11 @@
                                         @enderror
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label fw-semibold">Claim Number</label>
-                                        <input type="text" class="form-control" value="Auto-generated on submit" readonly>
-                                        <small class="text-muted">Claim number will be generated automatically</small>
+                                        <label class="form-label fw-semibold">Claim Number <span class="text-danger">*</span></label>
+                                        <input type="text" name="claim_number" class="form-control @error('claim_number') is-invalid @enderror" placeholder="Enter claim number" required value="{{ old('claim_number') }}">
+                                        @error('claim_number')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
 
@@ -235,27 +240,6 @@
                                     </div>
                                 </div>
 
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold">LOA Amount</label>
-                                        <input type="text" name="loa_amount" class="form-control" placeholder="Enter LOA amount">
-                                    </div>
-                                </div>
-
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold">Participation Amount</label>
-                                        <input type="text" name="participation_amount" class="form-control" placeholder="Enter Participation amount">
-                                    </div>
-                                </div>
-
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold">Deductible</label>
-                                        <input type="text" name="deductible" class="form-control" placeholder="Enter Deductible">
-                                    </div>
-                                </div>
-
                                 <div class="row mb-4">
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold">File Upload</label>
@@ -265,31 +249,21 @@
 
                                 <div class="row mb-4">
                                     <div class="col-12">
-                                        <label class="form-label fw-semibold">Estimate Amount:</label>
+                                        <label class="form-label fw-semibold">Claim Amount:</label>
                                         <div class="table-responsive mt-2">
                                             <table class="table table-bordered table-hover mb-0">
                                                 <tbody>
                                                     <tr>
-                                                        <td class="fw-semibold">PARTS</td>
+                                                        <td class="fw-semibold">LOA AMOUNT</td>
                                                         <td class="w-25">
-                                                            <input type="number" id="parts" name="parts" class="form-control text-end" placeholder="0" min="0" step="0.01" oninput="calculateTotals()">
+                                                            <input type="number" id="loaAmount" name="loa_amount" class="form-control text-end" placeholder="0" min="0" step="0.01" oninput="calculateTotals()">
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <td class="fw-semibold">LABOR COST</td>
+                                                        <td class="fw-semibold">DEDUCTIBLE/PARTICIPATION AMOUNT</td>
                                                         <td>
-                                                            <input type="number" id="laborCost" name="laborCost" class="form-control text-end" placeholder="0" min="0" step="0.01" oninput="calculateTotals()">
+                                                            <input type="number" id="deductibleParticipation" name="deductible_participation" class="form-control text-end" placeholder="0" min="0" step="0.01" oninput="calculateTotals()">
                                                         </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="fw-semibold">MATERIALS</td>
-                                                        <td>
-                                                            <input type="number" id="materials" name="materials" class="form-control text-end" placeholder="0" min="0" step="0.01" oninput="calculateTotals()">
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="fw-semibold">VAT 12%</td>
-                                                        <td class="text-end fw-semibold" id="vat">0.00</td>
                                                     </tr>
                                                     <tr class="table-primary">
                                                         <td class="fw-bold">TOTAL AMOUNT DUE</td>
@@ -337,8 +311,37 @@
 
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery (required for Select2) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
+        $(document).ready(function() {
+            // Initialize Select2 for Policy dropdown with search
+            $('#policy_id').select2({
+                theme: 'bootstrap-5',
+                width: '100%',
+                placeholder: 'Select Policy',
+                allowClear: true,
+                matcher: function(params, data) {
+                    // Custom matcher for policy number and client name search
+                    if ($.trim(params.term) === '') {
+                        return data;
+                    }
+
+                    var term = params.term.toLowerCase();
+                    var text = data.text.toLowerCase();
+                    
+                    if (text.indexOf(term) > -1) {
+                        return data;
+                    }
+
+                    return null;
+                }
+            });
+        });
+
         // Auto-fill policy number and client when policy is selected (also fills new client/vehicle fields)
         document.getElementById('policy_id').addEventListener('change', function() {
             const selectedOption = this.options[this.selectedIndex];
@@ -399,6 +402,7 @@
             
             // Reset policy selection
             policySelect.value = '';
+            $(policySelect).trigger('change');
             document.getElementById('policy_number').value = '';
             document.getElementById('client').value = '';
             // Also clear newly added client/vehicle fields
@@ -410,17 +414,13 @@
             if (document.getElementById('model_year')) document.getElementById('model_year').value = '';
         });
 
-        // Calculate VAT and Total Amount
+        // Calculate Total Amount
         function calculateTotals() {
-            var parts = parseFloat(document.getElementById('parts').value) || 0;
-            var laborCost = parseFloat(document.getElementById('laborCost').value) || 0;
-            var materials = parseFloat(document.getElementById('materials').value) || 0;
+            var loaAmount = parseFloat(document.getElementById('loaAmount').value) || 0;
+            var deductibleParticipation = parseFloat(document.getElementById('deductibleParticipation').value) || 0;
             
-            var subtotal = parts + laborCost + materials;
-            var vat = subtotal * 0.12;
-            var total = subtotal + vat;
+            var total = loaAmount - deductibleParticipation;
             
-            document.getElementById('vat').textContent = vat.toFixed(2);
             document.getElementById('totalAmount').textContent = total.toFixed(2);
         }
 

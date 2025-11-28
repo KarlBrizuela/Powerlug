@@ -93,11 +93,27 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">{{ $client->firstName }} {{ $client->middleName }} {{ $client->lastName }}</h5>
+                    
+                    <!-- Contact Information -->
+                    <h6 class="mt-3 mb-2" style="color: #495057; font-weight: 600;">Contact Information</h6>
                     <p class="mb-1"><strong>Email:</strong> {{ $client->email }}</p>
                     <p class="mb-1"><strong>Phone:</strong> {{ $client->phone }}</p>
+                    
+                    <!-- Address Information -->
+                    <h6 class="mt-3 mb-2" style="color: #495057; font-weight: 600;">Address Information</h6>
                     <p class="mb-1"><strong>Address:</strong> {{ $client->address }}, {{ $client->city }}, {{ $client->province }} {{ $client->postalCode }}</p>
-                    <p class="mb-1"><strong>Birth Date:</strong> {{ optional($client->birthDate)->format('Y-m-d') ?? $client->birthDate }}</p>
-                    <p class="mb-1"><strong>Occupation:</strong> {{ $client->occupation }}</p>
+                    
+                    <!-- TIN Information -->
+                    <h6 class="mt-3 mb-2" style="color: #495057; font-weight: 600;">TIN Information</h6>
+                    <p class="mb-1"><strong>TIN:</strong> {{ $client->tin ?? 'N/A' }}</p>
+                    
+                    <!-- Vehicle Information -->
+                    <h6 class="mt-3 mb-2" style="color: #495057; font-weight: 600;">Vehicle Information</h6>
+                    <p class="mb-1"><strong>Make Model:</strong> {{ $client->make_model ?? 'N/A' }}</p>
+                    <p class="mb-1"><strong>Plate No.:</strong> {{ $client->plate_no ?? 'N/A' }}</p>
+                    <p class="mb-1"><strong>Model Year:</strong> {{ $client->model_year ?? 'N/A' }}</p>
+                    <p class="mb-1"><strong>Color:</strong> {{ $client->color ?? 'N/A' }}</p>
+                    
                     <p class="text-muted small">Created at: {{ $client->created_at }} | Updated at: {{ $client->updated_at }}</p>
                 </div>
             </div>

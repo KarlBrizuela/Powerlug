@@ -289,11 +289,11 @@
                                    Claim
                                 </a>
                             </li>
-                            <!-- <li>
+                            <li>
                                 <a href="{{ route('walk-in.create') }}" class="{{ request()->routeIs('walk-in.create') ? 'active' : '' }}">
-                                   walk-in
+                                   Walk-in
                                 </a>
-                            </li> -->
+                            </li>
                         </ul>
                     </li>
 

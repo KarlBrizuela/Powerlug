@@ -47,54 +47,14 @@ class CollectionController extends Controller
     }
 
     /**
-     * Create Client records for walk-in and claim names that don't have a matching client yet.
-     * Returns the filtered list of clients to display in the dropdown (only those from walk-in/claims).
+     * Create Client records for claim names that don't have a matching client yet.
+     * Returns the filtered list of clients to display in the dropdown (only those from claims).
      */
     protected function syncAndGetClientsFromWalkinsAndClaims()
     {
         $createdClients = [];
 
-        // Process walk-in insured names
-        $walkIns = WalkIn::query()->select('id', 'insured_name')->whereNotNull('insured_name')->distinct()->get();
-        foreach ($walkIns as $walk) {
-            $name = trim($walk->insured_name);
-            if (empty($name)) {
-                continue;
-            }
-
-            // Parse name
-            $first = $name;
-            $last = '';
-            $parts = preg_split('/\s+/', $name);
-            if (count($parts) > 1) {
-                $first = array_shift($parts);
-                $last = array_pop($parts);
-            }
-
-            // Check if client already exists
-            $existing = Client::where('firstName', $first)->where('lastName', $last)->first();
-            if (!$existing) {
-                $uniqueSuffix = uniqid() . '-' . bin2hex(random_bytes(4));
-                $client = Client::create([
-                    'firstName' => $first,
-                    'middleName' => implode(' ', $parts),
-                    'lastName' => $last,
-                    'email' => 'unknown+' . $uniqueSuffix . '@example.com',
-                    'phone' => '00000000000',
-                    'address' => $name,
-                    'city' => 'Unknown',
-                    'province' => 'Unknown',
-                    'postalCode' => '0000',
-                    'birthDate' => '1970-01-01',
-                    'occupation' => 'Unknown',
-                ]);
-                $createdClients[$client->id] = 'Walk-in';
-            } else {
-                $createdClients[$existing->id] = 'Walk-in';
-            }
-        }
-
-        // Process claim client names
+        // Process claim client names only (exclude walk-ins)
         $claims = Claim::query()->select('id', 'client_name')->whereNotNull('client_name')->distinct()->get();
         foreach ($claims as $claim) {
             $name = trim($claim->client_name);
@@ -125,8 +85,11 @@ class CollectionController extends Controller
                     'city' => 'Unknown',
                     'province' => 'Unknown',
                     'postalCode' => '0000',
-                    'birthDate' => '1970-01-01',
-                    'occupation' => 'Unknown',
+                    'tin' => 'unknown',
+                    'make_model' => 'Unknown',
+                    'plate_no' => 'Unknown',
+                    'model_year' => 2000,
+                    'color' => 'Unknown',
                 ]);
                 if (!isset($createdClients[$client->id])) {
                     $createdClients[$client->id] = 'Claim';
