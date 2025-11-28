@@ -17,13 +17,8 @@ class Claim extends Model
         'policy_number',
         'claim_number',
         'loa_amount',
-        'participation_amount',
-        'deductible',
+        'deductible_participation',
         'file_path',
-        'parts',
-        'labor_cost',
-        'materials',
-        'vat',
         'total_amount',
         'admin_status',
         'superadmin_status',
@@ -32,10 +27,8 @@ class Claim extends Model
 
     protected $casts = [
         'date_of_claim' => 'date',
-        'parts' => 'decimal:2',
-        'labor_cost' => 'decimal:2',
-        'materials' => 'decimal:2',
-        'vat' => 'decimal:2',
+        'loa_amount' => 'decimal:2',
+        'deductible_participation' => 'decimal:2',
         'total_amount' => 'decimal:2',
     ];
 

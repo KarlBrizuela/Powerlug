@@ -19,7 +19,10 @@ class Client extends Model
         'city',
         'province',
         'postalCode',
-        'birthDate',
-        'occupation'
+        'tin',
+        'make_model',
+        'plate_no',
+        'model_year',
+        'color'
     ];
 }

@@ -117,11 +117,37 @@
                                     
                                     <div class="col-md-6">
                                         <div class="mb-3">
+                                            <label for="policy_number" class="form-label">Policy Number</label>
+                                            <input type="text" class="form-control @error('policy_number') is-invalid @enderror" 
+                                                id="policy_number" name="policy_number" value="{{ old('policy_number') }}" 
+                                                placeholder="Auto-filled from claim" readonly>
+                                            @error('policy_number')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
                                             <label for="invoice_number" class="form-label">Service Invoice Number <span class="text-danger">*</span></label>
                                             <input type="text" class="form-control @error('invoice_number') is-invalid @enderror" 
                                                 id="invoice_number" name="invoice_number" value="{{ old('invoice_number') }}" 
                                                 placeholder="Enter invoice number" required>
                                             @error('invoice_number')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="claim_number" class="form-label">Claim Number</label>
+                                            <input type="text" class="form-control @error('claim_number') is-invalid @enderror" 
+                                                id="claim_number" name="claim_number" value="{{ old('claim_number') }}" 
+                                                placeholder="Auto-filled from claim" readonly>
+                                            @error('claim_number')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
@@ -140,6 +166,18 @@
                                                 <option value="overdue" {{ old('billing_status') == 'overdue' ? 'selected' : '' }}>Overdue</option>
                                             </select>
                                             @error('billing_status')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="loa_amount" class="form-label">LOA Amount (₱)</label>
+                                            <input type="number" class="form-control @error('loa_amount') is-invalid @enderror" 
+                                                id="loa_amount" name="loa_amount" value="{{ old('loa_amount') }}" 
+                                                placeholder="Auto-filled from claim" min="0" step="0.01" readonly>
+                                            @error('loa_amount')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
@@ -270,10 +308,38 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize Feather Icons
-            if (typeof feather !== 'undefined') {
-                feather.replace();
-            }
+            const clientSelect = document.getElementById('client_id');
+            
+            // When client is selected, fetch claim data
+            clientSelect.addEventListener('change', function() {
+                const clientId = this.value;
+                
+                if (!clientId) {
+                    // Clear fields if no client selected
+                    document.getElementById('policy_number').value = '';
+                    document.getElementById('loa_amount').value = '';
+                    document.getElementById('claim_number').value = '';
+                    return;
+                }
+                
+                // Fetch claim data for the selected client
+                fetch(`/api/claims/by-client/${clientId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.policy_number) {
+                            document.getElementById('policy_number').value = data.policy_number;
+                        }
+                        if (data.loa_amount) {
+                            document.getElementById('loa_amount').value = data.loa_amount;
+                        }
+                        if (data.claim_number) {
+                            document.getElementById('claim_number').value = data.claim_number;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching claim data:', error);
+                    });
+            });
         });
     </script>
 </body>

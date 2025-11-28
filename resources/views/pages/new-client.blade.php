@@ -262,16 +262,33 @@
                                         </div>
                                     </div>
 
-                                    <!-- Additional Information -->
+                                    <!-- TIN Information -->
                                     <div class="form-section">
-                                        <h5 class="section-title">Additional Information</h5>
+                                        <h5 class="section-title">TIN Information</h5>
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <div class="mb-3">
-                                                    <label for="birthDate" class="form-label">Birth Date <span class="text-danger">*</span></label>
-                                                    <input type="date" class="form-control @error('birthDate') is-invalid @enderror" 
-                                                        id="birthDate" name="birthDate" value="{{ old('birthDate') }}" required>
-                                                    @error('birthDate')
+                                                    <label for="tin" class="form-label">TIN (Tax Identification Number) <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control @error('tin') is-invalid @enderror" 
+                                                        id="tin" name="tin" value="{{ old('tin') }}" required>
+                                                    @error('tin')
+                                                        <span class="invalid-feedback">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Vehicle Information -->
+                                    <div class="form-section">
+                                        <h5 class="section-title">Vehicle Information</h5>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="make_model" class="form-label">Make Model <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control @error('make_model') is-invalid @enderror" 
+                                                        id="make_model" name="make_model" value="{{ old('make_model') }}" required>
+                                                    @error('make_model')
                                                         <span class="invalid-feedback">{{ $message }}</span>
                                                     @enderror
                                                 </div>
@@ -279,10 +296,32 @@
 
                                             <div class="col-md-6">
                                                 <div class="mb-3">
-                                                    <label for="occupation" class="form-label">Occupation <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control @error('occupation') is-invalid @enderror" 
-                                                        id="occupation" name="occupation" value="{{ old('occupation') }}" required>
-                                                    @error('occupation')
+                                                    <label for="plate_no" class="form-label">Plate No. <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control @error('plate_no') is-invalid @enderror" 
+                                                        id="plate_no" name="plate_no" value="{{ old('plate_no') }}" required>
+                                                    @error('plate_no')
+                                                        <span class="invalid-feedback">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="model_year" class="form-label">Model Year <span class="text-danger">*</span></label>
+                                                    <input type="number" class="form-control @error('model_year') is-invalid @enderror" 
+                                                        id="model_year" name="model_year" value="{{ old('model_year') }}" required min="1900" max="2100">
+                                                    @error('model_year')
+                                                        <span class="invalid-feedback">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="color" class="form-label">Color <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control @error('color') is-invalid @enderror" 
+                                                        id="color" name="color" value="{{ old('color') }}" required>
+                                                    @error('color')
                                                         <span class="invalid-feedback">{{ $message }}</span>
                                                     @enderror
                                                 </div>

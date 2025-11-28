@@ -39,8 +39,11 @@ class ClientController extends Controller
             'city' => 'required|string|max:255',
             'province' => 'required|string|max:255',
             'postalCode' => 'required|string|size:4',
-            'birthDate' => 'required|date',
-            'occupation' => 'required|string|max:255',
+            'tin' => 'required|string|max:255',
+            'make_model' => 'required|string|max:255',
+            'plate_no' => 'required|string|max:255',
+            'model_year' => 'required|integer|min:1900|max:2100',
+            'color' => 'required|string|max:255',
         ]);
 
         Client::create($validatedData);
@@ -72,8 +75,11 @@ class ClientController extends Controller
             'city' => 'required|string|max:255',
             'province' => 'required|string|max:255',
             'postalCode' => 'required|string|size:4',
-            'birthDate' => 'required|date',
-            'occupation' => 'required|string|max:255',
+            'tin' => 'required|string|max:255',
+            'make_model' => 'required|string|max:255',
+            'plate_no' => 'required|string|max:255',
+            'model_year' => 'required|integer|min:1900|max:2100',
+            'color' => 'required|string|max:255',
         ]);
 
         $client->update($validatedData);

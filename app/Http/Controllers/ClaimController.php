@@ -59,17 +59,11 @@ class ClaimController extends Controller
             'insurance_provider_id' => 'required|exists:insurance_providers,id',
             'policy_id' => 'required|exists:policies,id',
             'policy_number' => 'required|string',
+            'claim_number' => 'required|string|unique:claims,claim_number',
             'loa_amount' => 'nullable|numeric|min:0',
-            'participation_amount' => 'nullable|numeric|min:0',
-            'deductible' => 'nullable|numeric|min:0',
+            'deductible_participation' => 'nullable|numeric|min:0',
             'file' => 'nullable|file|mimes:pdf,jpg,jpeg,png',
-            'parts' => 'nullable|numeric|min:0',
-            'laborCost' => 'nullable|numeric|min:0',
-            'materials' => 'nullable|numeric|min:0',
         ]);
-
-        // Auto-generate claim number
-        $claimNumber = Claim::generateClaimNumber();
 
         $data = [
             'date_of_claim' => $validated['date_of_claim'] ?? null,
@@ -77,25 +71,17 @@ class ClaimController extends Controller
             'insurance_provider_id' => $validated['insurance_provider_id'],
             'policy_id' => $validated['policy_id'],
             'policy_number' => $validated['policy_number'],
-            'claim_number' => $claimNumber,
+            'claim_number' => $validated['claim_number'],
             'loa_amount' => $validated['loa_amount'] ?? null,
-            'participation_amount' => $validated['participation_amount'] ?? null,
-            'deductible' => $validated['deductible'] ?? null,
-            'parts' => $validated['parts'] ?? null,
-            'labor_cost' => $validated['laborCost'] ?? null,
-            'materials' => $validated['materials'] ?? null,
+            'participation_amount' => $validated['deductible_participation'] ?? null,
         ];
 
-        // calculate VAT and total
-        $parts = $data['parts'] ?? 0;
-        $labor = $data['labor_cost'] ?? 0;
-        $materials = $data['materials'] ?? 0;
-        $subtotal = $parts + $labor + $materials;
-        $vat = round($subtotal * 0.12, 2);
-        $total = round($subtotal + $vat, 2);
+        // Calculate total amount due (LOA Amount - Deductible/Participation)
+        $loaAmount = $data['loa_amount'] ?? 0;
+        $deductibleParticipation = $data['participation_amount'] ?? 0;
+        $totalAmount = $loaAmount - $deductibleParticipation;
 
-        $data['vat'] = $vat;
-        $data['total_amount'] = $total;
+        $data['total_amount'] = $totalAmount >= 0 ? $totalAmount : 0;
 
         // handle file upload
         if ($request->hasFile('file')) {
@@ -222,5 +208,53 @@ class ClaimController extends Controller
         }
 
         return redirect()->back()->with('error', 'No file to delete');
+    }
+
+    /**
+     * Get claim data by client ID for API
+     */
+    public function getClaimByClient($clientId)
+    {
+        try {
+            // Get the client
+            $client = \App\Models\Client::find($clientId);
+            
+            if (!$client) {
+                return response()->json([
+                    'policy_number' => '',
+                    'loa_amount' => 0,
+                    'claim_number' => ''
+                ]);
+            }
+
+            // Find claim by client name (match firstName + lastName)
+            $clientFullName = $client->firstName . ' ' . $client->lastName;
+            
+            $claim = Claim::where('client_name', 'like', '%' . $client->firstName . '%')
+                ->where('client_name', 'like', '%' . $client->lastName . '%')
+                ->latest()
+                ->first();
+
+            if ($claim) {
+                return response()->json([
+                    'policy_number' => $claim->policy_number ?? '',
+                    'loa_amount' => $claim->loa_amount ?? 0,
+                    'claim_number' => $claim->claim_number ?? ''
+                ]);
+            }
+
+            return response()->json([
+                'policy_number' => '',
+                'loa_amount' => 0,
+                'claim_number' => ''
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'policy_number' => '',
+                'loa_amount' => 0,
+                'claim_number' => '',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }
