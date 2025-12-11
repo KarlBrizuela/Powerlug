@@ -23,6 +23,13 @@ class Client extends Model
         'make_model',
         'plate_no',
         'model_year',
-        'color'
+        'color',
+        'birthday',
+        'occupation'
     ];
+
+    public function vehicles()
+    {
+        return $this->hasMany(Vehicle::class);
+    }
 }

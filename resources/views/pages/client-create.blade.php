@@ -259,45 +259,16 @@
                             </div>
                         </div>
                         
-                        <!-- Address Information -->
-                        <div class="section-title">Address Information</div>
-                        
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Make & Model</label>
-                                <input type="text" class="form-control @error('make_model') is-invalid @enderror" 
-                                       name="make_model" value="{{ old('make_model') }}" placeholder="Enter vehicle make and model">
-                                @error('make_model')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Plate Number</label>
-                                <input type="text" class="form-control @error('plate_no') is-invalid @enderror" 
-                                       name="plate_no" value="{{ old('plate_no') }}" placeholder="Enter plate number">
-                                @error('plate_no')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+                        <!-- Vehicle Information -->
+                        <div class="section-title">
+                            Vehicle Information
+                            <button type="button" class="btn btn-sm btn-success float-end" id="addCarBtn">
+                                <i class="fas fa-plus me-2"></i>Add Car
+                            </button>
                         </div>
                         
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Model Year</label>
-                                <input type="text" class="form-control @error('model_year') is-invalid @enderror" 
-                                       name="model_year" value="{{ old('model_year') }}" placeholder="Enter model year">
-                                @error('model_year')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Color</label>
-                                <input type="text" class="form-control @error('color') is-invalid @enderror" 
-                                       name="color" value="{{ old('color') }}" placeholder="Enter vehicle color">
-                                @error('color')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+                        <div id="vehiclesContainer">
+                            <!-- Vehicle rows will be added here -->
                         </div>
                         
                         <!-- Form Actions -->
@@ -336,6 +307,73 @@
                 });
             }, false);
         }());
+
+        // Vehicle management
+        let vehicleRowCount = 0;
+
+        function addVehicleRow(makeModel = '', plateNumber = '', modelYear = '', color = '') {
+            const container = document.getElementById('vehiclesContainer');
+            const rowId = 'vehicle-row-' + vehicleRowCount++;
+            
+            const row = document.createElement('div');
+            row.id = rowId;
+            row.className = 'row mb-3 p-3 border rounded bg-light vehicle-row';
+            row.innerHTML = `
+                <div class="col-md-3">
+                    <label class="form-label">Make & Model</label>
+                    <input type="text" class="form-control" 
+                           name="vehicles[${vehicleRowCount - 1}][make_model]" 
+                           value="${makeModel}" 
+                           placeholder="Enter vehicle make and model">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Plate Number</label>
+                    <input type="text" class="form-control" 
+                           name="vehicles[${vehicleRowCount - 1}][plate_number]" 
+                           value="${plateNumber}" 
+                           placeholder="Enter plate number">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Model Year</label>
+                    <input type="text" class="form-control" 
+                           name="vehicles[${vehicleRowCount - 1}][model_year]" 
+                           value="${modelYear}" 
+                           placeholder="e.g., 2020">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Color</label>
+                    <input type="text" class="form-control" 
+                           name="vehicles[${vehicleRowCount - 1}][color]" 
+                           value="${color}" 
+                           placeholder="Enter vehicle color">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="button" class="btn btn-danger w-100" onclick="removeVehicleRow('${rowId}')">
+                        <i class="fas fa-trash me-2"></i>Remove
+                    </button>
+                </div>
+            `;
+            
+            container.appendChild(row);
+        }
+
+        function removeVehicleRow(rowId) {
+            const row = document.getElementById(rowId);
+            if (row) {
+                row.remove();
+            }
+        }
+
+        // Add Car button event listener
+        document.getElementById('addCarBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            addVehicleRow();
+        });
+
+        // Initialize with one empty vehicle row on page load
+        window.addEventListener('load', function() {
+            addVehicleRow();
+        });
     </script>
 </body>
 </html>

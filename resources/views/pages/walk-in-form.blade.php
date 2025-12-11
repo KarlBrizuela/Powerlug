@@ -349,8 +349,13 @@
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label">Plate No.</label>
+                                            <select class="form-select @error('plate_number') is-invalid @enderror" 
+                                                id="plateNumberSelectWalkin" name="plate_number">
+                                                <option value="">Select vehicle...</option>
+                                            </select>
+                                            <small class="form-text text-muted">Or enter manually:</small>
                                             <input type="text" class="form-control @error('plate_number') is-invalid @enderror" 
-                                                id="clientPlateNumber" name="plate_number" value="{{ old('plate_number') }}">
+                                                id="clientPlateNumber" placeholder="Enter plate number manually" style="display: none;">
                                             @error('plate_number')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -707,16 +712,79 @@
                 clientSelect.addEventListener('change', function() {
                     const option = this.options[this.selectedIndex];
                     const clientName = option.textContent.trim();
+                    const clientId = this.value;
+                    const oldPlate = option.dataset.plateNo || '';
                     
                     clientNameHidden.value = clientName;
                     clientEmail.value = option.dataset.email || '';
                     clientPhone.value = option.dataset.phone || '';
                     clientAddress.value = option.dataset.address || '';
                     clientMakeModel.value = option.dataset.makeModel || '';
-                    clientPlateNumber.value = option.dataset.plateNo || '';
                     clientModelYear.value = option.dataset.modelYear || '';
                     clientColor.value = option.dataset.color || '';
+                    
+                    // Load vehicles for this client
+                    if (clientId) {
+                        fetch('/api/clients/' + clientId + '/vehicles')
+                            .then(response => response.json())
+                            .then(vehicles => {
+                                const plateSelect = document.getElementById('plateNumberSelectWalkin');
+                                const plateInput = document.getElementById('clientPlateNumber');
+                                
+                                plateSelect.innerHTML = '<option value="">Select vehicle...</option>';
+                                
+                                if (vehicles.length > 0) {
+                                    vehicles.forEach(function(vehicle) {
+                                        const option = document.createElement('option');
+                                        option.value = vehicle.plate_number;
+                                        
+                                        let displayText = vehicle.plate_number + ' - ' + vehicle.make_model;
+                                        
+                                        // Add "Primary" label for the old plate number
+                                        if (vehicle.plate_number === oldPlate) {
+                                            displayText += ' (Primary)';
+                                        }
+                                        
+                                        option.textContent = displayText;
+                                        option.dataset.makeModel = vehicle.make_model;
+                                        option.dataset.modelYear = vehicle.model_year;
+                                        option.dataset.color = vehicle.color;
+                                        plateSelect.appendChild(option);
+                                    });
+                                    
+                                    // Auto-select first vehicle and trigger change
+                                    plateSelect.value = vehicles[0].plate_number;
+                                    plateSelect.dispatchEvent(new Event('change'));
+                                    
+                                    plateSelect.style.display = 'block';
+                                    plateInput.style.display = 'none';
+                                    plateInput.removeAttribute('name');
+                                } else {
+                                    plateSelect.style.display = 'none';
+                                    plateInput.style.display = 'block';
+                                    plateInput.setAttribute('name', 'plate_number');
+                                    plateInput.value = option.dataset.plateNo || '';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error loading vehicles:', error);
+                                document.getElementById('plateNumberSelectWalkin').style.display = 'none';
+                                document.getElementById('clientPlateNumber').style.display = 'block';
+                                document.getElementById('clientPlateNumber').setAttribute('name', 'plate_number');
+                            });
+                    }
                 });
+
+                // Handle vehicle selection change
+                const plateSelect = document.getElementById('plateNumberSelectWalkin');
+                if (plateSelect) {
+                    plateSelect.addEventListener('change', function() {
+                        const option = this.options[this.selectedIndex];
+                        clientMakeModel.value = option.dataset.makeModel || '';
+                        clientModelYear.value = option.dataset.modelYear || '';
+                        clientColor.value = option.dataset.color || '';
+                    });
+                }
 
                 // Trigger change event on load if a client is already selected
                 if (clientSelect.value) {

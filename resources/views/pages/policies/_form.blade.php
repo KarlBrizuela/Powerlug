@@ -20,6 +20,7 @@
                                 data-email="{{ $client->email }}" 
                                 data-phone="{{ $client->phone }}" 
                                 data-address="{{ $client->address }}"
+                                data-old-plate="{{ $client->plate_no }}"
                                 {{ old('client_id', optional($policy)->client_id) == $client->id ? 'selected' : '' }}>
                                 {{ $client->firstName }} {{ $client->middleName }} {{ $client->lastName }} @if($client->plate_no)({{ $client->plate_no }})@endif
                             </option>
@@ -56,14 +57,18 @@
         <div class="row mb-3">
             <div class="col-md-6">
                 <label class="form-label">Make Model</label>
-                <input type="text" class="form-control @error('make_model') is-invalid @enderror"
+                <input type="text" class="form-control @error('make_model') is-invalid @enderror" id="makeModel"
                        name="make_model" value="{{ old('make_model', optional($policy)->make_model) }}" required>
                 @error('make_model')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
             <div class="col-md-6">
                 <label class="form-label">Plate No.</label>
-                <input type="text" class="form-control @error('plate_number') is-invalid @enderror"
-                       name="plate_number" value="{{ old('plate_number', optional($policy)->plate_number) }}" required>
+                <select class="form-select @error('plate_number') is-invalid @enderror" id="plateNumberSelect" name="plate_number">
+                    <option value="">Select vehicle...</option>
+                </select>
+                <small class="form-text text-muted">Or enter manually:</small>
+                <input type="text" class="form-control @error('plate_number') is-invalid @enderror" id="plateNumberInput"
+                       placeholder="Enter plate number manually" style="display: none;">
                 @error('plate_number')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
         </div>
@@ -71,13 +76,13 @@
         <div class="row mb-3">
             <div class="col-md-6">
                 <label class="form-label">Model Year</label>
-                <input type="text" class="form-control @error('model_year') is-invalid @enderror"
+                <input type="text" class="form-control @error('model_year') is-invalid @enderror" id="modelYear"
                        name="model_year" value="{{ old('model_year', optional($policy)->model_year) }}" required>
                 @error('model_year')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
             <div class="col-md-6">
                 <label class="form-label">Color</label>
-                <input type="text" class="form-control @error('color') is-invalid @enderror"
+                <input type="text" class="form-control @error('color') is-invalid @enderror" id="vehicleColor"
                        name="color" value="{{ old('color', optional($policy)->color) }}" required>
                 @error('color')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>

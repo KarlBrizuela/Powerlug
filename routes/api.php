@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ClaimController;
+use App\Http\Controllers\ClientController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,3 +22,6 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 // API endpoint to get claim data by client
 Route::get('/claims/by-client/{clientId}', [ClaimController::class, 'getClaimByClient']);
+
+// API endpoint to get vehicles for a client
+Route::get('/clients/{clientId}/vehicles', [ClientController::class, 'getVehicles']);

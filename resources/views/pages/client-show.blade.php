@@ -114,6 +114,32 @@
                     <p class="mb-1"><strong>Model Year:</strong> {{ $client->model_year ?? 'N/A' }}</p>
                     <p class="mb-1"><strong>Color:</strong> {{ $client->color ?? 'N/A' }}</p>
                     
+                    @if($client->vehicles->count() > 0)
+                        <h6 class="mt-3 mb-2" style="color: #495057; font-weight: 600;">Client Vehicles</h6>
+                        <div style="overflow-x: auto;">
+                            <table class="table table-sm table-bordered">
+                                <thead style="background-color: #f8f9fa;">
+                                    <tr>
+                                        <th>Make & Model</th>
+                                        <th>Plate Number</th>
+                                        <th>Model Year</th>
+                                        <th>Color</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($client->vehicles as $vehicle)
+                                        <tr>
+                                            <td>{{ $vehicle->make_model }}</td>
+                                            <td>{{ $vehicle->plate_number }}</td>
+                                            <td>{{ $vehicle->model_year }}</td>
+                                            <td>{{ $vehicle->color }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                    
                     <p class="text-muted small">Created at: {{ $client->created_at }} | Updated at: {{ $client->updated_at }}</p>
                 </div>
             </div>

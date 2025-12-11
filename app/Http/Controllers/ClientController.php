@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exports\ClientsExport;
 use App\Models\Client;
+use App\Models\Vehicle;
 use App\Models\Policy;
 use App\Models\WalkIn;
 use Illuminate\Http\Request;
@@ -166,18 +167,45 @@ class ClientController extends Controller
                 'province' => 'required|string|max:255',
                 'postalCode' => 'required|string|size:4',
                 'tin' => 'required|string|max:255',
-                'make_model' => 'required|string|max:255',
-                'plate_no' => 'required|array|min:1',
-                'plate_no.*' => 'required|string|max:255',
-                'model_year' => 'required|integer|min:1900|max:2100',
-                'color' => 'required|string|max:255',
+                'birthday' => 'nullable|date',
+                'occupation' => 'nullable|string|max:255',
+                'make_model' => 'nullable|string|max:255',
+                'plate_no' => 'nullable|string|max:255',
+                'model_year' => 'nullable|integer|min:1900|max:2100',
+                'color' => 'nullable|string|max:255',
+            ]);
+
+            // Validate vehicle data if present
+            $request->validate([
+                'vehicles' => 'nullable|array',
+                'vehicles.*.make_model' => 'required_with:vehicles|string|max:255',
+                'vehicles.*.plate_number' => 'required_with:vehicles|string|max:255',
+                'vehicles.*.model_year' => 'required_with:vehicles|integer|min:1900|max:2100',
+                'vehicles.*.color' => 'required_with:vehicles|string|max:255',
             ]);
         }
 
-        // Store plate numbers as comma-separated string
-        $validatedData['plate_no'] = implode(',', $validatedData['plate_no']);
-
+        // Create the client
         $client = Client::create($validatedData);
+
+        // Store vehicles if provided
+        $vehicles = $request->input('vehicles', []);
+        if (!empty($vehicles)) {
+            foreach ($vehicles as $vehicleData) {
+                // Skip empty vehicle rows
+                if (empty($vehicleData['make_model']) && empty($vehicleData['plate_number'])) {
+                    continue;
+                }
+                
+                Vehicle::create([
+                    'client_id' => $client->id,
+                    'make_model' => $vehicleData['make_model'] ?? '',
+                    'plate_number' => $vehicleData['plate_number'] ?? '',
+                    'model_year' => $vehicleData['model_year'] ?? '',
+                    'color' => $vehicleData['color'] ?? '',
+                ]);
+            }
+        }
 
         // If AJAX request, return JSON
         if ($request->expectsJson()) {
@@ -216,13 +244,48 @@ class ClientController extends Controller
             'province' => 'required|string|max:255',
             'postalCode' => 'required|string|size:4',
             'tin' => 'required|string|max:255',
-            'make_model' => 'required|string|max:255',
-            'plate_no' => 'required|string|max:255',
-            'model_year' => 'required|integer|min:1900|max:2100',
-            'color' => 'required|string|max:255',
+            'birthday' => 'nullable|date',
+            'occupation' => 'nullable|string|max:255',
+            'make_model' => 'nullable|string|max:255',
+            'plate_no' => 'nullable|string|max:255',
+            'model_year' => 'nullable|integer|min:1900|max:2100',
+            'color' => 'nullable|string|max:255',
+        ]);
+
+        // Validate vehicle data if present
+        $request->validate([
+            'vehicles' => 'nullable|array',
+            'vehicles.*.make_model' => 'required_with:vehicles|string|max:255',
+            'vehicles.*.plate_number' => 'required_with:vehicles|string|max:255',
+            'vehicles.*.model_year' => 'required_with:vehicles|integer|min:1900|max:2100',
+            'vehicles.*.color' => 'required_with:vehicles|string|max:255',
         ]);
 
         $client->update($validatedData);
+
+        // Handle vehicle updates
+        $vehicles = $request->input('vehicles', []);
+        
+        // Delete existing vehicles first
+        $client->vehicles()->delete();
+        
+        // Create new vehicles
+        if (!empty($vehicles)) {
+            foreach ($vehicles as $vehicleData) {
+                // Skip empty vehicle rows
+                if (empty($vehicleData['make_model']) && empty($vehicleData['plate_number'])) {
+                    continue;
+                }
+                
+                Vehicle::create([
+                    'client_id' => $client->id,
+                    'make_model' => $vehicleData['make_model'] ?? '',
+                    'plate_number' => $vehicleData['plate_number'] ?? '',
+                    'model_year' => $vehicleData['model_year'] ?? '',
+                    'color' => $vehicleData['color'] ?? '',
+                ]);
+            }
+        }
 
         return redirect()->route('clients.index')
                         ->with('success', 'Client updated successfully');
@@ -234,5 +297,33 @@ class ClientController extends Controller
     public function show(Client $client)
     {
         return view('pages.client-show', compact('client'));
+    }
+
+    /**
+     * Get vehicles for a specific client (API endpoint)
+     */
+    public function getVehicles($clientId)
+    {
+        $client = Client::find($clientId);
+        
+        if (!$client) {
+            return response()->json([], 404);
+        }
+        
+        // Get vehicles from vehicles table
+        $vehicles = $client->vehicles()->select('id', 'make_model', 'plate_number', 'model_year', 'color')->get();
+        
+        // Add the old plate_no from clients table if it exists and is not already in vehicles table
+        if ($client->plate_no && !$vehicles->contains('plate_number', $client->plate_no)) {
+            $vehicles->prepend((object)[
+                'id' => null,
+                'make_model' => $client->make_model,
+                'plate_number' => $client->plate_no,
+                'model_year' => $client->model_year,
+                'color' => $client->color
+            ]);
+        }
+        
+        return response()->json($vehicles);
     }
 }

@@ -342,6 +342,21 @@
                                         </div>
                                     </div>
 
+                                    <!-- Vehicle Management Section -->
+                                    <div class="row mt-5">
+                                        <div class="col-12">
+                                            <h6 style="color: #495057; font-weight: 600; margin-bottom: 1rem;">
+                                                Client Vehicles
+                                                <button type="button" class="btn btn-sm btn-success float-end" id="addCarBtn">
+                                                    <i class="fas fa-plus me-2"></i>Add Car
+                                                </button>
+                                            </h6>
+                                            <div id="vehiclesContainer">
+                                                <!-- Vehicle rows will be added here -->
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div class="text-end mt-4">
                                         <a href="{{ route('clients.index') }}" class="btn btn-secondary me-2">Cancel</a>
                                         <button type="submit" class="btn btn-primary">Update Client</button>
@@ -357,5 +372,79 @@
 
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Vehicle management
+        let vehicleRowCount = 0;
+
+        function addVehicleRow(makeModel = '', plateNumber = '', modelYear = '', color = '') {
+            const container = document.getElementById('vehiclesContainer');
+            const rowId = 'vehicle-row-' + vehicleRowCount++;
+            
+            const row = document.createElement('div');
+            row.id = rowId;
+            row.className = 'row mb-3 p-3 border rounded bg-light vehicle-row';
+            row.innerHTML = `
+                <div class="col-md-3">
+                    <label class="form-label">Make & Model</label>
+                    <input type="text" class="form-control" 
+                           name="vehicles[${vehicleRowCount - 1}][make_model]" 
+                           value="${makeModel}" 
+                           placeholder="Enter vehicle make and model">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Plate Number</label>
+                    <input type="text" class="form-control" 
+                           name="vehicles[${vehicleRowCount - 1}][plate_number]" 
+                           value="${plateNumber}" 
+                           placeholder="Enter plate number">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Model Year</label>
+                    <input type="text" class="form-control" 
+                           name="vehicles[${vehicleRowCount - 1}][model_year]" 
+                           value="${modelYear}" 
+                           placeholder="e.g., 2020">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Color</label>
+                    <input type="text" class="form-control" 
+                           name="vehicles[${vehicleRowCount - 1}][color]" 
+                           value="${color}" 
+                           placeholder="Enter vehicle color">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="button" class="btn btn-danger w-100" onclick="removeVehicleRow('${rowId}')">
+                        <i class="fas fa-trash me-2"></i>Remove
+                    </button>
+                </div>
+            `;
+            
+            container.appendChild(row);
+        }
+
+        function removeVehicleRow(rowId) {
+            const row = document.getElementById(rowId);
+            if (row) {
+                row.remove();
+            }
+        }
+
+        // Add Car button event listener
+        document.getElementById('addCarBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            addVehicleRow();
+        });
+
+        // Initialize with existing vehicles and one empty row for adding new vehicles
+        window.addEventListener('load', function() {
+            @if($client->vehicles->count() > 0)
+                @foreach($client->vehicles as $vehicle)
+                    addVehicleRow('{{ $vehicle->make_model }}', '{{ $vehicle->plate_number }}', '{{ $vehicle->model_year }}', '{{ $vehicle->color }}');
+                @endforeach
+            @else
+                addVehicleRow();
+            @endif
+        });
+    </script>
 </body>
 </html>

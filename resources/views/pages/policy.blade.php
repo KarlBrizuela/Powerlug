@@ -1119,21 +1119,86 @@
                     $('#clientPhone').val(phone);
                     $('#clientAddress').val(address);
                     $('#clientNameHidden').val(clientName);
-                    $('input[name="make_model"]').val(makeModel);
-                    $('input[name="plate_number"]').val(plateNumber);
-                    $('input[name="model_year"]').val(modelYear);
-                    $('input[name="color"]').val(color);
+                    $('#makeModel').val(makeModel);
+                    $('#modelYear').val(modelYear);
+                    $('#vehicleColor').val(color);
+                    
+                    // Load vehicles for this client via AJAX
+                    $.ajax({
+                        url: '/api/clients/' + clientId + '/vehicles',
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function(vehicles) {
+                            const plateSelect = $('#plateNumberSelect');
+                            const oldPlate = selectedOption.data('old-plate') || '';
+                            plateSelect.empty();
+                            plateSelect.append('<option value="">Select vehicle...</option>');
+                            
+                            if (vehicles.length > 0) {
+                                vehicles.forEach(function(vehicle, index) {
+                                    let displayText = vehicle.plate_number + ' - ' + vehicle.make_model;
+                                    
+                                    // Add "Primary" label for the old plate number
+                                    if (vehicle.plate_number === oldPlate) {
+                                        displayText += ' (Primary)';
+                                    }
+                                    
+                                    plateSelect.append(
+                                        `<option value="${vehicle.plate_number}" 
+                                            data-make-model="${vehicle.make_model}" 
+                                            data-model-year="${vehicle.model_year}" 
+                                            data-color="${vehicle.color}">
+                                            ${displayText}
+                                        </option>`
+                                    );
+                                });
+                                
+                                // Auto-select first vehicle and trigger change
+                                plateSelect.val(vehicles[0].plate_number).change();
+                            }
+                            
+                            // Show vehicle dropdown if vehicles exist, hide manual input
+                            if (vehicles.length > 0) {
+                                plateSelect.show();
+                                $('#plateNumberInput').hide().removeAttr('name');
+                            } else {
+                                plateSelect.hide();
+                                $('#plateNumberInput').show().attr('name', 'plate_number');
+                                $('#plateNumberInput').val(plateNumber || '');
+                            }
+                        },
+                        error: function() {
+                            // Fallback to manual input if AJAX fails
+                            $('#plateNumberSelect').hide();
+                            $('#plateNumberInput').show().attr('name', 'plate_number');
+                            $('#plateNumberInput').val(plateNumber || '');
+                        }
+                    });
                 } else {
                     // Clear fields if no client selected
                     $('#clientEmail').val('');
                     $('#clientPhone').val('');
                     $('#clientAddress').val('');
                     $('#clientNameHidden').val('');
-                    $('input[name="make_model"]').val('');
-                    $('input[name="plate_number"]').val('');
-                    $('input[name="model_year"]').val('');
-                    $('input[name="color"]').val('');
+                    $('#makeModel').val('');
+                    $('#plateNumberSelect').empty().append('<option value="">Select vehicle...</option>');
+                    $('#plateNumberInput').hide().val('');
+                    $('#modelYear').val('');
+                    $('#vehicleColor').val('');
                 }
+            });
+
+            // Handle vehicle selection change
+            $('#plateNumberSelect').on('change', function() {
+                const selectedOption = $(this).find(':selected');
+                const makeModel = selectedOption.data('make-model') || '';
+                const modelYear = selectedOption.data('model-year') || '';
+                const color = selectedOption.data('color') || '';
+                
+                // Auto-fill vehicle details
+                $('#makeModel').val(makeModel);
+                $('#modelYear').val(modelYear);
+                $('#vehicleColor').val(color);
             });
 
             // Trigger change on page load if a client is already selected (for edit mode)
