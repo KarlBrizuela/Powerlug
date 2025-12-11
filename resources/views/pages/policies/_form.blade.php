@@ -21,7 +21,7 @@
                                 data-phone="{{ $client->phone }}" 
                                 data-address="{{ $client->address }}"
                                 {{ old('client_id', optional($policy)->client_id) == $client->id ? 'selected' : '' }}>
-                                {{ $client->firstName }} {{ $client->middleName }} {{ $client->lastName }}
+                                {{ $client->firstName }} {{ $client->middleName }} {{ $client->lastName }} @if($client->plate_no)({{ $client->plate_no }})@endif
                             </option>
                         @endforeach
                     @endif
@@ -219,11 +219,6 @@
 
                 <div class="row mb-2">
                     <div class="col-md-6">
-                        <label class="form-label">Estimate Amount</label>
-                        <input type="text" class="form-control @error('estimate_amount') is-invalid @enderror" name="estimate_amount" value="{{ old('estimate_amount', optional($policy)->estimate_amount) }}" placeholder="Enter estimate amount">
-                        @error('estimate_amount')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                    <div class="col-md-6">
                         <label class="form-label">Size</label>
                         <select class="form-select @error('size') is-invalid @enderror" name="size">
                             <option value="">Select size</option>
@@ -306,7 +301,7 @@
 
         <!-- Additional Information -->
         <div class="row mb-3">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <label class="form-label">Payment Terms</label>
                 <select class="form-select @error('payment_terms') is-invalid @enderror" name="payment_terms">
                     <option value="">Choose payment method</option>
@@ -316,10 +311,15 @@
                 </select>
                 @error('payment_terms')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <label class="form-label">Paid Amount</label>
-                <input type="text" class="form-control @error('paid_amount') is-invalid @enderror" name="paid_amount" value="{{ old('paid_amount', optional($policy)->paid_amount) }}" placeholder="Enter paid amount">
+                <input type="text" class="form-control @error('paid_amount') is-invalid @enderror" id="paidAmount" name="paid_amount" value="{{ old('paid_amount', optional($policy)->paid_amount) }}" placeholder="Enter paid amount">
                 @error('paid_amount')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Proof of Payment</label>
+                <input type="file" class="form-control @error('proof_of_payment') is-invalid @enderror" name="proof_of_payment" accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx" placeholder="Upload proof">
+                @error('proof_of_payment')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
         </div>
 

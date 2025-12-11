@@ -63,12 +63,14 @@ class Policy extends Model
         'coc_vp',
         'premium_remarks',
         'policy_file',
+        'proof_of_payment',
         'paid_services',
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'walkin_date' => 'date',
         'coverage_amount' => 'decimal:2',
         'premium' => 'decimal:2',
         // Cast services (checkbox array) to array so it's stored as JSON in DB safely

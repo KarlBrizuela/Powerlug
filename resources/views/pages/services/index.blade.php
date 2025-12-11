@@ -19,9 +19,14 @@
             <!-- Page Header -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h1 class="h3 text-primary mb-0">Services Management</h1>
-                <a href="{{ route('services.create') }}" class="btn btn-primary">
-                    <i class="bi bi-plus-circle"></i> Add Service
-                </a>
+                <div>
+                    <a href="{{ route('services.create') }}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Add Service
+                    </a>
+                    <a href="{{ route('services.export') }}" class="btn btn-success">
+                        <i class="fas fa-download"></i> Export to Excel
+                    </a>
+                </div>
             </div>
 
             <!-- Success Message -->

@@ -125,13 +125,23 @@
 
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
+                                        <label for="agent" class="form-label">Agent</label>
+                                        <input type="text" name="agent" id="agent" class="form-control @error('agent') is-invalid @enderror" value="{{ old('agent', $commission->agent ?? '') }}" placeholder="Enter agent name">
+                                        @error('agent')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
                                         <label for="policy_number" class="form-label">Policy Number <span class="text-danger">*</span></label>
                                         <input type="text" name="policy_number" id="policy_number" class="form-control @error('policy_number') is-invalid @enderror" value="{{ old('policy_number', $commission->policy_number ?? '') }}" required>
                                         @error('policy_number')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
+                                </div>
 
+                                <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="loa" class="form-label">LOA (Authorization)</label>
                                         <input type="text" name="loa" id="loa" class="form-control @error('loa') is-invalid @enderror" value="{{ old('loa', $commission->loa ?? '') }}" placeholder="LOA reference or notes">

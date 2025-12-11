@@ -33,7 +33,12 @@
             <div class="container-fluid">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h2>Freebies</h2>
-                    <a href="{{ route('freebies.create') }}" class="btn btn-primary">Create Freebie</a>
+                    <div>
+                        <a href="{{ route('freebies.create') }}" class="btn btn-primary">Create Freebie</a>
+                        <a href="{{ route('freebies.export') }}" class="btn btn-success">
+                            <i class="fas fa-download"></i> Export to Excel
+                        </a>
+                    </div>
                 </div>
 
                 @if(session('success'))

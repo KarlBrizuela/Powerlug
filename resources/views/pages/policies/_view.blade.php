@@ -278,7 +278,13 @@
             <div class="col-md-6">
                 <div class="policy-info-row">
                     <p class="policy-info-label">Date:</p>
-                    <p class="policy-info-value">{{ optional($policy->walkin_date)->format('F d, Y') ?? 'N/A' }}</p>
+                    <p class="policy-info-value">
+                        @if($policy->walkin_date)
+                            {{ \Carbon\Carbon::parse($policy->walkin_date)->format('F d, Y') }}
+                        @else
+                            N/A
+                        @endif
+                    </p>
                 </div>
             </div>
             <div class="col-md-6">

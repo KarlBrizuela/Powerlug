@@ -31,6 +31,7 @@
                     </div>
 
                     <!-- Stats Cards -->
+                    @if (!auth()->user()->isAdmin())
                     <div class="row mt-4">
                         <div class="col-xl-4 col-md-6 mb-4">
                             <div class="card border-0 shadow-sm h-100 hover-card" style="transition: all 0.3s ease;">
@@ -92,6 +93,7 @@
                             box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15) !important;
                         }
                     </style>
+                    @endif
 
                     <!-- Tables Section -->
                     <div class="row mt-4">

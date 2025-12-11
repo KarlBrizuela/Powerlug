@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\InsuranceProvider;
+use App\Exports\InsuranceProvidersExport;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class InsuranceProviderController extends Controller
 {
@@ -75,5 +77,13 @@ class InsuranceProviderController extends Controller
         $insuranceProvider->delete();
         return redirect()->route('insurance-providers.index')
                         ->with('success', 'Insurance Provider deleted successfully');
+    }
+
+    /**
+     * Export insurance providers to Excel.
+     */
+    public function export()
+    {
+        return Excel::download(new InsuranceProvidersExport, 'insurance-providers-' . date('Y-m-d-H-i-s') . '.xlsx');
     }
 }

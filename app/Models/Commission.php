@@ -16,6 +16,7 @@ class Commission extends Model
         'insurance_provider_id',
         'policy_number',
         'insured',
+        'agent',
         'gross_premium',
         'net_premium',
         'loa',

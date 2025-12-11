@@ -263,9 +263,14 @@
                     <div class="col-12">
                         <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                             <h4 class="mb-sm-0 font-size-18">Client List</h4>
-                            <a href="{{ route('clients.create') }}" class="btn btn-primary">
-                                <i class="fas fa-plus me-1"></i> Add New Client
-                            </a>
+                            <div>
+                                <a href="{{ route('clients.create') }}" class="btn btn-primary">
+                                    <i class="fas fa-plus me-1"></i> Add New Client
+                                </a>
+                                <a href="{{ route('clients.export') }}" class="btn btn-success">
+                                    <i class="fas fa-download"></i> Export to Excel
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -310,6 +315,8 @@
                                         <thead>
                                             <tr>
                                                 <th>Client Name</th>
+                                                <th>Model</th>
+                                                <th>Plate Number</th>
                                                 <th>Address</th>
                                                 <th>Contact Number</th>
                                                 <th>Email</th>
@@ -321,6 +328,8 @@
                                             @forelse($clients as $client)
                                             <tr>
                                                 <td>{{ $client->firstName }} {{ $client->middleName }} {{ $client->lastName }}</td>
+                                                <td>{{ $client->make_model ?? '-' }}</td>
+                                                <td>{{ $client->plate_no ?? '-' }}</td>
                                                 <td>{{ $client->address }}, {{ $client->city }}, {{ $client->province }} {{ $client->postalCode }}</td>
                                                 <td>{{ $client->phone }}</td>
                                                 <td>{{ $client->email }}</td>
@@ -356,7 +365,7 @@
                                             </tr>
                                             @empty
                                             <tr>
-                                                <td colspan="6" class="text-center">No clients found</td>
+                                                <td colspan="8" class="text-center">No clients found</td>
                                             </tr>
                                             @endforelse
                                         </tbody>

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Freebie;
+use App\Exports\FreebiesExport;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class FreebieController extends Controller
 {
@@ -77,5 +79,13 @@ class FreebieController extends Controller
     {
         $freebie->delete();
         return redirect()->route('freebies.index')->with('success', 'Freebie deleted');
+    }
+
+    /**
+     * Export freebies to Excel.
+     */
+    public function export()
+    {
+        return Excel::download(new FreebiesExport, 'freebies-' . date('Y-m-d-H-i-s') . '.xlsx');
     }
 }

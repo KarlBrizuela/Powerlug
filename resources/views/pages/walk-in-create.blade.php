@@ -272,40 +272,6 @@
                                     </div>
                                 </div>
 
-                                <div class="row mb-4">
-                                    <div class="col-12">
-                                        <label class="form-label">Estimate Amount:</label>
-                                        <div class="table-responsive mt-2">
-                                            <table class="table table-bordered">
-                                                <tbody>
-                                                    <tr>
-                                                        <td><strong>PARTS</strong></td>
-                                                        <td><input type="number" name="parts_amount" id="parts" class="form-control text-end" placeholder="0" min="0" step="0.01" oninput="calculateTotals()" required></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><strong>LABOR COST</strong></td>
-                                                        <td><input type="number" name="labor_cost" id="laborCost" class="form-control text-end" placeholder="0" min="0" step="0.01" oninput="calculateTotals()" required></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><strong>MATERIALS</strong></td>
-                                                        <td><input type="number" name="materials_cost" id="materials" class="form-control text-end" placeholder="0" min="0" step="0.01" oninput="calculateTotals()" required></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><strong>VAT 12%</strong></td>
-                                                        <td class="text-end" id="vat">0.00</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td><strong>TOTAL AMOUNT DUE</strong></td>
-                                                        <td class="text-end" id="totalAmount"><strong>0.00</strong></td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                            <input type="hidden" name="vat_amount" id="vatInput">
-                                            <input type="hidden" name="total_amount" id="totalAmountInput">
-                                        </div>
-                                    </div>
-                                </div>
-
                                 <div class="text-end mt-4">
                                     <button type="reset" class="btn btn-secondary me-2">Reset</button>
                                     <button type="submit" class="btn btn-primary">Submit</button>

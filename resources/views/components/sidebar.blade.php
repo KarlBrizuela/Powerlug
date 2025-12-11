@@ -253,7 +253,7 @@
     <!-- ========== Left Sidebar Start ========== -->
     <div class="vertical-menu">
         <div class="sidebar-logo">
-            <img src="/public/images/logs.jpg" alt="logo" class="img-fluid">
+            <img src="/images/logs.jpg" alt="logo" class="img-fluid">
         </div>
         <div data-simplebar class="h-100">
             <!--- Sidemenu -->
@@ -262,7 +262,7 @@
                 <ul class="metismenu list-unstyled" id="side-menu">
                     <li class="menu-title" data-key="t-menu">Menu</li>
 
-                    @if(auth()->user()->position === 'superadmin')
+                    @if(auth()->user()->position === 'superadmin' || auth()->user()->position === 'admin')
                     <li>
                         <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
                             <i data-feather="home"></i>
@@ -272,11 +272,23 @@
                     @endif
 
                    <li>
-    <a href="{{ route('policy') }}" class="@if(request()->url() === route('policy')) active @endif">
-        <i data-feather="file-text"></i>
-        <span data-key="t-pages">Client Form</span>
-    </a>
-</li>
+                        <a href="javascript: void(0);" class="has-arrow">
+                            <i data-feather="file-text"></i>
+                            <span data-key="t-policies">Policies</span>
+                        </a>
+                        <ul class="sub-menu" aria-expanded="false">
+                            <li>
+                                <a href="{{ route('policies.create') }}" class="{{ request()->routeIs('policies.create') ? 'active' : '' }}">
+                                    New Policy
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('policy.walkin') }}" class="{{ request()->routeIs('policy.walkin') ? 'active' : '' }}">
+                                    New Walk-in
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
 
                     <li>
                         <a href="javascript: void(0);" class="has-arrow">
@@ -289,10 +301,6 @@
                                    Claim
                                 </a>
                             </li>
-                            <li>
-                                <a href="{{ route('walk-in.create') }}" class="{{ request()->routeIs('walk-in.create') ? 'active' : '' }}">
-                                   Walk-in
-                                </a>
                             </li>
                         </ul>
                     </li>

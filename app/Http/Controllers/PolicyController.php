@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\PoliciesExport;
 use App\Models\Policy;
 use App\Models\Client;
 use App\Models\InsuranceProvider;
@@ -9,6 +10,7 @@ use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PolicyController extends Controller
 {
@@ -54,7 +56,46 @@ class PolicyController extends Controller
         // Load services to populate the Walk-in "Services Availed" dropdown/checkboxes
         $services = Service::orderBy('name')->get();
 
-        return view('pages.policy', compact('clients', 'insuranceProviders', 'freebies', 'services'));
+        // Get all policies (recent first)
+        $allPolicies = Policy::latest()->get();
+
+        $policy = null;
+        return view('pages.policy', compact('policy', 'clients', 'insuranceProviders', 'freebies', 'services', 'allPolicies'));
+    }
+
+    /**
+     * Show the form for creating a new walk-in.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function createWalkin()
+    {
+        // Load clients for the searchable dropdown
+        $clients = Client::orderBy('firstName')->orderBy('lastName')->get();
+        
+        // Load services to populate the Walk-in "Services Availed" dropdown/checkboxes
+        $services = Service::orderBy('name')->get();
+
+        // Load active freebies for the freebie select
+        $freebies = \App\Models\Freebie::where('is_active', true)->orderBy('name')->get();
+
+        // Get all walk-ins (recent first)
+        $allWalkIns = \App\Models\WalkIn::latest()->get();
+
+        return view('pages.walk-in-form', compact('clients', 'services', 'freebies', 'allWalkIns'));
+    }
+
+    /**
+     * Show the walk-ins list page.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function walkinsList()
+    {
+        // Get all walk-ins (recent first)
+        $allWalkIns = \App\Models\WalkIn::latest()->get();
+
+        return view('pages.walk-ins-list', compact('allWalkIns'));
     }
 
     /**
@@ -65,18 +106,18 @@ class PolicyController extends Controller
      */
     public function store(Request $request)
     {
-    // Check if user is submitting policy details or walk-in details
+    // Check if user is submitting policy details
     $hasPolicyData = $request->filled('insurance_provider_id') || 
                          $request->filled('issue_date') || 
                          $request->filled('coverage_from') || 
                          $request->filled('coverage_to') ||
                          $request->filled('chassis_number');
-        
-        $hasWalkinData = $request->filled('walkin_date') || 
-                         $request->filled('estimate_amount') || 
-                         $request->filled('size') ||
-                         $request->filled('rate') ||
-                         $request->filled('walkin_payment');
+
+    // Check if user is submitting walk-in details
+    $hasWalkinData = $request->filled('walkin_date') || 
+                     $request->filled('size') || 
+                     $request->has('services') ||
+                     $request->hasFile('walkin_file');
 
         $validated = $request->validate([
             // Primary Information
@@ -107,15 +148,14 @@ class PolicyController extends Controller
             'freebie' => 'nullable|string',
             'policy_file' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png',
             
-            // Walk-in Details - At least one is required if walk-in type is selected
+            // Walk-in Details
             'walkin_date' => 'nullable|date',
             'walkin_file' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png',
-            'estimate_amount' => 'nullable|numeric|min:0',
             'size' => 'nullable|string',
             'services' => 'nullable|array',
+            'services.*' => 'nullable|string',
             'service_payment_dues' => 'nullable|array',
-            'rate' => 'nullable|numeric|min:0',
-            'walkin_payment' => 'nullable|numeric|min:0',
+            'service_payment_dues.*' => 'nullable|numeric',
             
             // Additional Payment Information
             'payment_terms' => 'nullable|string',
@@ -134,8 +174,8 @@ class PolicyController extends Controller
             'documentary_stamp_tax' => 'nullable|numeric|min:0',
             'local_gov_tax' => 'nullable|numeric|min:0',
             'amount_due' => 'nullable|numeric|min:0',
-            'coc_vp' => 'nullable|numeric|min:0',
             'premium_remarks' => 'nullable|string',
+            'proof_of_payment' => 'nullable|file|mimes:pdf,jpg,jpeg,png,gif,doc,docx|max:5120',
             
             // Status Information
             'policy_type' => 'nullable|in:individual,family,corporate',
@@ -145,13 +185,6 @@ class PolicyController extends Controller
             'billing_status' => 'nullable|in:paid,unpaid,partial',
             'remarks' => 'nullable|string',
         ]);
-
-        // Validate that at least policy details OR walk-in details are provided
-        if (!$hasPolicyData && !$hasWalkinData) {
-            return back()->withErrors([
-                'details' => 'Please fill in either Policy Details or Walk-in Details (or both).'
-            ])->withInput();
-        }
 
         $validated['created_by'] = auth()->id();
 
@@ -192,11 +225,11 @@ class PolicyController extends Controller
             $validated['end_date'] = $validated['coverage_to'];
         }
 
-        // Ensure required DB columns start_date/end_date are set even for walk-in only submissions.
-        // Preference: coverage_from/coverage_to -> walkin_date -> today
+        // Ensure required DB columns start_date/end_date are set
+        // Preference: coverage_from/coverage_to -> today
         $today = now()->toDateString();
         if (empty($validated['start_date'])) {
-            $validated['start_date'] = $validated['coverage_from'] ?? $validated['walkin_date'] ?? $today;
+            $validated['start_date'] = $validated['coverage_from'] ?? $today;
         }
         if (empty($validated['end_date'])) {
             $validated['end_date'] = $validated['coverage_to'] ?? $validated['start_date'] ?? $today;
@@ -205,6 +238,25 @@ class PolicyController extends Controller
         // Handle file upload if provided
         if ($request->hasFile('policy_file')) {
             $validated['policy_file'] = $request->file('policy_file')->store('policies', 'public');
+        }
+
+        // Handle walk-in file upload if provided
+        if ($request->hasFile('walkin_file')) {
+            $validated['walkin_file'] = $request->file('walkin_file')->store('policies/walk-ins', 'public');
+        }
+
+        // Handle proof of payment file upload if provided
+        if ($request->hasFile('proof_of_payment')) {
+            $validated['proof_of_payment'] = $request->file('proof_of_payment')->store('policies/proofs', 'public');
+        }
+
+        // Handle services and service_payment_dues arrays
+        if ($request->has('services') && is_array($request->input('services'))) {
+            $validated['services'] = $request->input('services');
+        }
+        
+        if ($request->has('service_payment_dues') && is_array($request->input('service_payment_dues'))) {
+            $validated['service_payment_dues'] = $request->input('service_payment_dues');
         }
 
         $policy = Policy::create($validated);
@@ -216,7 +268,7 @@ class PolicyController extends Controller
             $policy->save();
         }
 
-        return redirect()->route('policies.index')->with('success', 'Policy created successfully');
+        return redirect()->route('policies.show', $policy->id)->with('success', 'Policy created successfully');
     }
 
     /**
@@ -264,18 +316,12 @@ class PolicyController extends Controller
      */
     public function update(Request $request, Policy $policy)
     {
-        // Check if user is submitting policy details or walk-in details
+        // Check if user is submitting policy details
         $hasPolicyData = $request->filled('insurance_provider') || 
                          $request->filled('issue_date') || 
                          $request->filled('coverage_from') || 
                          $request->filled('coverage_to') ||
                          $request->filled('chassis_number');
-        
-        $hasWalkinData = $request->filled('walkin_date') || 
-                         $request->filled('estimate_amount') || 
-                         $request->filled('size') ||
-                         $request->filled('rate') ||
-                         $request->filled('walkin_payment');
 
         $validated = $request->validate([
             // Primary Information
@@ -306,16 +352,6 @@ class PolicyController extends Controller
             'freebie' => 'nullable|string',
             'policy_file' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png',
             
-            // Walk-in Details
-            'walkin_date' => 'nullable|date',
-            'walkin_file' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png',
-            'estimate_amount' => 'nullable|numeric|min:0',
-            'size' => 'nullable|string',
-            'services' => 'nullable|array',
-            'service_payment_dues' => 'nullable|array',
-            'rate' => 'nullable|numeric|min:0',
-            'walkin_payment' => 'nullable|numeric|min:0',
-            
             // Additional Payment Information
             'payment_terms' => 'nullable|string',
             'paid_amount' => 'nullable|numeric|min:0',
@@ -331,7 +367,6 @@ class PolicyController extends Controller
             'documentary_stamp_tax' => 'nullable|numeric|min:0',
             'local_gov_tax' => 'nullable|numeric|min:0',
             'amount_due' => 'nullable|numeric|min:0',
-            'coc_vp' => 'nullable|numeric|min:0',
             'premium_remarks' => 'nullable|string',
             
             // Status Information
@@ -343,7 +378,7 @@ class PolicyController extends Controller
             'remarks' => 'nullable|string',
         ]);
 
-        // Validate that at least policy details OR walk-in details are provided
+        // If bank_transfer was set to OTHER, replace with manual value if provided
         if (!$hasPolicyData && !$hasWalkinData) {
             return back()->withErrors([
                 'details' => 'Please fill in either Policy Details or Walk-in Details (or both).'
@@ -398,6 +433,14 @@ class PolicyController extends Controller
         $policy->delete();
 
         return redirect()->route('policies.index')->with('success', 'Policy deleted successfully');
+    }
+
+    /**
+     * Export policies to Excel.
+     */
+    public function export()
+    {
+        return Excel::download(new PoliciesExport, 'policies-' . date('Y-m-d-H-i-s') . '.xlsx');
     }
 
     /**

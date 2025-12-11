@@ -34,24 +34,24 @@ Route::get('/', function () {
 
 // Protected routes
 Route::middleware(['auth'])->group(function () {
-    // Dashboard (Superadmin only)
+    // Dashboard (Superadmin and Admin)
     Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->middleware('check.position:superadmin')
+        ->middleware('check.position:superadmin,admin')
         ->name('dashboard');
     
-    // Insurance Expiration Reminders (Superadmin only)
+    // Insurance Expiration Reminders (Superadmin and Admin)
     Route::get('/expiration-reminders', [DashboardController::class, 'expirationReminders'])
-        ->middleware('check.position:superadmin')
+        ->middleware('check.position:superadmin,admin')
         ->name('expiration.reminders');
     
-    // Payment Reminders (Superadmin only)
+    // Payment Reminders (Superadmin and Admin)
     Route::get('/payment-reminders', [DashboardController::class, 'paymentReminders'])
-        ->middleware('check.position:superadmin')
+        ->middleware('check.position:superadmin,admin')
         ->name('payment.reminders');
     
     // Mark payment as paid API
     Route::post('/api/mark-payment-paid', [DashboardController::class, 'markPaymentPaid'])
-        ->middleware('check.position:superadmin')
+        ->middleware('check.position:superadmin,admin')
         ->name('api.mark-payment-paid');
     
     // Mark policy as availed (Superadmin only)
@@ -66,15 +66,19 @@ Route::middleware(['auth'])->group(function () {
 
     // Policy routes
     Route::resource('policies', PolicyController::class);
-    Route::get('/policy', [PolicyController::class, 'create'])->name('policy');
+    Route::get('/policy', [PolicyController::class, 'create'])->name('policy.create');
+    Route::get('/policy/walkin', [PolicyController::class, 'createWalkin'])->name('policy.walkin');
+    Route::get('/policy/walkins-list', [PolicyController::class, 'walkinsList'])->name('policy.walkins-list');
     Route::get('/policies/{policy}/installment', [PolicyController::class, 'installment'])->name('policies.installment');
     Route::post('/policies/{policy}/installment', [PolicyController::class, 'storeInstallment'])->name('policies.storeInstallment');
     Route::get('/policies/{policy}/installments', [PolicyController::class, 'listInstallments'])->name('policies.listInstallments');
     Route::delete('/policies/{policy}/file', [PolicyController::class, 'deleteFile'])->name('policies.deleteFile');
     Route::delete('/policies/{policy}/walkin-file', [PolicyController::class, 'deleteWalkinFile'])->name('policies.deleteWalkinFile');
     Route::get('/api/clients/{id}', [PolicyController::class, 'getClientDetails'])->name('clients.details');
+    Route::get('/policies/export', [PolicyController::class, 'export'])->name('policies.export');
 
     // Freebies
+    Route::get('/freebies/export', [FreebieController::class, 'export'])->name('freebies.export');
     // Explicit parameter name mapping to ensure route-model binding uses {freebie}
     Route::resource('freebies', FreebieController::class)->parameters([
         'freebies' => 'freebie'
@@ -82,10 +86,14 @@ Route::middleware(['auth'])->group(function () {
 
     // Client routes
     Route::resource('clients', ClientController::class);
+    Route::get('/clients-form', [ClientController::class, 'quickForm'])->name('clients.form');
+    Route::get('/clients/export', [ClientController::class, 'export'])->name('clients.export');
     
     // Insurance Provider routes
+    Route::get('/insurance-providers/export', [InsuranceProviderController::class, 'export'])->name('insurance-providers.export');
     Route::resource('insurance-providers', InsuranceProviderController::class);    // Claims routes
     // Service routes
+    Route::get('/services/export', [ServiceController::class, 'export'])->name('services.export');
     Route::resource('services', ServiceController::class);
     // Claims: use controller resource for create/index/store
     Route::get('/claims/create', function () {
@@ -117,10 +125,15 @@ Route::middleware(['auth'])->group(function () {
     // Walk-in routes - Default to create form, with list accessible via button
     Route::get('/walk-in', [WalkInController::class, 'create'])->name('walk-in.create');
     Route::get('/walk-in/list', [WalkInController::class, 'index'])->name('walk-in.index');
+    Route::get('/walk-in/export', [WalkInController::class, 'export'])->name('walk-in.export');
+    Route::post('/walk-in', [WalkInController::class, 'store'])->name('walk-in.store');
     Route::post('/walk-in', [WalkInController::class, 'store'])->name('walk-in.store');
     // Individual walk-in actions
     Route::get('/walk-in/{walkIn}', [WalkInController::class, 'show'])->name('walk-in.show');
     Route::get('/walk-in/{walkIn}/download', [WalkInController::class, 'download'])->name('walk-in.download');
+    Route::delete('/walk-in/{id}/file', [WalkInController::class, 'deleteFile'])->name('walk-in.deleteFile');
+    Route::get('/walk-in/{walkIn}/installment', [WalkInController::class, 'installment'])->name('walk-in.installment');
+    Route::post('/walk-in/{walkIn}/installment', [WalkInController::class, 'storeInstallment'])->name('walk-in.storeInstallment');
     Route::delete('/walk-in/{walkIn}', [WalkInController::class, 'destroy'])->name('walk-in.destroy');
 
     // Client Management routes

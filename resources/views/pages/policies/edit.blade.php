@@ -740,6 +740,29 @@
                 calculateBalance();
             });
 
+            // Payment Terms - Calculate installment amounts
+            $('select[name="payment_terms"]').on('change', function() {
+                const amountDue = parseFloat($('input[name="amount_due"]').val()) || 0;
+                const paidAmountInput = $('#paidAmount');
+                let divisor = 1;
+
+                // Determine divisor based on payment terms
+                if (this.value === '30 days') {
+                    divisor = 2;
+                } else if (this.value === '60 days') {
+                    divisor = 3;
+                } else if (this.value === '90 days') {
+                    divisor = 4;
+                }
+
+                // Calculate paid amount
+                const calculatedPaidAmount = amountDue / divisor;
+                paidAmountInput.val(calculatedPaidAmount.toFixed(2));
+
+                // Trigger balance calculation
+                calculateBalance();
+            });
+
             // Calculate on page load if values exist
             calculateAmountDue();
             calculateBalance();

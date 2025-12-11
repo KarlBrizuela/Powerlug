@@ -232,6 +232,9 @@
                     <a href="{{ route('policies.create') }}" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Add New Policy
                     </a>
+                    <a href="{{ route('policies.export') }}" class="btn btn-success">
+                        <i class="fas fa-download"></i> Export to Excel
+                    </a>
                 </div>
             </div>
 
@@ -356,7 +359,7 @@
                                                         <a href="{{ route('policies.installment', $policy->id) }}" 
                                                            class="action-menu-item installment">
                                                             <i class="fas fa-credit-card"></i>
-                                                            <span>Installment</span>
+                                                            <span>Installments</span>
                                                         </a>
                                                         <div class="action-menu-divider"></div>
                                                         <form action="{{ route('policies.destroy', $policy->id) }}" 

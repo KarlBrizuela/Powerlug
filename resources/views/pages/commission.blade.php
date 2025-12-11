@@ -206,6 +206,7 @@
                                                 <th>INSURANCE PROVIDER</th>
                                                 <th>POLICY NUMBER</th>
                                                 <th>INSURED</th>
+                                                <th>AGENT</th>
                                                 <th>GROSS</th>
                                                 <th>NET</th>
                                                 <th>LOA</th>
@@ -220,6 +221,7 @@
                                                         <td>{{ $commission->insuranceProvider->name ?? 'N/A' }}</td>
                                                         <td>{{ $commission->policy_number }}</td>
                                                         <td>{{ $commission->insured }}</td>
+                                                        <td>{{ $commission->agent ?? 'N/A' }}</td>
                                                         <td>₱{{ number_format($commission->gross_premium, 2) }}</td>
                                                         <td>₱{{ number_format($commission->net_premium, 2) }}</td>
                                                         <td>{{ $commission->loa ?? 'N/A' }}</td>
@@ -400,6 +402,10 @@
                                         <tr>
                                             <td><strong>Insured:</strong></td>
                                             <td>${data.insured}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Agent:</strong></td>
+                                            <td>${data.agent || 'N/A'}</td>
                                         </tr>
                                         
                                         <tr>

@@ -360,7 +360,7 @@
                             </button>
                         </div>
                         <div class="card-body" id="installmentFormContainer" style="display: none;">
-                            <form method="POST" action="{{ route('policies.storeInstallment', $policy->id) }}" class="needs-validation" id="installmentForm">
+                            <form method="POST" action="{{ route('policies.storeInstallment', $policy->id) }}" class="needs-validation" id="installmentForm" enctype="multipart/form-data">
                                 @csrf
                                 
                                 <div id="installmentRows">
@@ -516,6 +516,19 @@
                                     <input type="text" class="form-control" 
                                            id="reference_number_${rowIndex}" name="installments[${rowIndex}][reference]" 
                                            placeholder="Check #, Transfer Ref #, etc.">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="proof_of_payment_${rowIndex}" class="form-label">Proof of Payment</label>
+                                    <input type="file" class="form-control" 
+                                           id="proof_of_payment_${rowIndex}" name="installments[${rowIndex}][proof_file]"
+                                           accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx"
+                                           placeholder="Upload proof of payment (receipt, screenshot, etc.)">
+                                    <small class="text-muted d-block mt-1">Accepted formats: PDF, JPG, PNG, GIF, DOC, DOCX (Max 5MB)</small>
                                 </div>
                             </div>
                         </div>

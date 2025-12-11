@@ -328,8 +328,12 @@
                                                                 data-email="{{ $client->email }}" 
                                                                 data-phone="{{ $client->phone }}" 
                                                                 data-address="{{ $client->address }}"
+                                                                data-make-model="{{ $client->make_model ?? '' }}"
+                                                                data-plate-number="{{ $client->plate_no ?? '' }}"
+                                                                data-model-year="{{ $client->model_year ?? '' }}"
+                                                                data-color="{{ $client->color ?? '' }}"
                                                                 {{ old('client_id') == $client->id ? 'selected' : '' }}>
-                                                                {{ $client->firstName }} {{ $client->middleName }} {{ $client->lastName }}
+                                                                {{ $client->firstName }} {{ $client->middleName }} {{ $client->lastName }} @if($client->plate_no)({{ $client->plate_no }})@endif
                                                             </option>
                                                         @endforeach
                                                     @endif
@@ -418,10 +422,6 @@
                                         <div class="insurance-details-box">
                                             <div class="d-flex justify-content-between align-items-center mb-3">
                                                 <div class="text-center fw-bold">Insurance Policy Details</div>
-                                                <div class="form-type-buttons">
-                                                    <button type="button" class="btn btn-primary" id="policyDetailsBtn">Policy Details</button>
-                                                    <button type="button" class="btn btn-outline-primary" id="walkinDetailsBtn">Walk-in Details</button>
-                                                </div>
                                             </div>
 
                                             <!-- Policy Details (Default) -->
@@ -557,99 +557,6 @@
                                                 </div>
                                             </div>
 
-                                            <!-- Walk-in Details -->
-                                            <div id="walkinDetails" class="details-content">
-                                                <div class="row mb-2">
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Date</label>
-                                                        <input type="date" class="form-control @error('walkin_date') is-invalid @enderror" 
-                                                               name="walkin_date" value="{{ old('walkin_date') }}">
-                                                        @error('walkin_date')
-                                                            <div class="invalid-feedback">{{ $message }}</div>
-                                                        @enderror
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">File Upload</label>
-                                                        <input type="file" class="form-control @error('walkin_file') is-invalid @enderror" 
-                                                               name="walkin_file">
-                                                        @error('walkin_file')
-                                                            <div class="invalid-feedback">{{ $message }}</div>
-                                                        @enderror
-                                                    </div>
-                                                </div>
-
-                                                <div class="row mb-2">
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Estimate Amount</label>
-                                                        <input type="text" class="form-control @error('estimate_amount') is-invalid @enderror" 
-                                                               name="estimate_amount" value="{{ old('estimate_amount') }}" 
-                                                               placeholder="Enter estimate amount">
-                                                        @error('estimate_amount')
-                                                            <div class="invalid-feedback">{{ $message }}</div>
-                                                        @enderror
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Size</label>
-                                                        <select class="form-select @error('size') is-invalid @enderror" name="size">
-                                                            <option value="">Select size</option>
-                                                            @foreach(['Small', 'Medium', 'Large', 'X-Large', 'XXL-Large'] as $size)
-                                                                <option value="{{ $size }}" {{ old('size') == $size ? 'selected' : '' }}>
-                                                                    {{ $size }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                        @error('size')
-                                                            <div class="invalid-feedback">{{ $message }}</div>
-                                                        @enderror
-                                                    </div>
-                                                </div>
-
-                                                <div class="row mb-2">
-                                                    <div class="col-md-12">
-                                                        <label class="form-label">Services Availed</label>
-                                                        <div class="services-input-wrapper" id="servicesInputGroup">
-                                                            <select class="services-dropdown" id="serviceDropdown">
-                                                                <option value="">Select a service to add</option>
-                                                                @if(isset($services) && $services->count())
-                                                                    @foreach($services as $s)
-                                                                        <option value="{{ $s->name }}" data-price="{{ number_format((float)$s->price, 2, '.', '') }}">{{ $s->name }} - ₱ {{ number_format((float)$s->price, 2) }}</option>
-                                                                    @endforeach
-                                                                @else
-                                                                    <option value="Carwash" data-price="0.00">Carwash</option>
-                                                                    <option value="Change Oil" data-price="0.00">Change Oil</option>
-                                                                    <option value="Etc" data-price="0.00">Etc</option>
-                                                                @endif
-                                                            </select>
-                                                        </div>
-                                                        <div id="servicesContainer"></div>
-                                                        @error('services')
-                                                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                                                        @enderror
-                                                    </div>
-                                                </div>
-
-                                                <div class="row mb-2">
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Rate</label>
-                                                        <input type="text" class="form-control @error('rate') is-invalid @enderror" 
-                                                               name="rate" value="{{ old('rate') }}" placeholder="Enter rate">
-                                                        @error('rate')
-                                                            <div class="invalid-feedback">{{ $message }}</div>
-                                                        @enderror
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Payment</label>
-                                                        <input type="text" class="form-control @error('walkin_payment') is-invalid @enderror" 
-                                                               name="walkin_payment" value="{{ old('walkin_payment') }}" 
-                                                               placeholder="Enter payment amount">
-                                                        @error('walkin_payment')
-                                                            <div class="invalid-feedback">{{ $message }}</div>
-                                                        @enderror
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
                                          <!-- Summary of Premium and Other Charges Section -->
                                 <div class="section-container mb-4">
                                     <div class="section-title">Summary of Premium and Other Charges</div>
@@ -706,15 +613,6 @@
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <div class="premium-row">
-                                                        <span>COC VP</span>
-                                                        <input type="text" class="form-control form-control-sm @error('coc_vp') is-invalid @enderror" 
-                                                               style="width: 150px;" name="coc_vp" value="{{ old('coc_vp', '0.00') }}" placeholder="PHP">
-                                                        @error('coc_vp')
-                                                            <div class="invalid-feedback">{{ $message }}</div>
-                                                        @enderror
-                                                    </div>
-
                                                     <div class="col-md-12 mt-3">
                                                         <label class="form-label">Remarks</label>
                                                         <textarea class="form-control @error('premium_remarks') is-invalid @enderror" 
@@ -730,7 +628,7 @@
                                 </div>
                                         <!-- Additional Information -->
                                         <div class="row mb-3">
-                                            <div class="col-md-6">
+                                            <div class="col-md-4">
                                                 <label class="form-label">Payment Terms</label>
                                                 <select class="form-select @error('payment_terms') is-invalid @enderror" name="payment_terms">
                                                     <option value="">Choose payment method</option>
@@ -744,11 +642,20 @@
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
-                                            <div class="col-md-6">
+                                            <div class="col-md-4">
                                                 <label class="form-label">Paid Amount</label>
                                                 <input type="text" class="form-control @error('paid_amount') is-invalid @enderror" 
                                                        name="paid_amount" id="paidAmount" value="{{ old('paid_amount') }}" placeholder="Enter paid amount">
                                                 @error('paid_amount')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">Proof of Payment</label>
+                                                <input type="file" class="form-control @error('proof_of_payment') is-invalid @enderror" 
+                                                       name="proof_of_payment" accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx" 
+                                                       placeholder="Upload proof">
+                                                @error('proof_of_payment')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
@@ -860,10 +767,6 @@
 
         // Details switching functionality
         document.addEventListener('DOMContentLoaded', function() {
-            const policyDetailsBtn = document.getElementById('policyDetailsBtn');
-            const walkinDetailsBtn = document.getElementById('walkinDetailsBtn');
-            const policyDetails = document.getElementById('policyDetails');
-            const walkinDetails = document.getElementById('walkinDetails');
             const insuranceProvider = document.getElementById('insuranceProvider');
             const paymentMethod = document.getElementById('paymentMethod');
             const bankTransferFields = document.getElementById('bankTransferFields');
@@ -876,42 +779,6 @@
             const additionalFreebieDate = document.getElementById('additionalFreebieDate');
 
             console.log('DOM loaded - initializing functionality');
-
-            // Initialize the details sections
-            if (policyDetails && walkinDetails) {
-                policyDetails.classList.add('active');
-                walkinDetails.classList.remove('active');
-            }
-
-            // Show Policy Details
-            if (policyDetailsBtn) {
-                policyDetailsBtn.addEventListener('click', function() {
-                    console.log('Policy Details button clicked');
-                    if (policyDetails && walkinDetails) {
-                        policyDetails.classList.add('active');
-                        walkinDetails.classList.remove('active');
-                        policyDetailsBtn.classList.remove('btn-outline-primary');
-                        policyDetailsBtn.classList.add('btn-primary');
-                        walkinDetailsBtn.classList.remove('btn-primary');
-                        walkinDetailsBtn.classList.add('btn-outline-primary');
-                    }
-                });
-            }
-
-            // Show Walk-in Details
-            if (walkinDetailsBtn) {
-                walkinDetailsBtn.addEventListener('click', function() {
-                    console.log('Walk-in Details button clicked');
-                    if (policyDetails && walkinDetails) {
-                        walkinDetails.classList.add('active');
-                        policyDetails.classList.remove('active');
-                        walkinDetailsBtn.classList.remove('btn-outline-primary');
-                        walkinDetailsBtn.classList.add('btn-primary');
-                        policyDetailsBtn.classList.remove('btn-primary');
-                        policyDetailsBtn.classList.add('btn-outline-primary');
-                    }
-                });
-            }
 
             // Show/hide bank transfer fields based on payment method
             if (paymentMethod) {
@@ -1241,6 +1108,10 @@
                     const email = selectedOption.data('email') || '';
                     const phone = selectedOption.data('phone') || '';
                     const address = selectedOption.data('address') || '';
+                    const makeModel = selectedOption.data('make-model') || '';
+                    const plateNumber = selectedOption.data('plate-number') || '';
+                    const modelYear = selectedOption.data('model-year') || '';
+                    const color = selectedOption.data('color') || '';
                     const clientName = selectedOption.text().trim();
                     
                     // Fill the form fields
@@ -1248,12 +1119,20 @@
                     $('#clientPhone').val(phone);
                     $('#clientAddress').val(address);
                     $('#clientNameHidden').val(clientName);
+                    $('input[name="make_model"]').val(makeModel);
+                    $('input[name="plate_number"]').val(plateNumber);
+                    $('input[name="model_year"]').val(modelYear);
+                    $('input[name="color"]').val(color);
                 } else {
                     // Clear fields if no client selected
                     $('#clientEmail').val('');
                     $('#clientPhone').val('');
                     $('#clientAddress').val('');
                     $('#clientNameHidden').val('');
+                    $('input[name="make_model"]').val('');
+                    $('input[name="plate_number"]').val('');
+                    $('input[name="model_year"]').val('');
+                    $('input[name="color"]').val('');
                 }
             });
 
@@ -1311,6 +1190,29 @@
 
             // Also recalculate balance when amount due changes manually
             $('input[name="amount_due"]').on('input', function() {
+                calculateBalance();
+            });
+
+            // Payment Terms - Calculate installment amounts
+            $('select[name="payment_terms"]').on('change', function() {
+                const amountDue = parseFloat($('input[name="amount_due"]').val()) || 0;
+                const paidAmountInput = $('#paidAmount');
+                let divisor = 1;
+
+                // Determine divisor based on payment terms
+                if (this.value === '30 days') {
+                    divisor = 2;
+                } else if (this.value === '60 days') {
+                    divisor = 3;
+                } else if (this.value === '90 days') {
+                    divisor = 4;
+                }
+
+                // Calculate paid amount
+                const calculatedPaidAmount = amountDue / divisor;
+                paidAmountInput.val(calculatedPaidAmount.toFixed(2));
+
+                // Trigger balance calculation
                 calculateBalance();
             });
 

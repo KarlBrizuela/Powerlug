@@ -15,7 +15,7 @@
     <div class="card shadow-sm" style="width: 100%; max-width: 400px;">
         <div class="card-body">
             <div class="text-center mb-4">
-                <img src="public/images/logs.jpg" alt="logo" class="img-fluid" style="max-width: 200px; height: auto;">
+                <img src="/images/logs.jpg" alt="logo" class="img-fluid" style="max-width: 200px; height: auto;">
             </div>
 
             @if (session('error'))

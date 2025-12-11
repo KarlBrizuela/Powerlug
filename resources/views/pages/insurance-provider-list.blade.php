@@ -259,9 +259,14 @@
                 <div class="col-12">
                     <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                         <h4 class="mb-sm-0 font-size-18">Insurance Provider List</h4>
-                        <a href="{{ route('insurance-providers.create') }}" class="btn btn-primary">
-                            <i class="fas fa-plus me-1"></i> Add New Provider
-                        </a>
+                        <div>
+                            <a href="{{ route('insurance-providers.create') }}" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i> Add New Provider
+                            </a>
+                            <a href="{{ route('insurance-providers.export') }}" class="btn btn-success">
+                                <i class="fas fa-download"></i> Export to Excel
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

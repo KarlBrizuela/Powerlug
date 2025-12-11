@@ -31,12 +31,12 @@ class LoginController extends Controller
 		if (Auth::attempt($credentials, $remember)) {
 			$request->session()->regenerate();
 
-			// Redirect based on user position
-			if (Auth::user()->position === 'superadmin') {
+			// Redirect based on user position - both superadmin and admin go to dashboard
+			if (Auth::user()->position === 'superadmin' || Auth::user()->position === 'admin') {
 				return redirect()->intended(route('dashboard'));
 			} else {
-				// Redirect non-superadmin users to policies page
-				return redirect()->route('policy');
+				// Redirect other users to policies list
+				return redirect()->route('policies.index');
 			}
 		}
 

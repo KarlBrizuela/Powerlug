@@ -162,6 +162,19 @@
                                             @enderror
                                         </div>
 
+                                        <!-- TIN -->
+                                        <div class="col-md-12 mb-3">
+                                            <label for="tin" class="form-label">TIN (Tax Identification Number)</label>
+                                            <input type="text" 
+                                                   class="form-control @error('tin') is-invalid @enderror" 
+                                                   id="tin" 
+                                                   name="tin" 
+                                                   value="{{ old('tin', $client->tin) }}">
+                                            @error('tin')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
                                         <!-- Email -->
                                         <div class="col-md-6 mb-3">
                                             <label for="email" class="form-label">Email Address</label>
@@ -270,6 +283,60 @@
                                                    value="{{ old('occupation', $client->occupation) }}" 
                                                    required>
                                             @error('occupation')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <!-- Make Model -->
+                                        <div class="col-md-6 mb-3">
+                                            <label for="make_model" class="form-label">Make Model</label>
+                                            <input type="text" 
+                                                   class="form-control @error('make_model') is-invalid @enderror" 
+                                                   id="make_model" 
+                                                   name="make_model" 
+                                                   value="{{ old('make_model', $client->make_model) }}">
+                                            @error('make_model')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <!-- Plate Number -->
+                                        <div class="col-md-6 mb-3">
+                                            <label for="plate_no" class="form-label">Plate Number</label>
+                                            <input type="text" 
+                                                   class="form-control @error('plate_no') is-invalid @enderror" 
+                                                   id="plate_no" 
+                                                   name="plate_no" 
+                                                   value="{{ old('plate_no', $client->plate_no) }}">
+                                            @error('plate_no')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <!-- Model Year -->
+                                        <div class="col-md-6 mb-3">
+                                            <label for="model_year" class="form-label">Model Year</label>
+                                            <input type="number" 
+                                                   class="form-control @error('model_year') is-invalid @enderror" 
+                                                   id="model_year" 
+                                                   name="model_year" 
+                                                   value="{{ old('model_year', $client->model_year) }}"
+                                                   min="1900"
+                                                   max="2100">
+                                            @error('model_year')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <!-- Color -->
+                                        <div class="col-md-6 mb-3">
+                                            <label for="color" class="form-label">Color</label>
+                                            <input type="text" 
+                                                   class="form-control @error('color') is-invalid @enderror" 
+                                                   id="color" 
+                                                   name="color" 
+                                                   value="{{ old('color', $client->color) }}">
+                                            @error('color')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
