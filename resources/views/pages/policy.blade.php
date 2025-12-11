@@ -332,6 +332,7 @@
                                                                 data-plate-number="{{ $client->plate_no ?? '' }}"
                                                                 data-model-year="{{ $client->model_year ?? '' }}"
                                                                 data-color="{{ $client->color ?? '' }}"
+                                                                data-old-plate="{{ $client->plate_no }}"
                                                                 {{ old('client_id') == $client->id ? 'selected' : '' }}>
                                                                 {{ $client->firstName }} {{ $client->middleName }} {{ $client->lastName }} @if($client->plate_no)({{ $client->plate_no }})@endif
                                                             </option>
@@ -378,7 +379,7 @@
                                         <div class="row mb-3">
                                             <div class="col-md-6">
                               <label class="form-label">Make Model</label>
-                              <input type="text" class="form-control @error('make_model') is-invalid @enderror" 
+                              <input type="text" class="form-control @error('make_model') is-invalid @enderror" id="makeModelPolicy"
                                   name="make_model" value="{{ old('make_model') }}">
                                                 @error('make_model')
                                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -386,8 +387,12 @@
                                             </div>
                                             <div class="col-md-6">
                               <label class="form-label">Plate No.</label>
-                              <input type="text" class="form-control @error('plate_number') is-invalid @enderror" 
-                                  name="plate_number" value="{{ old('plate_number') }}">
+                              <select class="form-select @error('plate_number') is-invalid @enderror" id="plateNumberSelectPolicy" name="plate_number">
+                                  <option value="">Select vehicle...</option>
+                              </select>
+                              <small class="form-text text-muted">Or enter manually:</small>
+                              <input type="text" class="form-control @error('plate_number') is-invalid @enderror" id="plateNumberInputPolicy"
+                                  placeholder="Enter plate number manually" style="display: none;">
                                                 @error('plate_number')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
@@ -397,7 +402,7 @@
                                         <div class="row mb-3">
                                             <div class="col-md-6">
                               <label class="form-label">Model Year</label>
-                              <input type="text" class="form-control @error('model_year') is-invalid @enderror" 
+                              <input type="text" class="form-control @error('model_year') is-invalid @enderror" id="modelYearPolicy"
                                   name="model_year" value="{{ old('model_year') }}">
                                                 @error('model_year')
                                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -405,7 +410,7 @@
                                             </div>
                                             <div class="col-md-6">
                               <label class="form-label">Color</label>
-                              <input type="text" class="form-control @error('color') is-invalid @enderror" 
+                              <input type="text" class="form-control @error('color') is-invalid @enderror" id="colorPolicy"
                                   name="color" value="{{ old('color') }}">
                                                 @error('color')
                                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -1119,9 +1124,9 @@
                     $('#clientPhone').val(phone);
                     $('#clientAddress').val(address);
                     $('#clientNameHidden').val(clientName);
-                    $('#makeModel').val(makeModel);
-                    $('#modelYear').val(modelYear);
-                    $('#vehicleColor').val(color);
+                    $('#makeModelPolicy').val(makeModel);
+                    $('#modelYearPolicy').val(modelYear);
+                    $('#colorPolicy').val(color);
                     
                     // Load vehicles for this client via AJAX
                     $.ajax({
@@ -1129,7 +1134,7 @@
                         type: 'GET',
                         dataType: 'json',
                         success: function(vehicles) {
-                            const plateSelect = $('#plateNumberSelect');
+                            const plateSelect = $('#plateNumberSelectPolicy');
                             const oldPlate = selectedOption.data('old-plate') || '';
                             plateSelect.empty();
                             plateSelect.append('<option value="">Select vehicle...</option>');
@@ -1160,18 +1165,18 @@
                             // Show vehicle dropdown if vehicles exist, hide manual input
                             if (vehicles.length > 0) {
                                 plateSelect.show();
-                                $('#plateNumberInput').hide().removeAttr('name');
+                                $('#plateNumberInputPolicy').hide().removeAttr('name');
                             } else {
                                 plateSelect.hide();
-                                $('#plateNumberInput').show().attr('name', 'plate_number');
-                                $('#plateNumberInput').val(plateNumber || '');
+                                $('#plateNumberInputPolicy').show().attr('name', 'plate_number');
+                                $('#plateNumberInputPolicy').val(plateNumber || '');
                             }
                         },
                         error: function() {
                             // Fallback to manual input if AJAX fails
-                            $('#plateNumberSelect').hide();
-                            $('#plateNumberInput').show().attr('name', 'plate_number');
-                            $('#plateNumberInput').val(plateNumber || '');
+                            $('#plateNumberSelectPolicy').hide();
+                            $('#plateNumberInputPolicy').show().attr('name', 'plate_number');
+                            $('#plateNumberInputPolicy').val(plateNumber || '');
                         }
                     });
                 } else {
@@ -1180,25 +1185,25 @@
                     $('#clientPhone').val('');
                     $('#clientAddress').val('');
                     $('#clientNameHidden').val('');
-                    $('#makeModel').val('');
-                    $('#plateNumberSelect').empty().append('<option value="">Select vehicle...</option>');
-                    $('#plateNumberInput').hide().val('');
-                    $('#modelYear').val('');
-                    $('#vehicleColor').val('');
+                    $('#makeModelPolicy').val('');
+                    $('#plateNumberSelectPolicy').empty().append('<option value="">Select vehicle...</option>');
+                    $('#plateNumberInputPolicy').hide().val('');
+                    $('#modelYearPolicy').val('');
+                    $('#colorPolicy').val('');
                 }
             });
 
             // Handle vehicle selection change
-            $('#plateNumberSelect').on('change', function() {
+            $('#plateNumberSelectPolicy').on('change', function() {
                 const selectedOption = $(this).find(':selected');
                 const makeModel = selectedOption.data('make-model') || '';
                 const modelYear = selectedOption.data('model-year') || '';
                 const color = selectedOption.data('color') || '';
                 
                 // Auto-fill vehicle details
-                $('#makeModel').val(makeModel);
-                $('#modelYear').val(modelYear);
-                $('#vehicleColor').val(color);
+                $('#makeModelPolicy').val(makeModel);
+                $('#modelYearPolicy').val(modelYear);
+                $('#colorPolicy').val(color);
             });
 
             // Trigger change on page load if a client is already selected (for edit mode)
