@@ -578,4 +578,193 @@ class PolicyController extends Controller
 
         return redirect()->back()->with('error', 'No file to delete');
     }
+
+    /**
+     * Handle payment reminder attachments upload
+     */
+    public function uploadPaymentReminderAttachments(Request $request)
+    {
+        try {
+            $request->validate([
+                'policy_id' => 'required|exists:policies,id',
+                'attachments' => 'required|array|min:1',
+                'attachments.*' => 'file|image|mimes:jpg,jpeg,png,gif,webp|max:5120', // 5MB per file, images only
+            ]);
+
+            $policy = Policy::findOrFail($request->input('policy_id'));
+            
+            // Initialize payment_reminder_attachments array if it doesn't exist
+            $attachments = is_array($policy->payment_reminder_attachments) ? $policy->payment_reminder_attachments : [];
+
+            $uploadedFiles = [];
+
+            // Store all files
+            if ($request->hasFile('attachments')) {
+                foreach ($request->file('attachments') as $file) {
+                    // Get file info before moving
+                    $originalName = $file->getClientOriginalName();
+                    $fileSize = $file->getSize();
+                    $mimeType = $file->getMimeType();
+                    
+                    // Create directory if it doesn't exist
+                    $directory = public_path('policies/payment-reminders');
+                    if (!file_exists($directory)) {
+                        mkdir($directory, 0755, true);
+                    }
+                    
+                    // Generate unique filename
+                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    
+                    // Move file directly to public folder
+                    $file->move($directory, $filename);
+                    
+                    $filePath = 'policies/payment-reminders/' . $filename;
+                    
+                    // Store metadata in the array
+                    $attachments[] = [
+                        'file_path' => $filePath,
+                        'name' => $originalName,
+                        'size' => $fileSize,
+                        'mime_type' => $mimeType,
+                        'uploaded_at' => now()->toDateTimeString(),
+                        'uploaded_by' => auth()->id(),
+                    ];
+
+                    $uploadedFiles[] = [
+                        'name' => $originalName,
+                        'size' => $fileSize,
+                        'path' => $filePath,
+                    ];
+                }
+
+                // Save the attachments array to the policy
+                $policy->payment_reminder_attachments = $attachments;
+                $policy->updated_by = auth()->id();
+                $policy->save();
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => count($uploadedFiles) . ' file(s) uploaded successfully',
+                'files' => $uploadedFiles,
+                'total_attachments' => count($attachments),
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Payment reminder attachment upload error: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error uploading files: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete a payment reminder attachment
+     */
+    public function deletePaymentReminderAttachment($policyId, $fileIndex)
+    {
+        try {
+            Log::info('Delete attachment request', ['policyId' => $policyId, 'fileIndex' => $fileIndex]);
+            
+            // Get the policy
+            $policy = Policy::findOrFail($policyId);
+            Log::info('Policy found', ['policyId' => $policy->id]);
+            
+            // Validate that fileIndex is an integer
+            if (!is_numeric($fileIndex) || $fileIndex < 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid file index',
+                ], 400);
+            }
+
+            $fileIndex = (int)$fileIndex;
+            $attachments = is_array($policy->payment_reminder_attachments) ? $policy->payment_reminder_attachments : [];
+            Log::info('Attachments count', ['count' => count($attachments), 'index' => $fileIndex]);
+
+            if (isset($attachments[$fileIndex])) {
+                // Delete the file from public folder
+                $filePath = public_path($attachments[$fileIndex]['file_path']);
+                Log::info('Deleting file', ['path' => $filePath, 'exists' => file_exists($filePath)]);
+                
+                if (file_exists($filePath)) {
+                    unlink($filePath);
+                    Log::info('File deleted successfully');
+                }
+
+                // Remove from array
+                unset($attachments[$fileIndex]);
+                $attachments = array_values($attachments); // Reindex array
+
+                // Save updated attachments
+                $policy->payment_reminder_attachments = $attachments;
+                $policy->updated_by = auth()->id();
+                $policy->save();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Attachment deleted successfully',
+                    'total_attachments' => count($attachments),
+                ]);
+            }
+
+            Log::warning('Attachment not found at index', ['index' => $fileIndex, 'total' => count($attachments)]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Attachment not found',
+            ], 404);
+        } catch (\Exception $e) {
+            Log::error('Payment reminder attachment delete error: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error deleting attachment: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get payment reminder attachments for a policy (API endpoint)
+     */
+    public function getPaymentReminderAttachments(Policy $policy)
+    {
+        try {
+            // Get attachments from JSON column - ensure it's an array
+            $attachments = $policy->payment_reminder_attachments;
+            
+            // If null or empty, return empty array
+            if (!$attachments) {
+                $attachments = [];
+            }
+            
+            // If it's a string, decode it
+            if (is_string($attachments)) {
+                $attachments = json_decode($attachments, true) ?? [];
+            }
+            
+            // Ensure it's always an array
+            if (!is_array($attachments)) {
+                $attachments = [];
+            }
+            
+            return response()->json([
+                'success' => true,
+                'attachments' => $attachments
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching attachments: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'attachments' => []
+            ], 500);
+        }
+    }
 }

@@ -64,6 +64,11 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('check.position:superadmin')
         ->name('sales.report');
 
+    // Payment Reminder Attachment Routes - Must be BEFORE resource routes
+    Route::post('/policies/upload-payment-attachments', [PolicyController::class, 'uploadPaymentReminderAttachments']);
+    Route::delete('/policies/{policyId}/payment-attachment/{fileIndex}', [PolicyController::class, 'deletePaymentReminderAttachment'])->where('policyId', '[0-9]+')->where('fileIndex', '[0-9]+');
+    Route::get('/api/policies/{policy}/payment-attachments', [PolicyController::class, 'getPaymentReminderAttachments']);
+
     // Policy routes
     Route::resource('policies', PolicyController::class);
     Route::get('/policy', [PolicyController::class, 'create'])->name('policy.create');
