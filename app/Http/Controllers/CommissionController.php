@@ -6,6 +6,7 @@ use App\Models\Commission;
 use App\Models\Policy;
 use App\Models\InsuranceProvider;
 use App\Models\Claim;
+use App\Models\WalkIn;
 use App\Exports\CommissionsExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -59,8 +60,10 @@ class CommissionController extends Controller
         $insuranceProviders = InsuranceProvider::orderBy('name')->get();
         $policies = Policy::with('insuranceProvider')->orderBy('policy_number')->get();
         $claims = Claim::select('id', 'client_name', 'loa_amount', 'insurance_provider_id', 'policy_number')->orderBy('client_name')->get();
+        $walkIns = WalkIn::select('id', 'insured_name', 'plate_number', 'premium')->orderBy('insured_name')->get();
+        $services = \App\Models\Service::orderBy('name')->get();
         
-        return view('pages.commission-form', compact('insuranceProviders', 'policies', 'claims'));
+        return view('pages.commission-form', compact('insuranceProviders', 'policies', 'claims', 'walkIns', 'services'));
     }
 
     /**
@@ -112,8 +115,10 @@ class CommissionController extends Controller
         $insuranceProviders = InsuranceProvider::orderBy('name')->get();
         $policies = Policy::with('insuranceProvider')->orderBy('policy_number')->get();
         $claims = Claim::select('id', 'client_name', 'loa_amount', 'insurance_provider_id', 'policy_number')->orderBy('client_name')->get();
+        $walkIns = WalkIn::select('id', 'insured_name', 'plate_number', 'premium')->orderBy('insured_name')->get();
+        $services = \App\Models\Service::orderBy('name')->get();
         
-        return view('pages.commission-form', compact('commission', 'insuranceProviders', 'policies', 'claims'));
+        return view('pages.commission-form', compact('commission', 'insuranceProviders', 'policies', 'claims', 'walkIns', 'services'));
     }
 
     /**
