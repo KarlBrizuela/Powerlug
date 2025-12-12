@@ -212,7 +212,8 @@
                                 </thead>
                                 <tbody>
                                     @forelse($allPaymentReminders as $reminder)
-                                    <tr>
+                                    <tr class="payment-reminder-row" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#paymentReminderModal" 
+                                        data-reminder='@json($reminder)'>
                                         <td>
                                             <strong>{{ $reminder['client_name'] }}</strong>
                                         </td>
@@ -395,6 +396,351 @@
                         $(this).addClass('bg-paid');
                     } else {
                         $(this).addClass('bg-unpaid');
+                    }
+                });
+            }
+        });
+    </script>
+
+    <!-- Payment Reminder Details Modal -->
+    <div class="modal fade" id="paymentReminderModal" tabindex="-1" aria-labelledby="paymentReminderModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header border-0 bg-gradient" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); padding: 2rem;">
+                    <div class="w-100 d-flex align-items-center justify-content-between">
+                        <h3 class="mb-0 fw-bold text-dark" id="paymentClientName">Client Name</h3>
+                        <span id="paymentStatus" class="badge bg-white text-dark px-4 py-2 shadow-sm ms-3" style="font-size: 0.9rem; white-space: nowrap;">Payment Due</span>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4" style="background-color: #fafbfc;">
+                    <!-- Client Information Section -->
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-success bg-opacity-10 rounded-circle p-2 me-2" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-user text-success"></i>
+                            </div>
+                            <h6 class="text-dark fw-bold mb-0" style="font-size: 1rem;">Client Information</h6>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Client Name</label>
+                                    <p id="paymentClientNameDetail" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">N/A</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Phone Number</label>
+                                    <p id="paymentClientPhone" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">N/A</p>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Email Address</label>
+                                    <p id="paymentClientEmail" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">N/A</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Details Section -->
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-info bg-opacity-10 rounded-circle p-2 me-2" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-receipt text-info"></i>
+                            </div>
+                            <h6 class="text-dark fw-bold mb-0" style="font-size: 1rem;">Payment Details</h6>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Policy Number</label>
+                                    <p id="paymentPolicyNumber" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">N/A</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Service</label>
+                                    <p id="paymentServiceName" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">N/A</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card p-3 rounded-3 border-0 shadow-sm" style="background: linear-gradient(135deg, #d4f4dd 0%, #e8f5e9 100%); transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Service Amount</label>
+                                    <p id="paymentServiceAmount" class="mb-0 fw-bold text-success" style="font-size: 1.2rem;">₱0.00</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Due Date</label>
+                                    <p id="paymentDueDate" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">N/A</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Payment Status</label>
+                                    <p id="paymentStatusBadge" class="mb-0">
+                                        <span class="badge bg-danger" style="font-size: 0.85rem;">Unpaid</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vehicle Details Section -->
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-danger bg-opacity-10 rounded-circle p-2 me-2" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-car text-danger"></i>
+                            </div>
+                            <h6 class="text-dark fw-bold mb-0" style="font-size: 1rem;">Vehicle Details</h6>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Plate No.</label>
+                                    <p id="paymentPlateNumber" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">N/A</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Model Year</label>
+                                    <p id="paymentModelYear" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">N/A</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-card p-3 rounded-3 bg-white border" style="transition: all 0.2s;">
+                                    <label class="text-muted small mb-2 text-uppercase" style="font-weight: 600; font-size: 0.7rem; letter-spacing: 0.5px;">Color</label>
+                                    <p id="paymentVehicleColor" class="mb-0 fw-semibold text-dark" style="font-size: 1rem;">N/A</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Attachments Section -->
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-warning bg-opacity-10 rounded-circle p-2 me-2" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-paperclip text-warning"></i>
+                            </div>
+                            <h6 class="text-dark fw-bold mb-0" style="font-size: 1rem;">Payment Attachments</h6>
+                        </div>
+                        <div id="paymentAttachmentsContainer" class="row g-3">
+                            <div class="col-12">
+                                <p class="text-muted text-center py-4">
+                                    <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                                    No attachments uploaded
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 bg-white p-4">
+                    <button type="button" class="btn btn-light border rounded-pill px-4 py-2" data-bs-dismiss="modal" style="font-weight: 500;">
+                        Close
+                    </button>
+                    <a href="#" id="viewPolicyLink" class="btn btn-info rounded-pill px-4 py-2 shadow-sm" style="font-weight: 500; color: white;">
+                        <i class="fas fa-eye me-2"></i>View Full Policy
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .info-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+        }
+
+        .payment-reminder-row {
+            transition: all 0.3s ease;
+        }
+
+        .payment-reminder-row:hover {
+            background-color: #f8f9fa;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+    </style>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Payment Reminder Modal Handler
+            $('#paymentReminderModal').on('show.bs.modal', function (e) {
+                const triggerButton = $(e.relatedTarget);
+                const reminderData = triggerButton.data('reminder');
+                
+                if (reminderData) {
+                    // Populate client information
+                    $('#paymentClientName').text(reminderData.client_name);
+                    $('#paymentClientNameDetail').text(reminderData.client_name);
+                    $('#paymentClientPhone').text(reminderData.client_phone);
+                    $('#paymentClientEmail').text(reminderData.client_email);
+                    
+                    // Populate payment details
+                    $('#paymentPolicyNumber').text(reminderData.policy_number);
+                    $('#paymentServiceName').text(reminderData.service_name);
+                    $('#paymentServiceAmount').text(reminderData.amount);
+                    $('#paymentDueDate').text(reminderData.due_date);
+                    
+                    // Populate vehicle details
+                    $('#paymentPlateNumber').text(reminderData.plate_number);
+                    $('#paymentModelYear').text(reminderData.model_year);
+                    $('#paymentVehicleColor').text(reminderData.color);
+                    
+                    // Update payment status badge
+                    const statusBadgeHtml = reminderData.paid_status === 'paid' ? 
+                        '<span class="badge bg-success" style="font-size: 0.85rem;"><i class="fas fa-check me-1"></i>Paid</span>' :
+                        '<span class="badge bg-danger" style="font-size: 0.85rem;"><i class="fas fa-clock me-1"></i>Unpaid</span>';
+                    $('#paymentStatusBadge').html(statusBadgeHtml);
+                    
+                    // Update status badge
+                    const statusBadge = $('#paymentStatus');
+                    statusBadge.text(reminderData.service_name);
+                    
+                    // Update View Full Policy link
+                    $('#viewPolicyLink').attr('href', '/policies/' + reminderData.id);
+
+                    // Load attachments
+                    loadPaymentAttachments(reminderData.id);
+                }
+            });
+
+            function loadPaymentAttachments(policyId) {
+                $.ajax({
+                    url: '/api/policies/' + policyId + '/payment-attachments',
+                    method: 'GET',
+                    success: function(response) {
+                        const attachmentsContainer = $('#paymentAttachmentsContainer');
+                        attachmentsContainer.empty();
+
+                        if (response.attachments && response.attachments.length > 0) {
+                            let html = '';
+                            response.attachments.forEach((attachment, index) => {
+                                const filePath = attachment.file_path || attachment;
+                                const imageUrl = '/' + filePath;
+                                const filename = attachment.name || filePath.split('/').pop() || 'Attachment';
+                                
+                                html += `
+                                    <div class="col-md-4 col-sm-6">
+                                        <div class="attachment-card position-relative rounded-3 overflow-hidden shadow-sm" style="cursor: pointer; transition: all 0.3s; height: 200px; display: flex; align-items: center; justify-content: center; background: #f8f9fa;">
+                                            <img src="${imageUrl}" alt="${filename}" 
+                                                 class="img-thumbnail-preview" 
+                                                 style="max-width: 100%; max-height: 100%; object-fit: cover; width: 100%; height: 100%; border: none; border-radius: 12px;"
+                                                 data-image-url="${imageUrl}"
+                                                 data-filename="${filename}">
+                                            <div class="attachment-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" 
+                                                 style="background: rgba(0,0,0,0); transition: all 0.3s; pointer-events: none;">
+                                                <i class="fas fa-search-plus text-white" style="font-size: 2rem; opacity: 0; transition: opacity 0.3s;"></i>
+                                            </div>
+                                            <button type="button" class="btn btn-sm btn-link text-danger p-0 position-absolute top-0 end-0 m-1 delete-attachment-file" data-index="${index}" data-policy-id="${policyId}" style="font-size: 0.8rem; background: rgba(255,255,255,0.9); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; pointer-events: auto;">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                            attachmentsContainer.html(html);
+
+                            // Attach click handlers DIRECTLY to each image
+                            const images = attachmentsContainer.find('.img-thumbnail-preview');
+                            images.each(function(index) {
+                                $(this).on('click', function(e) {
+                                    e.stopPropagation();
+                                    const imageUrl = $(this).data('image-url');
+                                    const filename = $(this).data('filename');
+                                    
+                                    // Create modal dynamically
+                                    const modal = $(`
+                                        <div class="modal fade" tabindex="-1" aria-hidden="true" style="--bs-modal-bg: #000; --bs-modal-border-color: #000;">
+                                            <div class="modal-dialog modal-fullscreen">
+                                                <div class="modal-content border-0" style="background-color: #1a1a1a;">
+                                                    <div class="modal-header border-bottom border-secondary bg-dark">
+                                                        <h6 class="modal-title fw-semibold text-white">${filename}</h6>
+                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body p-0 bg-dark d-flex align-items-center justify-content-center" style="height: calc(100vh - 60px);">
+                                                        <img src="${imageUrl}" alt="${filename}" style="max-width: 95%; max-height: 95%; object-fit: contain;" class="img-fluid">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `);
+                                    
+                                    modal.on('click', function(e) {
+                                        e.stopPropagation();
+                                    });
+                                    
+                                    modal.appendTo('body');
+                                    const bsModal = new bootstrap.Modal(modal[0]);
+                                    bsModal.show();
+                                    
+                                    modal.on('hidden.bs.modal', function() {
+                                        $(this).remove();
+                                    });
+                                });
+                            });
+
+                            // Add hover effect
+                            attachmentsContainer.off('mouseenter', '.attachment-card').on('mouseenter', '.attachment-card', function() {
+                                $(this).find('.attachment-overlay').css('background', 'rgba(0,0,0,0.5)');
+                                $(this).find('i.fa-search-plus').css('opacity', '1');
+                            });
+
+                            attachmentsContainer.off('mouseleave', '.attachment-card').on('mouseleave', '.attachment-card', function() {
+                                $(this).find('.attachment-overlay').css('background', 'rgba(0,0,0,0)');
+                                $(this).find('i.fa-search-plus').css('opacity', '0');
+                            });
+
+                            // Delete attachment handler
+                            attachmentsContainer.off('click', '.delete-attachment-file').on('click', '.delete-attachment-file', function(e) {
+                                e.stopPropagation();
+                                const index = $(this).data('index');
+                                const policyId = $(this).data('policy-id');
+                                
+                                if (confirm('Are you sure you want to delete this attachment?')) {
+                                    $.ajax({
+                                        url: '/policies/' + policyId + '/payment-attachment/' + index,
+                                        type: 'DELETE',
+                                        headers: {
+                                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                                        },
+                                        success: function(response) {
+                                            if (response.success) {
+                                                // Reload attachments
+                                                loadPaymentAttachments(policyId);
+                                            }
+                                        },
+                                        error: function(xhr) {
+                                            alert('Error deleting attachment');
+                                        }
+                                    });
+                                }
+                            });
+                        } else {
+                            attachmentsContainer.html(`
+                                <div class="col-12">
+                                    <p class="text-muted text-center py-4">
+                                        <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                                        No attachments uploaded
+                                    </p>
+                                </div>
+                            `);
+                        }
+                    },
+                    error: function() {
+                        const attachmentsContainer = $('#paymentAttachmentsContainer');
+                        attachmentsContainer.html(`
+                            <div class="col-12">
+                                <p class="text-muted text-center py-4">
+                                    <i class="fas fa-exclamation-circle fa-2x mb-2 d-block text-warning"></i>
+                                    Unable to load attachments
+                                </p>
+                            </div>
+                        `);
                     }
                 });
             }

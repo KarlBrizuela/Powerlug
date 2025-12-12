@@ -368,6 +368,7 @@ class DashboardController extends Controller
                 // If no services, but has outstanding balance
                 $statusText = 'Due';
                 $statusClass = 'bg-warning';
+                $daysText = 'Payment pending';
                 
                 // Check if policy balance has been marked as paid
                 $paidServices = is_array($policy->paid_services) ? $policy->paid_services : [];
@@ -383,6 +384,8 @@ class DashboardController extends Controller
                     'amount' => '₱' . number_format($balance, 2),
                     'status' => $statusText,
                     'status_class' => $statusClass,
+                    'days_text' => $daysText,
+                    'days_until_due' => null,
                     'policy_number' => $policy->policy_number ?? 'N/A',
                     'paid_status' => $isPaid ? 'paid' : 'unpaid',
                     'service_index' => null,

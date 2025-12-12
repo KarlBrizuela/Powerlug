@@ -65,6 +65,7 @@ class Policy extends Model
         'policy_file',
         'proof_of_payment',
         'paid_services',
+        'payment_reminder_attachments',
     ];
 
     protected $casts = [
@@ -77,6 +78,7 @@ class Policy extends Model
         'services' => 'array',
         'service_payment_dues' => 'array',
         'paid_services' => 'array',
+        'payment_reminder_attachments' => 'array',
     ];
 
     /**

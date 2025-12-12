@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta content="Powerlug" name="description" />
     <meta content="Powerlug" name="author" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -254,7 +255,7 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-sm-6">
-                            <script>document.write(new Date().getFullYear())</script> © Powerlug.
+                            <span id="currentYear"></span> © Powerlug.
                         </div>
                         <div class="col-sm-6">
                             <div class="text-sm-end d-none d-sm-block">
@@ -544,10 +545,54 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Attachments Section -->
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-secondary bg-opacity-10 rounded-circle p-2 me-2" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-paperclip text-secondary"></i>
+                            </div>
+                            <h6 class="text-dark fw-bold mb-0" style="font-size: 1rem;">Attachments</h6>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <div class="border-2 border-dashed rounded-3 p-4 bg-light" id="dropZone" style="cursor: pointer; transition: all 0.2s; border-color: #dee2e6;">
+                                    <input type="file" id="paymentAttachmentInput" multiple accept=".jpg,.jpeg,.png,.gif,.webp" style="display: none;">
+                                    <div class="text-center">
+                                        <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3 d-block" style="opacity: 0.6;"></i>
+                                        <p class="text-muted mb-2">
+                                            <span id="attachmentText">Drag and drop files here or <strong style="color: #0d6efd; cursor: pointer;">click to browse</strong></span>
+                                        </p>
+                                        <small class="text-muted d-block">Supported: JPG, JPEG, PNG, GIF, WebP (Max 4+ files, 5MB each)</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div id="attachmentsList" style="display: none;">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label class="text-muted small mb-0 text-uppercase fw-bold">Selected Files:</label>
+                                        <button type="button" id="clearAttachments" class="btn btn-sm btn-link text-danger p-0" style="font-size: 0.85rem;">Clear All</button>
+                                    </div>
+                                    <div id="attachmentsPreview" class="d-flex flex-wrap gap-2"></div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div id="uploadedAttachmentsList" style="display: none;">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label class="text-muted small mb-0 text-uppercase fw-bold">Uploaded Files:</label>
+                                    </div>
+                                    <div id="uploadedAttachmentsContainer" class="d-flex flex-wrap gap-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer border-0 bg-white p-4">
                     <button type="button" class="btn btn-light border rounded-pill px-4 py-2" data-bs-dismiss="modal" style="font-weight: 500;">
                         Close
+                    </button>
+                    <button type="button" id="uploadAttachmentsBtn" class="btn btn-warning rounded-pill px-4 py-2 shadow-sm" style="font-weight: 500;">
+                        <i class="fas fa-upload me-2"></i>Upload Attachments
                     </button>
                     <a href="#" id="viewPolicyLink" class="btn btn-info rounded-pill px-4 py-2 shadow-sm" style="font-weight: 500; color: white;">
                         <i class="fas fa-eye me-2"></i>View Full Policy
@@ -581,6 +626,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
 
     <script>
+        // Set current year in footer
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
         // Policy data from backend
         const policyData = {
             @foreach($expiringPolicies as $policy)
@@ -603,6 +651,9 @@
             },
             @endforeach
         };
+
+        // Variable to store the current policy ID for attachment uploads
+        let currentPolicyId = null;
 
         // Handle modal display when a name is clicked
         $(document).ready(function() {
@@ -662,6 +713,11 @@
                 const triggerButton = $(e.relatedTarget); // Button that triggered the modal
                 const reminderData = triggerButton.data('reminder'); // Extract info from data-reminder attribute
                 
+                // Store the policy ID for attachment uploads
+                if (reminderData) {
+                    currentPolicyId = reminderData.id;
+                }
+                
                 if (reminderData) {
                     // Populate client information
                     $('#paymentClientName').text(reminderData.client_name);
@@ -694,6 +750,339 @@
                     
                     // Update View Full Policy link
                     $('#viewPolicyLink').attr('href', '/policies/' + reminderData.id);
+                }
+                
+                // Reset attachments when modal opens
+                $('#paymentAttachmentInput').val('');
+                $('#attachmentsList').hide();
+                $('#attachmentsPreview').empty();
+                
+                // Load uploaded attachments
+                loadUploadedAttachments(currentPolicyId);
+            });
+            
+            // Function to load and display uploaded attachments
+            function loadUploadedAttachments(policyId) {
+                // Fetch policy data to get attachments
+                $.ajax({
+                    url: '/api/policies/' + policyId + '/payment-attachments',
+                    type: 'GET',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        const uploadedAttachmentsList = $('#uploadedAttachmentsList');
+                        const uploadedAttachmentsContainer = $('#uploadedAttachmentsContainer');
+                        
+                        // Get attachments from response
+                        const attachments = response.attachments || [];
+                        
+                        uploadedAttachmentsContainer.empty();
+                        
+                        if (attachments.length > 0) {
+                            uploadedAttachmentsList.show();
+                            
+                            attachments.forEach((attachment, index) => {
+                                const fileIcon = getFileIcon(attachment.mime_type || '');
+                                const filename = attachment.name || 'Unknown File';
+                                const filePath = attachment.file_path;
+                                const imageUrl = '/' + filePath;
+                                
+                                const attachmentElement = $(`
+                                    <div class="position-relative" style="flex: 0 0 calc(50% - 4px); min-width: 150px;">
+                                        <div class="rounded-2 border bg-light overflow-hidden" style="height: 150px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s;">
+                                            <img src="${imageUrl}" alt="${filename}" style="max-width: 100%; max-height: 100%; object-fit: cover; width: 100%; height: 100%;" class="img-thumbnail-preview" data-image-url="${imageUrl}" data-filename="${filename}">
+                                        </div>
+                                        <small class="d-block text-center text-muted mt-2 fw-semibold" style="font-size: 0.75rem; word-break: break-word;">${truncateFilename(filename, 15)}</small>
+                                        <button type="button" class="btn btn-sm btn-link text-danger p-0 position-absolute top-0 end-0 m-1 delete-uploaded-file" data-index="${index}" data-policy-id="${policyId}" style="font-size: 0.8rem; background: rgba(255,255,255,0.9); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                `);
+                                
+                                uploadedAttachmentsContainer.append(attachmentElement);
+                            });
+                            
+                            // Add click handler to view full image (remove old handlers first to prevent duplicates)
+                            uploadedAttachmentsContainer.off('click', '.img-thumbnail-preview');
+                            uploadedAttachmentsContainer.on('click', '.img-thumbnail-preview', function(e) {
+                                e.stopPropagation();
+                                const imageUrl = $(this).data('image-url');
+                                const filename = $(this).data('filename');
+                                
+                                const modal = $(`
+                                    <div class="modal fade" tabindex="-1" aria-hidden="true" style="--bs-modal-bg: #000; --bs-modal-border-color: #000;">
+                                        <div class="modal-dialog modal-fullscreen">
+                                            <div class="modal-content border-0" style="background-color: #1a1a1a;">
+                                                <div class="modal-header border-bottom border-secondary bg-dark">
+                                                    <h6 class="modal-title fw-semibold text-white">${filename}</h6>
+                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body p-0 bg-dark d-flex align-items-center justify-content-center" style="height: calc(100vh - 60px);">
+                                                    <img src="${imageUrl}" alt="${filename}" style="max-width: 95%; max-height: 95%; object-fit: contain;" class="img-fluid">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `);
+                                
+                                // Prevent clicks inside modal from bubbling to parent handlers
+                                modal.on('click', function(e) {
+                                    e.stopPropagation();
+                                });
+                                
+                                modal.appendTo('body');
+                                const bsModal = new bootstrap.Modal(modal[0]);
+                                bsModal.show();
+                                
+                                modal.on('hidden.bs.modal', function() {
+                                    $(this).remove();
+                                });
+                            });
+                        } else {
+                            uploadedAttachmentsList.hide();
+                        }
+                    },
+                    error: function() {
+                        // Silently fail - don't show error for now
+                        $('#uploadedAttachmentsList').hide();
+                    }
+                });
+            }
+
+            // File Attachment Handling
+            const dropZone = $('#dropZone');
+            const fileInput = $('#paymentAttachmentInput');
+            const attachmentsList = $('#attachmentsList');
+            const attachmentsPreview = $('#attachmentsPreview');
+            let isProcessingFiles = false;
+
+            // Click to browse - prevent recursion by stopping propagation on file input
+            fileInput.on('click', function(e) {
+                e.stopPropagation();
+            });
+
+            dropZone.click(function(e) {
+                // Only trigger file input click if the click was directly on the dropzone, not on file input
+                if (e.target === this || e.target.closest('#dropZone') === this) {
+                    fileInput.click();
+                }
+            });
+
+            // Drag and drop
+            dropZone.on('dragover dragenter', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.css('border-color', '#0d6efd').css('background-color', '#f0f6ff');
+            });
+
+            dropZone.on('dragleave', function(e) {
+                e.preventDefault();
+                dropZone.css('border-color', '#dee2e6').css('background-color', '');
+            });
+
+            dropZone.on('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.css('border-color', '#dee2e6').css('background-color', '');
+                
+                const files = e.originalEvent.dataTransfer.files;
+                fileInput[0].files = files;
+                displayFiles(files);
+            });
+
+            // File input change
+            fileInput.on('change', function() {
+                displayFiles(this.files);
+            });
+
+            // Display files function
+            function displayFiles(files) {
+                if (files.length === 0) {
+                    attachmentsList.hide();
+                    attachmentsPreview.empty();
+                    return;
+                }
+
+                attachmentsList.show();
+                attachmentsPreview.empty();
+
+                Array.from(files).forEach((file, index) => {
+                    const fileSize = (file.size / 1024).toFixed(2); // Convert to KB
+                    const fileIcon = getFileIcon(file.type);
+                    
+                    const fileElement = $(`
+                        <div class="p-2 rounded-2 bg-white border" style="flex: 0 0 calc(50% - 4px); min-width: 150px;">
+                            <div class="d-flex align-items-start justify-content-between">
+                                <div class="d-flex align-items-start flex-grow-1 me-2">
+                                    <i class="fas ${fileIcon} text-primary me-2" style="margin-top: 2px; font-size: 1.1rem;"></i>
+                                    <div style="min-width: 0;">
+                                        <small class="d-block fw-semibold text-dark" style="word-break: break-word; font-size: 0.8rem;">${truncateFilename(file.name, 20)}</small>
+                                        <small class="text-muted d-block" style="font-size: 0.7rem;">${fileSize} KB</small>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-link text-danger p-0 ms-1 remove-file" data-index="${index}" style="font-size: 0.9rem;">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `);
+
+                    attachmentsPreview.append(fileElement);
+                });
+            }
+
+            // Get file icon based on MIME type
+            function getFileIcon(mimeType) {
+                if (mimeType.includes('pdf')) return 'fa-file-pdf';
+                if (mimeType.includes('word') || mimeType.includes('document')) return 'fa-file-word';
+                if (mimeType.includes('spreadsheet') || mimeType.includes('excel')) return 'fa-file-excel';
+                if (mimeType.includes('image')) return 'fa-file-image';
+                if (mimeType.includes('text')) return 'fa-file-alt';
+                if (mimeType.includes('zip') || mimeType.includes('compressed')) return 'fa-file-archive';
+                return 'fa-file';
+            }
+
+            // Truncate long filenames
+            function truncateFilename(filename, maxLength) {
+                // Handle undefined or null filename
+                if (!filename) return 'Unknown File';
+                
+                filename = String(filename); // Ensure it's a string
+                
+                if (filename.length <= maxLength) return filename;
+                const extension = filename.substring(filename.lastIndexOf('.'));
+                const nameWithoutExt = filename.substring(0, filename.lastIndexOf('.'));
+                return nameWithoutExt.substring(0, maxLength - extension.length - 3) + '...' + extension;
+            }
+
+            // Clear all attachments
+            $('#clearAttachments').on('click', function() {
+                fileInput.val('');
+                attachmentsList.hide();
+                attachmentsPreview.empty();
+            });
+
+            // Remove individual file using event delegation
+            attachmentsPreview.on('click', '.remove-file', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Prevent multiple simultaneous file operations
+                if (isProcessingFiles) return;
+                isProcessingFiles = true;
+                
+                const index = $(this).data('index');
+                
+                // Use setTimeout to break the call stack
+                setTimeout(() => {
+                    try {
+                        const dt = new DataTransfer();
+                        const input = fileInput[0];
+                        
+                        Array.from(input.files).forEach((file, i) => {
+                            if (i !== index) {
+                                dt.items.add(file);
+                            }
+                        });
+                        
+                        input.files = dt.files;
+                        displayFiles(input.files);
+                    } finally {
+                        isProcessingFiles = false;
+                    }
+                }, 0);
+            });
+
+            // Upload attachments button handler
+            $('#uploadAttachmentsBtn').on('click', function() {
+                const files = fileInput[0].files;
+                
+                if (files.length === 0) {
+                    alert('Please select at least one file to upload.');
+                    return;
+                }
+
+                if (!currentPolicyId) {
+                    alert('Policy ID not found. Please close and reopen the modal.');
+                    return;
+                }
+
+                // Create FormData and append files
+                const formData = new FormData();
+                formData.append('policy_id', currentPolicyId);
+
+                Array.from(files).forEach((file) => {
+                    formData.append('attachments[]', file);
+                });
+
+                // Show loading state
+                const btn = $('#uploadAttachmentsBtn');
+                const originalText = btn.html();
+                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Uploading...');
+
+                // Submit files
+                $.ajax({
+                    url: '/policies/upload-payment-attachments',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        btn.prop('disabled', false).html(originalText);
+                        
+                        if (response.success) {
+                            alert(response.message);
+                            // Clear the file input and preview
+                            fileInput.val('');
+                            attachmentsList.hide();
+                            attachmentsPreview.empty();
+                            
+                            // Reload uploaded attachments
+                            loadUploadedAttachments(currentPolicyId);
+                        }
+                    },
+                    error: function(xhr) {
+                        btn.prop('disabled', false).html(originalText);
+                        
+                        let errorMessage = 'Error uploading files.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        alert(errorMessage);
+                    }
+                });
+            });
+            
+            // Delete uploaded attachment
+            $(document).on('click', '.delete-uploaded-file', function() {
+                const index = $(this).data('index');
+                const policyId = $(this).data('policy-id');
+                
+                console.log('Delete button clicked:', {index, policyId, url: '/policies/' + policyId + '/payment-attachment/' + index});
+                
+                if (confirm('Are you sure you want to delete this attachment?')) {
+                    $.ajax({
+                        url: '/policies/' + policyId + '/payment-attachment/' + index,
+                        type: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(response) {
+                            console.log('Delete success:', response);
+                            if (response.success) {
+                                alert('Attachment deleted successfully.');
+                                loadUploadedAttachments(policyId);
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.log('Delete error:', {status, error, responseText: xhr.responseText, statusCode: xhr.status});
+                            alert('Error deleting attachment: ' + xhr.status + ' ' + error);
+                        }
+                    });
                 }
             });
         });
