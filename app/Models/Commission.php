@@ -13,6 +13,7 @@ class Commission extends Model
     protected $fillable = [
         'policy_id',
         'claim_id',
+        'walk_in_id',
         'insurance_provider_id',
         'policy_number',
         'insured',

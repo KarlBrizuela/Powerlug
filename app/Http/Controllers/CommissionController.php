@@ -6,6 +6,7 @@ use App\Models\Commission;
 use App\Models\Policy;
 use App\Models\InsuranceProvider;
 use App\Models\Claim;
+use App\Models\WalkIn;
 use App\Exports\CommissionsExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -59,8 +60,10 @@ class CommissionController extends Controller
         $insuranceProviders = InsuranceProvider::orderBy('name')->get();
         $policies = Policy::with('insuranceProvider')->orderBy('policy_number')->get();
         $claims = Claim::select('id', 'client_name', 'loa_amount', 'insurance_provider_id', 'policy_number')->orderBy('client_name')->get();
+        $walkIns = WalkIn::select('id', 'insured_name', 'plate_number', 'premium')->orderBy('insured_name')->get();
+        $services = \App\Models\Service::orderBy('name')->get();
         
-        return view('pages.commission-form', compact('insuranceProviders', 'policies', 'claims'));
+        return view('pages.commission-form', compact('insuranceProviders', 'policies', 'claims', 'walkIns', 'services'));
     }
 
     /**
@@ -71,6 +74,7 @@ class CommissionController extends Controller
         $validated = $request->validate([
             'policy_id' => 'nullable|exists:policies,id',
             'claim_id' => 'nullable|exists:claims,id',
+            'walk_in_id' => 'nullable|exists:walk_ins,id',
             'insurance_provider_id' => 'required|exists:insurance_providers,id',
             'policy_number' => 'required|string|max:255',
             'insured' => 'required|string|max:255',
@@ -79,6 +83,7 @@ class CommissionController extends Controller
             'loa' => 'nullable|string|max:255',
             'commission_rate' => 'required|numeric|min:0|max:100',
             'payment_status' => 'required|in:pending,partial,paid',
+            'agent' => 'nullable|string|max:255',
             'remarks' => 'nullable|string',
         ]);
 
@@ -112,8 +117,10 @@ class CommissionController extends Controller
         $insuranceProviders = InsuranceProvider::orderBy('name')->get();
         $policies = Policy::with('insuranceProvider')->orderBy('policy_number')->get();
         $claims = Claim::select('id', 'client_name', 'loa_amount', 'insurance_provider_id', 'policy_number')->orderBy('client_name')->get();
+        $walkIns = WalkIn::select('id', 'insured_name', 'plate_number', 'premium')->orderBy('insured_name')->get();
+        $services = \App\Models\Service::orderBy('name')->get();
         
-        return view('pages.commission-form', compact('commission', 'insuranceProviders', 'policies', 'claims'));
+        return view('pages.commission-form', compact('commission', 'insuranceProviders', 'policies', 'claims', 'walkIns', 'services'));
     }
 
     /**
@@ -126,6 +133,7 @@ class CommissionController extends Controller
         $validated = $request->validate([
             'policy_id' => 'nullable|exists:policies,id',
             'claim_id' => 'nullable|exists:claims,id',
+            'walk_in_id' => 'nullable|exists:walk_ins,id',
             'insurance_provider_id' => 'required|exists:insurance_providers,id',
             'policy_number' => 'required|string|max:255',
             'insured' => 'required|string|max:255',
@@ -134,6 +142,7 @@ class CommissionController extends Controller
             'loa' => 'nullable|string|max:255',
             'commission_rate' => 'required|numeric|min:0|max:100',
             'payment_status' => 'required|in:pending,partial,paid',
+            'agent' => 'nullable|string|max:255',
             'remarks' => 'nullable|string',
         ]);
 

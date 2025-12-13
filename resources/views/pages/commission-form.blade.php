@@ -58,7 +58,7 @@
                                 @endif
 
                                 <div class="row">
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-md-4 mb-3">
                                         <label for="claim_id" class="form-label">Claim</label>
                                         <select name="claim_id" id="claim_id" class="form-select">
                                             <option value="">Select Claim (Optional)</option>
@@ -74,7 +74,24 @@
                                         </select>
                                     </div>
 
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="walk_in_id" class="form-label">Walk-In</label>
+                                        <select name="walk_in_id" id="walk_in_id" class="form-select">
+                                            <option value="">Select Walk-In (Optional)</option>
+                                            @if(isset($walkIns))
+                                                @foreach($walkIns as $walkIn)
+                                                    <option value="{{ $walkIn->id }}" 
+                                                        data-client="{{ $walkIn->insured_name }}"
+                                                        data-plate="{{ $walkIn->plate_number }}"
+                                                        data-premium="{{ $walkIn->premium }}">
+                                                        {{ $walkIn->insured_name }} - {{ $walkIn->plate_number }}
+                                                    </option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-4 mb-3">
                                         <label for="policy_id" class="form-label">Policy <span class="text-danger">*</span></label>
                                         <select name="policy_id" id="policy_id" class="form-select @error('policy_id') is-invalid @enderror" required>
                                             <option value="">Select Policy</option>
@@ -100,6 +117,18 @@
 
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
+                                        <label for="services" class="form-label">Services</label>
+                                        <select name="services" id="services" class="form-select">
+                                            <option value="">Select Service (Optional)</option>
+                                            @if(isset($services))
+                                                @foreach($services as $service)
+                                                    <option value="{{ $service->id }}" data-price="{{ $service->price }}">{{ $service->name }} - ₱{{ number_format($service->price, 2) }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
                                         <label for="insurance_provider_id" class="form-label">Insurance Provider <span class="text-danger">*</span></label>
                                         <select name="insurance_provider_id" id="insurance_provider_id" class="form-select @error('insurance_provider_id') is-invalid @enderror" required>
                                             <option value="">Select Insurance Provider</option>
@@ -113,7 +142,9 @@
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
+                                </div>
 
+                                <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="insured" class="form-label">Insured <span class="text-danger">*</span></label>
                                         <input type="text" name="insured" id="insured" class="form-control @error('insured') is-invalid @enderror" value="{{ old('insured', $commission->insured ?? '') }}" required>
@@ -235,10 +266,15 @@
 
     <script>
         $(document).ready(function() {
-            // Initialize Select2
             $('#claim_id').select2({
                 theme: 'bootstrap-5',
                 placeholder: 'Select Claim (Optional)',
+                allowClear: true
+            });
+
+            $('#walk_in_id').select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Select Walk-In (Optional)',
                 allowClear: true
             });
 
@@ -251,6 +287,12 @@
             $('#insurance_provider_id').select2({
                 theme: 'bootstrap-5',
                 placeholder: 'Select Insurance Provider'
+            });
+
+            $('#services').select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Select Service (Optional)',
+                allowClear: true
             });
 
             // Auto-fill fields when claim is selected
@@ -269,7 +311,8 @@
                     $('#insurance_provider_id').val(providerId).trigger('change');
                     $('#policy_number').val(policyNumber);
                     
-                    // Disable policy dropdown
+                    // Disable other dropdowns
+                    $('#walk_in_id').prop('disabled', true).trigger('change.select2');
                     $('#policy_id').prop('disabled', true).trigger('change.select2');
                 } else {
                     // Clear fields when claim is unselected
@@ -278,8 +321,58 @@
                     $('#insurance_provider_id').val('').trigger('change');
                     $('#policy_number').val('');
                     
-                    // Enable policy dropdown if no claim is selected
+                    // Enable other dropdowns if no claim is selected
+                    $('#walk_in_id').prop('disabled', false).trigger('change.select2');
                     $('#policy_id').prop('disabled', false).trigger('change.select2');
+                }
+            });
+
+            // Auto-fill fields when walk-in is selected
+            $('#walk_in_id').on('change', function() {
+                const selectedOption = $(this).find(':selected');
+                
+                if (selectedOption.val()) {
+                    const clientName = selectedOption.data('client');
+                    const plateNumber = selectedOption.data('plate');
+                    const premium = selectedOption.data('premium') || 0;
+
+                    // Fill in the fields
+                    $('#insured').val(clientName);
+                    $('#policy_number').val(plateNumber);
+                    $('#gross_premium').val(premium);
+                    
+                    // Trigger commission calculation
+                    calculateCommission();
+                    
+                    // Disable other dropdowns
+                    $('#claim_id').prop('disabled', true).trigger('change.select2');
+                    $('#policy_id').prop('disabled', true).trigger('change.select2');
+                } else {
+                    // Clear fields when walk-in is unselected
+                    $('#insured').val('');
+                    $('#policy_number').val('');
+                    $('#gross_premium').val('');
+                    $('#commission_amount_display').val('₱0.00');
+                    
+                    // Enable other dropdowns if no walk-in is selected
+                    $('#claim_id').prop('disabled', false).trigger('change.select2');
+                    $('#policy_id').prop('disabled', false).trigger('change.select2');
+                }
+            });
+
+            // Auto-fill service price when service is selected
+            $('#services').on('change', function() {
+                const selectedOption = $(this).find(':selected');
+                
+                if (selectedOption.val()) {
+                    const servicePrice = parseFloat(selectedOption.data('price')) || 0;
+                    
+                    // Set net premium to service price and trigger calculation
+                    $('#net_premium').val(servicePrice);
+                    calculateCommission();
+                } else {
+                    $('#net_premium').val('');
+                    $('#commission_amount_display').val('₱0.00');
                 }
             });
 
@@ -305,8 +398,9 @@
                     // Trigger commission calculation
                     calculateCommission();
                     
-                    // Disable claim dropdown
+                    // Disable other dropdowns
                     $('#claim_id').prop('disabled', true).trigger('change.select2');
+                    $('#walk_in_id').prop('disabled', true).trigger('change.select2');
                 } else {
                     // Clear fields when policy is unselected
                     $('#insurance_provider_id').val('').trigger('change');
@@ -315,8 +409,9 @@
                     $('#gross_premium').val('');
                     $('#commission_amount_display').val('₱0.00');
                     
-                    // Enable claim dropdown if no policy is selected
+                    // Enable other dropdowns if no policy is selected
                     $('#claim_id').prop('disabled', false).trigger('change.select2');
+                    $('#walk_in_id').prop('disabled', false).trigger('change.select2');
                 }
             });
 
