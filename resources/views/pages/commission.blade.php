@@ -197,35 +197,58 @@
                                     </form>
                                 </div>
 
-                                <div class="section-title">Commission Summary</div>
+                                <div class="section-title">All Commissions</div>
+                                <div class="alert alert-info mb-3" role="alert">
+                                    <i class="fas fa-info-circle"></i> Unified view of all commission types: Policy, Claim, and Walk-In commissions
+                                </div>
 
                                 <div class="table-container">
-                                    <table id="commissionsTable" class="table table-bordered dt-responsive nowrap w-100">
+                                    <table id="allCommissionsTable" class="table table-bordered dt-responsive nowrap w-100">
                                         <thead class="table-light table-fixed-header">
                                             <tr>
+                                                <th>TYPE</th>
                                                 <th>INSURANCE PROVIDER</th>
                                                 <th>POLICY NUMBER</th>
                                                 <th>INSURED</th>
-                                                <th>AGENT</th>
                                                 <th>GROSS</th>
                                                 <th>NET</th>
-                                                <th>LOA</th>
                                                 <th>COMMISSION</th>
+                                                <th>STATUS</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @if(isset($commissions) && $commissions->count() > 0)
                                                 @foreach($commissions as $commission)
+                                                    @php
+                                                        // Determine commission type
+                                                        if ($commission->policy_id && !$commission->claim_id && !$commission->walk_in_id) {
+                                                            $type = 'Policy';
+                                                            $typeColor = 'primary';
+                                                        } elseif ($commission->claim_id && !$commission->walk_in_id) {
+                                                            $type = 'Claim';
+                                                            $typeColor = 'warning';
+                                                        } else {
+                                                            $type = 'Walk-In';
+                                                            $typeColor = 'success';
+                                                        }
+
+                                                        // Determine payment status color
+                                                        $statusColor = $commission->payment_status === 'paid' ? 'success' : ($commission->payment_status === 'partial' ? 'warning' : 'secondary');
+                                                    @endphp
                                                     <tr>
+                                                        <td>
+                                                            <span class="badge bg-{{ $typeColor }}">{{ $type }}</span>
+                                                        </td>
                                                         <td>{{ $commission->insuranceProvider->name ?? 'N/A' }}</td>
                                                         <td>{{ $commission->policy_number }}</td>
                                                         <td>{{ $commission->insured }}</td>
-                                                        <td>{{ $commission->agent ?? 'N/A' }}</td>
-                                                        <td>₱{{ number_format($commission->gross_premium, 2) }}</td>
-                                                        <td>₱{{ number_format($commission->net_premium, 2) }}</td>
-                                                        <td>{{ $commission->loa ?? 'N/A' }}</td>
+                                                        <td>₱{{ number_format($commission->gross_premium ?? 0, 2) }}</td>
+                                                        <td>₱{{ number_format($commission->net_premium ?? 0, 2) }}</td>
                                                         <td>₱{{ number_format($commission->commission_amount, 2) }}</td>
+                                                        <td>
+                                                            <span class="badge bg-{{ $statusColor }}">{{ ucfirst($commission->payment_status) }}</span>
+                                                        </td>
                                                         <td class="text-center">
                                                             <div class="btn-group" role="group">
                                                                 <button class="btn btn-sm btn-outline-primary border-0 view-commission" data-commission-id="{{ $commission->id }}" title="View Details">
@@ -243,31 +266,17 @@
                                                 @endforeach
                                             @else
                                                 <tr>
-                                                    <td colspan="12" class="text-center py-4">
-                                                        <div class="text-muted">
-                                                            <p>No commission records found.</p>
-                                                            @if(request()->hasAny(['insurance_provider_id', 'payment_status', 'date_from', 'date_to']))
-                                                                <p class="small">Try adjusting your filters or <a href="{{ route('commission.index') }}">clear filters</a>.</p>
-                                                            @else
-                                                                <p class="small">
-                                                                    <a href="{{ route('commission.create') }}" class="btn btn-sm btn-primary">
-                                                                        Add Commission
-                                                                    </a>
-                                                                </p>
-                                                            @endif
-                                                        </div>
-                                                    </td>
+                                                    <td colspan="9" class="text-center py-4 text-muted">No commission records found.</td>
                                                 </tr>
                                             @endif
                                         </tbody>
                                     </table>
                                 </div>
 
-                                @if(isset($commissions) && $commissions->hasPages())
-                                    <div class="mt-3">
-                                        {{ $commissions->links() }}
-                                    </div>
-                                @endif
+                                <hr class="my-4">
+                                <div class="alert alert-secondary mb-3" role="alert">
+                                    <i class="fas fa-lock"></i> <strong>Only for super admin, can tick pending, cleared</strong>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -354,28 +363,36 @@
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <script>
-        $(document).ready(function() {
-            // Show success message if present
-            @if(session('success'))
+    @if(session('success'))
+        <script>
+            $(document).ready(function() {
                 Swal.fire({
                     icon: 'success',
                     title: 'Success',
-                    text: '{{ session('success') }}',
+                    text: "{{ session('success') }}",
                     timer: 3000,
                     showConfirmButton: false
                 });
-            @endif
+            });
+        </script>
+    @endif
 
-            @if(session('error'))
+    @if(session('error'))
+        <script>
+            $(document).ready(function() {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: '{{ session('error') }}',
+                    text: "{{ session('error') }}",
                     timer: 3000,
                     showConfirmButton: false
                 });
-            @endif
+            });
+        </script>
+    @endif
+
+    <script>
+        $(document).ready(function() {
 
             // View commission details
             $(document).on('click', '.view-commission', function() {
