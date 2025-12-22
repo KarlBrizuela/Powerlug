@@ -8,6 +8,9 @@ use App\Models\Client;
 use App\Models\Collection;
 use App\Models\WalkIn;
 use App\Models\Claim;
+use App\Models\Policy;
+use App\Exports\CollectionsExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CollectionController extends Controller
 {
@@ -48,7 +51,7 @@ class CollectionController extends Controller
 
     /**
      * Create Client records for claim names that don't have a matching client yet.
-     * Returns the filtered list of clients to display in the dropdown (only those from claims).
+     * Returns all available clients, including those from claims.
      */
     protected function syncAndGetClientsFromWalkinsAndClaims()
     {
@@ -101,12 +104,11 @@ class CollectionController extends Controller
             }
         }
 
-        // Fetch clients and attach source information
-        $clientIds = array_keys($createdClients);
-        $clients = Client::whereIn('id', $clientIds)->orderBy('lastName')->orderBy('firstName')->get();
+        // Fetch ALL clients, ordered alphabetically, with source info for those from claims
+        $clients = Client::orderBy('lastName')->orderBy('firstName')->get();
         
         foreach ($clients as $client) {
-            $client->source = $createdClients[$client->id] ?? 'Unknown';
+            $client->source = $createdClients[$client->id] ?? 'Manual';
         }
 
         return $clients;
@@ -158,5 +160,60 @@ class CollectionController extends Controller
         return redirect()
             ->route('collections.index')
             ->with('success', 'Collection record created successfully.');
+    }
+
+    public function getClaimData($clientId)
+    {
+        try {
+            $client = Client::find($clientId);
+            if (!$client) {
+                return response()->json([
+                    'policy_number' => '',
+                    'claim_number' => '',
+                    'loa_amount' => 0
+                ], 200);
+            }
+
+            // Get all policies for this client
+            $policies = Policy::where('client_id', $clientId)->pluck('id')->toArray();
+            
+            if (empty($policies)) {
+                return response()->json([
+                    'policy_number' => '',
+                    'claim_number' => '',
+                    'loa_amount' => 0
+                ], 200);
+            }
+
+            // Find the latest claim for any of the client's policies
+            $claim = Claim::whereIn('policy_id', $policies)
+                ->latest()
+                ->first();
+
+            if ($claim) {
+                return response()->json([
+                    'policy_number' => $claim->policy_number ?? '',
+                    'claim_number' => $claim->claim_number ?? '',
+                    'loa_amount' => (float) ($claim->loa_amount ?? 0)
+                ], 200);
+            }
+
+            return response()->json([
+                'policy_number' => '',
+                'claim_number' => '',
+                'loa_amount' => 0
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'policy_number' => '',
+                'claim_number' => '',
+                'loa_amount' => 0
+            ], 200);
+        }
+    }
+
+    public function export()
+    {
+        return Excel::download(new CollectionsExport, 'collections-' . date('Y-m-d-H-i-s') . '.xlsx');
     }
 }

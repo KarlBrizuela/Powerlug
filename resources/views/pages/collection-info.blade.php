@@ -337,9 +337,9 @@
                             <a href="{{ route('collections.create') }}" class="btn btn-primary me-2">
                                 <i class="fas fa-plus me-1"></i> Add New Collection
                             </a>
-                            <button class="btn btn-success" onclick="exportToExcel()">
+                            <a href="{{ route('collections.export') }}" class="btn btn-success">
                                 <i class="fas fa-file-excel me-1"></i> Export to Excel
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>

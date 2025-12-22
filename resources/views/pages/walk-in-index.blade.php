@@ -11,6 +11,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
 
     <style>
         .page-title {
@@ -272,9 +274,9 @@
                 <a href="{{ route('walk-in.export') }}" class="btn btn-success btn-sm me-2">
                     <i class="fas fa-download"></i> Export Excel
                 </a>
-                <a href="{{ route('walk-in.create') }}" class="btn btn-primary">
+                <!-- <a href="{{ route('walk-in.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus"></i> New Walk-in
-                </a>
+                </a> -->
             </div>
         </div>
 
@@ -297,7 +299,7 @@
             <div class="card-body">
                 @if($walkIns->count() > 0)
                     <div class="table-responsive">
-                        <table class="table table-hover">
+                        <table class="table table-hover" id="walkInsTable">
                             <thead class="table-light">
                                 <tr>
                                     <th>#</th>
@@ -395,13 +397,6 @@
                             </tbody>
                         </table>
                     </div>
-
-                    <!-- Pagination -->
-                    @if($walkIns->hasPages())
-                        <div class="d-flex justify-content-center mt-4">
-                            {{ $walkIns->links() }}
-                        </div>
-                    @endif
                 @else
                     <div class="alert alert-info text-center py-5">
                         <i class="fas fa-info-circle fa-2x mb-3"></i>
@@ -415,8 +410,32 @@
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- jQuery (required for DataTables) -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
+    // Initialize DataTables
+    $(document).ready(function() {
+        $('#walkInsTable').DataTable({
+            "pageLength": 15,
+            "ordering": true,
+            "searching": true,
+            "lengthChange": true,
+            "info": true,
+            "paging": true,
+            "language": {
+                "search": "Search Walk-ins:",
+                "paginate": {
+                    "previous": "Previous",
+                    "next": "Next"
+                }
+            }
+        });
+    });
+
     function toggleActionMenu(event, walkInId) {
         event.stopPropagation();
         

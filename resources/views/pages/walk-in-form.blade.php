@@ -276,7 +276,7 @@
 
                 <div class="card">
                     <div class="card-body">
-                        <form method="POST" action="{{ route('policies.store') }}" enctype="multipart/form-data">
+                        <form method="POST" action="{{ route('walk-in.store') }}" enctype="multipart/form-data">
                             @csrf
 
                             <!-- Primary Information Section -->
@@ -408,14 +408,14 @@
 
                                     <div class="row mb-2">
                                         <div class="col-md-6">
-                                            <label class="form-label">Size</label>
-                                            <select class="form-select @error('size') is-invalid @enderror" name="size">
-                                                <option value="">Select size</option>
-                                                @foreach(['Small', 'Medium', 'Large', 'X-Large', 'XXL-Large'] as $size)
-                                                    <option value="{{ $size }}" {{ old('size') == $size ? 'selected' : '' }}>
-                                                        {{ $size }}
-                                                    </option>
-                                                @endforeach
+                                            <label class="form-label">Size Category</label>
+                                            <select class="form-select @error('size') is-invalid @enderror" id="sizeSelect" name="size">
+                                                <option value="">Select size category</option>
+                                                <option value="Small" {{ old('size') == 'Small' ? 'selected' : '' }}>Small</option>
+                                                <option value="Medium" {{ old('size') == 'Medium' ? 'selected' : '' }}>Medium</option>
+                                                <option value="Large" {{ old('size') == 'Large' ? 'selected' : '' }}>Large</option>
+                                                <option value="X-Large" {{ old('size') == 'X-Large' ? 'selected' : '' }}>X-Large</option>
+                                                <option value="XXL-Large" {{ old('size') == 'XXL-Large' ? 'selected' : '' }}>XXL-Large</option>
                                             </select>
                                             @error('size')
                                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -429,17 +429,8 @@
                                             <div class="services-input-wrapper" id="servicesInputGroup">
                                                 <select class="services-dropdown form-select" id="serviceDropdown">
                                                     <option value="">Select a service to add</option>
-                                                    @if(isset($services) && $services->count())
-                                                        @foreach($services as $s)
-                                                            <option value="{{ $s->name }}" data-price="{{ number_format((float)$s->price, 2, '.', '') }}">{{ $s->name }} - ₱ {{ number_format((float)$s->price, 2) }}</option>
-                                                        @endforeach
-                                                    @else
-                                                        <option value="Carwash" data-price="0.00">Carwash</option>
-                                                        <option value="Change Oil" data-price="0.00">Change Oil</option>
-                                                        <option value="Etc" data-price="0.00">Etc</option>
-                                                    @endif
                                                 </select>
-                                            </div>
+                            </div>
                                             <div id="servicesContainer"></div>
                                             @error('services')
                                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -451,60 +442,21 @@
 
                             <!-- Premium Summary Section -->
                             <div class="section-container mb-4">
-                                <div class="section-title">Summary of Premium and Other Charges</div>
+                                <div class="section-title">Summary of Amount Due</div>
                                 <div class="section-content">
                                     <div class="premium-summary">
-                                        <div class="header">SUMMARY OF PREMIUM AND OTHER CHARGES</div>
-                                        
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <div class="premium-row">
-                                                    <span>PREMIUM</span>
-                                                    <input type="text" class="form-control form-control-sm @error('premium') is-invalid @enderror" 
-                                                           style="width: 150px;" name="premium" value="{{ old('premium') }}" placeholder="PHP">
-                                                    @error('premium')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                                <div class="premium-row">
-                                                    <span>Value Added Tax</span>
-                                                    <input type="text" class="form-control form-control-sm @error('vat') is-invalid @enderror" 
-                                                           style="width: 150px;" name="vat" value="{{ old('vat') }}" placeholder="PHP">
-                                                    @error('vat')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                                <div class="premium-row">
-                                                    <span>Documentary Stamp Tax</span>
-                                                    <input type="text" class="form-control form-control-sm @error('documentary_stamp_tax') is-invalid @enderror" 
-                                                           style="width: 150px;" name="documentary_stamp_tax" value="{{ old('documentary_stamp_tax') }}" placeholder="PHP">
-                                                    @error('documentary_stamp_tax')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                                <div class="premium-row">
-                                                    <span>Local Government Tax</span>
-                                                    <input type="text" class="form-control form-control-sm @error('local_gov_tax') is-invalid @enderror" 
-                                                           style="width: 150px;" name="local_gov_tax" value="{{ old('local_gov_tax') }}" placeholder="PHP">
-                                                    @error('local_gov_tax')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                                <div class="premium-row">
-                                                    <span>Services Subtotal</span>
-                                                    <input type="text" class="form-control form-control-sm" 
-                                                           style="width: 150px;" id="servicesSubtotalWalkin" value="0.00" readonly>
-                                                </div>
                                                 <div class="premium-row total-row">
                                                     <span>AMOUNT DUE</span>
                                                     <input type="text" class="form-control form-control-sm fw-bold @error('amount_due') is-invalid @enderror" 
-                                                           style="width: 150px;" name="amount_due" value="{{ old('amount_due') }}" placeholder="PHP" readonly>
+                                                           style="width: 150px;" id="amountDueWalkin" name="amount_due" value="{{ old('amount_due') }}" placeholder="PHP" readonly>
                                                     @error('amount_due')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
                                                 </div>
                                             </div>
-                                            <div class="col-md-6">
+                                        
                                                 <div class="col-md-12 mt-3">
                                                     <label class="form-label">Remarks</label>
                                                     <textarea class="form-control @error('premium_remarks') is-invalid @enderror" 
@@ -513,7 +465,7 @@
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
                                                 </div>
-                                            </div>
+                                        
                                         </div>
                                     </div>
                                 </div>
@@ -792,21 +744,86 @@
                 }
             }
 
-            // Service selection functionality
+            // Load services
             const serviceDropdown = document.getElementById('serviceDropdown');
-            const servicesContainer = document.getElementById('servicesContainer');
-            const servicesSubtotalInput = document.getElementById('servicesSubtotalWalkin');
+            const sizeSelect = document.getElementById('sizeSelect');
+            
+            // Function to load and populate services based on size
+            function loadServices(size = null) {
+                if (size) {
+                    // Fetch services for specific size category
+                    fetch('/api/services/by-size?size=' + encodeURIComponent(size))
+                        .then(response => response.json())
+                        .then(services => {
+                            serviceDropdown.innerHTML = '<option value="">Select a service to add</option>';
+                            if (services.length > 0) {
+                                services.forEach(function(service) {
+                                    const option = document.createElement('option');
+                                    option.value = service.name;
+                                    option.textContent = service.name + ' (' + service.size_category + ') - ₱ ' + parseFloat(service.price).toFixed(2);
+                                    option.dataset.price = parseFloat(service.price).toFixed(2);
+                                    option.dataset.sizeCategory = service.size_category;
+                                    serviceDropdown.appendChild(option);
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error loading services:', error);
+                            serviceDropdown.innerHTML = '<option value="">Select a service to add</option>';
+                        });
+                } else {
+                    // Load all services if no size selected
+                    fetch('/api/services/all')
+                        .then(response => response.json())
+                        .then(services => {
+                            serviceDropdown.innerHTML = '<option value="">Select a service to add</option>';
+                            if (services.length > 0) {
+                                services.forEach(function(service) {
+                                    const option = document.createElement('option');
+                                    option.value = service.name;
+                                    option.textContent = service.name + ' (' + service.size_category + ') - ₱ ' + parseFloat(service.price).toFixed(2);
+                                    option.dataset.price = parseFloat(service.price).toFixed(2);
+                                    option.dataset.sizeCategory = service.size_category;
+                                    serviceDropdown.appendChild(option);
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error loading services:', error);
+                            serviceDropdown.innerHTML = '<option value="">Select a service to add</option>';
+                        });
+                }
+            }
+            
+            // Load services on page load
+            loadServices();
+            
+            // Load services when size changes
+            if (sizeSelect) {
+                sizeSelect.addEventListener('change', function() {
+                    const selectedSize = this.value;
+                    if (selectedSize) {
+                        loadServices(selectedSize);
+                    } else {
+                        loadServices();
+                    }
+                });
+            }
 
-            // Function to calculate services subtotal
+            // Define variables for services
+            const servicesContainer = document.getElementById('servicesContainer');
+            const amountDueInput = document.getElementById('amountDueWalkin');
+
+            // Function to calculate services subtotal and update amount due
             function calculateServicesSubtotal() {
                 const servicePrices = Array.from(servicesContainer.querySelectorAll('input[name="service_payment_dues[]"]'))
                     .map(input => parseFloat(input.value) || 0);
                 const subtotal = servicePrices.reduce((sum, price) => sum + price, 0);
                 
-                if (servicesSubtotalInput) {
-                    servicesSubtotalInput.value = subtotal.toFixed(2);
-                    // Trigger amount due calculation
-                    calculateAmountDue();
+                if (amountDueInput) {
+                    amountDueInput.value = subtotal.toFixed(2);
+                    // Update balance when amount due changes
+                    updateBalance();
                 }
             }
 
@@ -815,6 +832,7 @@
                     if (this.value) {
                         const serviceName = this.value;
                         const servicePrice = this.options[this.selectedIndex].dataset.price || '0.00';
+                        const sizeCategory = this.options[this.selectedIndex].dataset.sizeCategory || '';
 
                         // Check if service already exists
                         const existingService = Array.from(servicesContainer.querySelectorAll('input[name="services[]"]'))
@@ -824,7 +842,7 @@
                             const serviceDiv = document.createElement('div');
                             serviceDiv.className = 'mb-2 p-2 bg-light rounded d-flex justify-content-between align-items-center';
                             serviceDiv.innerHTML = `
-                                <span>${serviceName} - ₱${parseFloat(servicePrice).toFixed(2)}</span>
+                                <span>${serviceName} (${sizeCategory}) - ₱${parseFloat(servicePrice).toFixed(2)}</span>
                                 <input type="hidden" name="services[]" value="${serviceName}">
                                 <input type="hidden" name="service_payment_dues[]" value="${servicePrice}">
                                 <button type="button" class="btn btn-sm btn-danger" onclick="removeService(this)">
@@ -848,52 +866,21 @@
             // Payment terms - calculate installment amounts
             const paymentTermsSelect = document.querySelector('select[name="payment_terms"]');
             const paidAmountInput = document.getElementById('paidAmountWalkin');
-            const amountDueInput = document.querySelector('input[name="amount_due"]');
+            const amountDueInputPayment = document.querySelector('input[name="amount_due"]');
             const balanceAmountInput = document.getElementById('balanceAmountWalkin');
-
-            // Get all premium/tax inputs
-            const premiumInput = document.querySelector('input[name="premium"]');
-            const vatInput = document.querySelector('input[name="vat"]');
-            const docStampTaxInput = document.querySelector('input[name="documentary_stamp_tax"]');
-            const localGovTaxInput = document.querySelector('input[name="local_gov_tax"]');
 
             // Update balance calculation
             function updateBalance() {
-                if (!amountDueInput || !paidAmountInput || !balanceAmountInput) return;
-                const amountDue = parseFloat(amountDueInput.value) || 0;
+                if (!amountDueInputPayment || !paidAmountInput || !balanceAmountInput) return;
+                const amountDue = parseFloat(amountDueInputPayment.value) || 0;
                 const paidAmount = parseFloat(paidAmountInput.value) || 0;
                 const balance = amountDue - paidAmount;
                 balanceAmountInput.value = balance.toFixed(2);
             }
 
-            // Function to calculate amount due
-            function calculateAmountDue() {
-                if (!premiumInput || !vatInput || !docStampTaxInput || !localGovTaxInput || !servicesSubtotalInput || !amountDueInput) return;
-                
-                const premium = parseFloat(premiumInput.value) || 0;
-                const vat = parseFloat(vatInput.value) || 0;
-                const docStampTax = parseFloat(docStampTaxInput.value) || 0;
-                const localGovTax = parseFloat(localGovTaxInput.value) || 0;
-                const servicesSubtotal = parseFloat(servicesSubtotalInput.value) || 0;
-
-                const totalAmountDue = premium + vat + docStampTax + localGovTax + servicesSubtotal;
-                amountDueInput.value = totalAmountDue.toFixed(2);
-                console.log('Amount Due calculated:', totalAmountDue);
-
-                // Update balance when amount due changes
-                updateBalance();
-            }
-
-            // Add event listeners to all premium/tax inputs
-            if (premiumInput) premiumInput.addEventListener('input', calculateAmountDue);
-            if (vatInput) vatInput.addEventListener('input', calculateAmountDue);
-            if (docStampTaxInput) docStampTaxInput.addEventListener('input', calculateAmountDue);
-            if (localGovTaxInput) localGovTaxInput.addEventListener('input', calculateAmountDue);
-            if (servicesSubtotalInput) servicesSubtotalInput.addEventListener('input', calculateAmountDue);
-
-            if (paymentTermsSelect && paidAmountInput && amountDueInput) {
+            if (paymentTermsSelect && paidAmountInput && amountDueInputPayment) {
                 paymentTermsSelect.addEventListener('change', function() {
-                    const amountDue = parseFloat(amountDueInput.value) || 0;
+                    const amountDue = parseFloat(amountDueInputPayment.value) || 0;
                     let divisor = 1;
 
                     // Determine divisor based on payment terms

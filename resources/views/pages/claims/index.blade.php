@@ -137,7 +137,12 @@
                 <div class="page-header">
                     <div class="d-flex justify-content-between align-items-center">
                         <h4 class="mb-0">Claims</h4>
-                        <a href="{{ route('claims.create') }}" class="btn btn-primary">New Claim</a>
+                        <div class="d-flex gap-2">
+                            <a href="{{ route('claims.export') }}" class="btn btn-success">
+                                <i class="bi bi-download"></i> Export to Excel
+                            </a>
+                            <a href="{{ route('claims.create') }}" class="btn btn-primary">New Claim</a>
+                        </div>
                     </div>
                 </div>
 
@@ -219,6 +224,8 @@
                                         <th>Insurance Provider</th>
                                         <th>Policy No.</th>
                                         <th>Claim No.</th>
+                                        <th>LOA Amount</th>
+                                        <th>Deductibles</th>
                                         <th>Total</th>
                                         <th>Admin Status</th>
                                         @if(auth()->user() && auth()->user()->position === 'superadmin')
@@ -232,10 +239,12 @@
                                         <tr>
                                             <td>{{ $claim->id }}</td>
                                             <td>{{ $claim->date_of_claim?->format('Y-m-d') }}</td>
-                                            <td>{{ $claim->client_name }}</td>
+                                            <td>{{ $claim->policy?->client_name ?? 'N/A' }}</td>
                                             <td>{{ $claim->insuranceProvider->name ?? 'N/A' }}</td>
                                             <td>{{ $claim->policy_number }}</td>
                                             <td><span class="badge bg-primary">{{ $claim->claim_number }}</span></td>
+                                            <td>₱{{ number_format($claim->loa_amount ?? 0, 2) }}</td>
+                                            <td>₱{{ number_format($claim->deductible_participation ?? 0, 2) }}</td>
                                             <td>₱{{ number_format($claim->total_amount ?? 0, 2) }}</td>
                                             <td>
                                                 <form method="POST" action="{{ route('claims.update-admin-status', $claim) }}" class="d-inline">
@@ -262,9 +271,19 @@
                                             @endif
                                             <td>
                                                 <div class="d-flex" style="gap: 0.25rem;">
-                                                    <a href="{{ route('claims.show', $claim) }}" class="action-btn view" title="View">
+                                                    <button type="button" class="action-btn view" title="View" data-bs-toggle="modal" data-bs-target="#claimModal"
+                                                        data-claim-id="{{ $claim->id }}"
+                                                        data-claim-date="{{ $claim->date_of_claim?->format('Y-m-d') }}"
+                                                        data-claim-number="{{ $claim->claim_number }}"
+                                                        data-client-name="{{ $claim->policy?->client_name ?? 'N/A' }}"
+                                                        data-policy-number="{{ $claim->policy_number }}"
+                                                        data-insurance-provider="{{ $claim->insuranceProvider->name ?? 'N/A' }}"
+                                                        data-loa-amount="{{ $claim->loa_amount ?? 0 }}"
+                                                        data-deductible-participation="{{ $claim->deductible_participation ?? 0 }}"
+                                                        data-total-amount="{{ $claim->total_amount ?? 0 }}"
+                                                        data-file-path="{{ $claim->file_path ?? '' }}">
                                                         <i class="bi bi-eye-fill"></i>
-                                                    </a>
+                                                    </button>
                                                     @if($claim->file_path)
                                                         <a href="{{ route('claims.download', $claim) }}" class="action-btn download" title="Download">
                                                             <i class="bi bi-download"></i>
@@ -310,7 +329,119 @@
                     document.body.classList.toggle('sidebar-collapsed');
                 });
             }
+
+            // Handle view button click to populate modal
+            const claimModal = document.getElementById('claimModal');
+            if (claimModal) {
+                claimModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    
+                    // Get data attributes
+                    const claimId = button.getAttribute('data-claim-id');
+                    const claimDate = button.getAttribute('data-claim-date');
+                    const claimNumber = button.getAttribute('data-claim-number');
+                    const clientName = button.getAttribute('data-client-name');
+                    const policyNumber = button.getAttribute('data-policy-number');
+                    const insuranceProvider = button.getAttribute('data-insurance-provider');
+                    const loaAmount = parseFloat(button.getAttribute('data-loa-amount'));
+                    const deductibleParticipation = parseFloat(button.getAttribute('data-deductible-participation'));
+                    const totalAmount = parseFloat(button.getAttribute('data-total-amount'));
+                    const filePath = button.getAttribute('data-file-path');
+
+                    // Populate modal fields
+                    document.getElementById('modalClaimId').textContent = claimId;
+                    document.getElementById('modalClaimDate').textContent = claimDate || 'N/A';
+                    document.getElementById('modalClaimNumber').textContent = claimNumber || 'N/A';
+                    document.getElementById('modalClientName').textContent = clientName || 'N/A';
+                    document.getElementById('modalPolicyNumber').textContent = policyNumber || 'N/A';
+                    document.getElementById('modalInsuranceProvider').textContent = insuranceProvider || 'N/A';
+                    document.getElementById('modalLoaAmount').textContent = '₱' + loaAmount.toFixed(2);
+                    document.getElementById('modalDeductibleParticipation').textContent = '₱' + deductibleParticipation.toFixed(2);
+                    document.getElementById('modalTotalAmount').textContent = '₱' + totalAmount.toFixed(2);
+
+                    // Handle file download link
+                    const downloadBtn = document.getElementById('modalDownloadBtn');
+                    if (filePath) {
+                        downloadBtn.href = `/claims/${claimId}/download`;
+                        downloadBtn.style.display = 'inline-block';
+                    } else {
+                        downloadBtn.style.display = 'none';
+                    }
+                });
+            }
         });
     </script>
+
+    <!-- Claim Detail Modal -->
+    <div class="modal fade" id="claimModal" tabindex="-1" aria-labelledby="claimModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="claimModalLabel">Claim Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Claim ID:</strong>
+                            <p id="modalClaimId">-</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Date of Claim:</strong>
+                            <p id="modalClaimDate">-</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Claim Number:</strong>
+                            <p id="modalClaimNumber">-</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Client Name:</strong>
+                            <p id="modalClientName">-</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Policy Number:</strong>
+                            <p id="modalPolicyNumber">-</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Insurance Provider:</strong>
+                            <p id="modalInsuranceProvider">-</p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>LOA Amount:</strong>
+                            <p id="modalLoaAmount">₱0.00</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Deductible/Participation:</strong>
+                            <p id="modalDeductibleParticipation">₱0.00</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Total Amount Due:</strong>
+                            <p id="modalTotalAmount" style="font-size: 1.25rem; font-weight: bold; color: #198754;">₱0.00</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a id="modalDownloadBtn" href="#" class="btn btn-sm btn-success" style="display: none;">
+                        <i class="bi bi-download"></i> Download File
+                    </a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

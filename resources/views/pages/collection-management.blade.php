@@ -120,7 +120,7 @@
                                             <label for="policy_number" class="form-label">Policy Number</label>
                                             <input type="text" class="form-control @error('policy_number') is-invalid @enderror" 
                                                 id="policy_number" name="policy_number" value="{{ old('policy_number') }}" 
-                                                placeholder="Auto-filled from claim" readonly>
+                                                placeholder="Auto-filled from claim">
                                             @error('policy_number')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -146,7 +146,7 @@
                                             <label for="claim_number" class="form-label">Claim Number</label>
                                             <input type="text" class="form-control @error('claim_number') is-invalid @enderror" 
                                                 id="claim_number" name="claim_number" value="{{ old('claim_number') }}" 
-                                                placeholder="Auto-filled from claim" readonly>
+                                                placeholder="Auto-filled from claim">
                                             @error('claim_number')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -176,7 +176,7 @@
                                             <label for="loa_amount" class="form-label">LOA Amount (₱)</label>
                                             <input type="number" class="form-control @error('loa_amount') is-invalid @enderror" 
                                                 id="loa_amount" name="loa_amount" value="{{ old('loa_amount') }}" 
-                                                placeholder="Auto-filled from claim" min="0" step="0.01" readonly>
+                                                placeholder="Auto-filled from claim" min="0" step="0.01">
                                             @error('loa_amount')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -313,6 +313,9 @@
             // When client is selected, fetch claim data
             clientSelect.addEventListener('change', function() {
                 const clientId = this.value;
+                const clientText = this.options[this.selectedIndex].text;
+                
+                console.log('Client selected:', clientId, clientText);
                 
                 if (!clientId) {
                     // Clear fields if no client selected
@@ -323,21 +326,37 @@
                 }
                 
                 // Fetch claim data for the selected client
-                fetch(`/api/claims/by-client/${clientId}`)
-                    .then(response => response.json())
+                const url = `/collections/client/${clientId}/claim-data`;
+                console.log('Fetching from:', url);
+                
+                fetch(url)
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok: ' + response.status);
+                        }
+                        return response.json();
+                    })
                     .then(data => {
-                        if (data.policy_number) {
-                            document.getElementById('policy_number').value = data.policy_number;
-                        }
-                        if (data.loa_amount) {
-                            document.getElementById('loa_amount').value = data.loa_amount;
-                        }
-                        if (data.claim_number) {
-                            document.getElementById('claim_number').value = data.claim_number;
-                        }
+                        console.log('Claim data received:', data);
+                        const policyNum = data.policy_number || '';
+                        const claimNum = data.claim_number || '';
+                        const loaAmount = data.loa_amount || '';
+                        
+                        console.log('Setting values - Policy:', policyNum, 'Claim:', claimNum, 'LOA:', loaAmount);
+                        
+                        document.getElementById('policy_number').value = policyNum;
+                        document.getElementById('claim_number').value = claimNum;
+                        document.getElementById('loa_amount').value = loaAmount;
+                        
+                        console.log('Fields updated');
                     })
                     .catch(error => {
                         console.error('Error fetching claim data:', error);
+                        // Clear fields on error
+                        document.getElementById('policy_number').value = '';
+                        document.getElementById('loa_amount').value = '';
+                        document.getElementById('claim_number').value = '';
                     });
             });
         });

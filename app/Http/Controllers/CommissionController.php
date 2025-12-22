@@ -179,6 +179,41 @@ class CommissionController extends Controller
     }
 
     /**
+     * Update commission status - Super Admin only.
+     */
+    public function updateStatus(Request $request, $id)
+    {
+        // Check if user is super admin
+        if (Auth::user()->position !== 'superadmin') {
+            return response()->json(['message' => 'Unauthorized. Only super admins can change commission status.'], 403);
+        }
+
+        $commission = Commission::findOrFail($id);
+        
+        $validated = $request->validate([
+            'status' => 'required|string|in:PENDING,CLEARED,TRANSFERRED',
+            'type' => 'required|string|in:Policy,Claim,Walk-In'
+        ]);
+
+        // Validate status based on commission type
+        if ($validated['type'] === 'Policy' && !in_array($validated['status'], ['PENDING', 'CLEARED'])) {
+            return response()->json(['message' => 'Invalid status for Policy commission.'], 422);
+        }
+
+        if ($validated['type'] === 'Claim' && !in_array($validated['status'], ['PENDING', 'TRANSFERRED'])) {
+            return response()->json(['message' => 'Invalid status for Claim commission.'], 422);
+        }
+
+        // Update the commission status
+        $commission->update([
+            'status' => $validated['status'],
+            'updated_by' => Auth::id()
+        ]);
+
+        return response()->json(['message' => 'Commission status updated successfully.', 'status' => $validated['status']]);
+    }
+
+    /**
      * Auto-fill commission data from policy.
      */
     public function getPolicyData($policyId)

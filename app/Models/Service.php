@@ -20,6 +20,15 @@ class Service extends Model
         'description',
         'price',
         'duration',
+        'size_category_id',
         'created_by',
     ];
+
+    /**
+     * Get the size category that this service belongs to.
+     */
+    public function sizeCategory()
+    {
+        return $this->belongsTo(SizeCategory::class, 'size_category_id');
+    }
 }

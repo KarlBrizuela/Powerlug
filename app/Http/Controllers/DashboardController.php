@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Client;
 use App\Models\Policy;
 use App\Models\Service;
+use App\Models\Installment;
+use App\Models\WalkIn;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -30,14 +32,14 @@ class DashboardController extends Controller
     private function getExpiringPolicies()
     {
         $today = Carbon::now();
-        $twoMonthsFromNow = Carbon::now()->addMonths(2);
+        $oneMonthFromNow = Carbon::now()->addMonths(1);
 
-        // Get policies expiring within the next 2 months OR already overdue
+        // Get policies expiring within the next 1 month (reminder appears 1 month before expiration)
         // Include policies where expiration_status is not 'availed'
         $policies = Policy::with(['client', 'insuranceProvider'])
-            ->where(function($query) use ($today, $twoMonthsFromNow) {
-                // Get upcoming policies (within 2 months)
-                $query->whereBetween('end_date', [$today, $twoMonthsFromNow])
+            ->where(function($query) use ($today, $oneMonthFromNow) {
+                // Get upcoming policies (within 1 month from today)
+                $query->whereBetween('end_date', [$today, $oneMonthFromNow])
                       // OR get overdue policies (past due date)
                       ->orWhere('end_date', '<', $today);
             })
@@ -138,19 +140,16 @@ class DashboardController extends Controller
 
     private function getPaymentReminders()
     {
-        // Get policies with outstanding payments and service payment dues
-        $policies = Policy::with(['client'])
-            ->where(function($query) {
-                // Get policies with outstanding balance OR policies with service payment dues
-                $query->whereRaw('(amount_due - COALESCE(paid_amount, 0)) > 0')
-                      ->orWhereNotNull('services');
-            })
+        $today = Carbon::now();
+        
+        // Get all policies with installments
+        $policies = Policy::with(['client', 'installments'])
+            ->whereHas('installments')
             ->orderBy('created_at', 'desc')
-            ->limit(5)
             ->get();
 
-        // Format data for view
         $paymentData = [];
+        
         foreach ($policies as $policy) {
             $balance = ($policy->amount_due ?? 0) - ($policy->paid_amount ?? 0);
             
@@ -158,97 +157,47 @@ class DashboardController extends Controller
             $firstName = $policy->client->firstName ?? '';
             $lastName = $policy->client->lastName ?? '';
             $initials = strtoupper(substr($firstName, 0, 1) . substr($lastName, 0, 1));
-
-            // Check if policy has services with payment dues
-            $services = is_array($policy->services) ? $policy->services : [];
-            $paymentDues = is_array($policy->service_payment_dues) ? $policy->service_payment_dues : [];
-            $paidServices = is_array($policy->paid_services) ? $policy->paid_services : [];
             
-            if (count($services) > 0) {
-                // Add an entry for each service with a payment due date
-                foreach ($services as $index => $serviceName) {
-                    $dueDate = $paymentDues[$index] ?? null;
-                    
-                    if ($dueDate) {
-                        // Skip if this service has already been marked as paid
-                        if (in_array($serviceName, $paidServices)) {
-                            continue;
-                        }
-                        
-                        // Check if payment is due within 10 days (for dashboard display)
-                        $dueDateObj = Carbon::parse($dueDate);
-                        $daysUntilDue = Carbon::now()->diffInDays($dueDateObj, false);
-                        
-                        // Only include items due within 10 days for dashboard
-                        if ($daysUntilDue <= 10) {
-                            // Get the service price from the Service model
-                            $serviceModel = Service::where('name', $serviceName)->first();
-                            $servicePrice = $serviceModel ? ($serviceModel->price ?? 0) : 0;
-                            
-                            $paymentData[] = [
-                                'id' => $policy->id,
-                                'client_name' => $policy->client->firstName . ' ' . $policy->client->lastName,
-                                'client_email' => $policy->client->email ?? 'N/A',
-                                'client_phone' => $policy->client->phone ?? 'N/A',
-                                'client_address' => $policy->client->address ?? 'N/A',
-                                'initials' => $initials,
-                                'service_name' => $serviceName,
-                                'due_date' => $dueDateObj->format('M d, Y'),
-                                'due_date_raw' => $dueDate,
-                                'amount' => '₱' . number_format($servicePrice, 2),
-                                'amount_raw' => $servicePrice,
-                                'badge_class' => $this->getPaymentDueBadgeClass($dueDate),
-                                'avatar_class' => 'bg-primary bg-opacity-10',
-                                'avatar_text_class' => 'text-primary',
-                                // Policy details for modal
-                                'policy_number' => $policy->policy_number ?? 'N/A',
-                                'plate_number' => $policy->plate_number ?? 'N/A',
-                                'model_year' => $policy->model_year ?? 'N/A',
-                                'color' => $policy->color ?? 'N/A',
-                                'service_amount' => '₱' . number_format($servicePrice, 2),
-                                'amount_due' => '₱' . number_format($policy->amount_due ?? 0, 2),
-                                'paid_amount' => '₱' . number_format($policy->paid_amount ?? 0, 2),
-                                'balance' => '₱' . number_format($balance, 2),
-                                'status' => $policy->billing_status ?? 'N/A',
-                                // Check if this service has been marked as paid
-                                'paid_services' => $paidServices,
-                                'is_service_paid' => false,
-                            ];
-                        }
-                    }
+            // Check each installment (reminder appears 7 days before due date)
+            foreach ($policy->installments as $installment) {
+                $paymentDate = Carbon::parse($installment->payment_date);
+                $reminderDate = $paymentDate->copy()->subDays(7); // 7 days before
+                $daysUntilReminder = $today->diffInDays($reminderDate, false);
+                
+                // Show reminder from 7 days before to 1 day after the due date
+                if ($daysUntilReminder >= -1 && $daysUntilReminder <= 7) {
+                    $paymentData[] = [
+                        'id' => $policy->id,
+                        'client_name' => $policy->client->firstName . ' ' . $policy->client->lastName,
+                        'client_email' => $policy->client->email ?? 'N/A',
+                        'client_phone' => $policy->client->phone ?? 'N/A',
+                        'client_address' => $policy->client->address ?? 'N/A',
+                        'initials' => $initials,
+                        'service_name' => 'Policy Payment',
+                        'due_date' => $paymentDate->format('M d, Y'),
+                        'due_date_raw' => $paymentDate->toDateString(),
+                        'amount' => '₱' . number_format($installment->amount ?? 0, 2),
+                        'amount_raw' => $installment->amount ?? 0,
+                        'badge_class' => $this->getPaymentDueBadgeClass($paymentDate->toDateString()),
+                        'avatar_class' => 'bg-primary bg-opacity-10',
+                        'avatar_text_class' => 'text-primary',
+                        // Policy details for modal
+                        'policy_number' => $policy->policy_number ?? 'N/A',
+                        'plate_number' => $policy->plate_number ?? 'N/A',
+                        'model_year' => $policy->model_year ?? 'N/A',
+                        'color' => $policy->color ?? 'N/A',
+                        'service_amount' => '₱' . number_format($installment->amount ?? 0, 2),
+                        'amount_due' => '₱' . number_format($policy->amount_due ?? 0, 2),
+                        'paid_amount' => '₱' . number_format($policy->paid_amount ?? 0, 2),
+                        'balance' => '₱' . number_format($balance, 2),
+                        'status' => $policy->billing_status ?? 'N/A',
+                        'is_service_paid' => false,
+                    ];
                 }
-            } elseif ($balance > 0) {
-                // If no services, but has outstanding balance
-                $paymentData[] = [
-                    'id' => $policy->id,
-                    'client_name' => $policy->client->firstName . ' ' . $policy->client->lastName,
-                    'client_email' => $policy->client->email ?? 'N/A',
-                    'client_phone' => $policy->client->phone ?? 'N/A',
-                    'client_address' => $policy->client->address ?? 'N/A',
-                    'initials' => $initials,
-                    'service_name' => 'Policy Balance',
-                    'due_date' => 'N/A',
-                    'due_date_raw' => null,
-                    'amount' => '₱' . number_format($balance, 2),
-                    'amount_raw' => $balance,
-                    'badge_class' => 'bg-warning bg-opacity-10 text-warning border border-warning',
-                    'avatar_class' => 'bg-warning bg-opacity-10',
-                    'avatar_text_class' => 'text-warning',
-                    // Policy details for modal
-                    'policy_number' => $policy->policy_number ?? 'N/A',
-                    'plate_number' => $policy->plate_number ?? 'N/A',
-                    'model_year' => $policy->model_year ?? 'N/A',
-                    'color' => $policy->color ?? 'N/A',
-                    'amount_due' => '₱' . number_format($policy->amount_due ?? 0, 2),
-                    'paid_amount' => '₱' . number_format($policy->paid_amount ?? 0, 2),
-                    'balance' => '₱' . number_format($balance, 2),
-                    'status' => $policy->billing_status ?? 'N/A',
-                ];
             }
         }
 
-        // Return only the first 5 entries
-        return array_slice($paymentData, 0, 5);
+        return $paymentData;
     }
 
     private function getPaymentDueBadgeClass($dueDate)
@@ -278,128 +227,84 @@ class DashboardController extends Controller
 
     public function paymentReminders()
     {
-        // Get all payment reminders (not limited to 5)
-        $paymentReminders = $this->getPaymentReminders();
+        $today = Carbon::now();
+        $paymentData = [];
         
-        // Convert to include contact details for full view
-        $allPaymentReminders = [];
-        
-        // Get policies with outstanding payments and service payment dues
-        $policies = Policy::with(['client'])
-            ->where(function($query) {
-                $query->whereRaw('(amount_due - COALESCE(paid_amount, 0)) > 0')
-                      ->orWhereNotNull('services');
-            })
+        // Get all policies with installments (without 7-day filter)
+        $policies = Policy::with(['client', 'installments'])
+            ->whereHas('installments')
             ->orderBy('created_at', 'desc')
             ->get();
-
-        // Format data for view
+        
         foreach ($policies as $policy) {
             $balance = ($policy->amount_due ?? 0) - ($policy->paid_amount ?? 0);
-            
-            // Get client initials
             $firstName = $policy->client->firstName ?? '';
             $lastName = $policy->client->lastName ?? '';
             $initials = strtoupper(substr($firstName, 0, 1) . substr($lastName, 0, 1));
-
-            // Check if policy has services with payment dues
-            $services = is_array($policy->services) ? $policy->services : [];
-            $paymentDues = is_array($policy->service_payment_dues) ? $policy->service_payment_dues : [];
             
-            if (count($services) > 0) {
-                // Add an entry for each service with a payment due date
-                foreach ($services as $index => $serviceName) {
-                    $dueDate = $paymentDues[$index] ?? null;
-                    
-                    if ($dueDate) {
-                        // Get the service price from the Service model
-                        $serviceModel = Service::where('name', $serviceName)->first();
-                        $servicePrice = $serviceModel ? ($serviceModel->price ?? 0) : 0;
-                        
-                        $dueDateObj = Carbon::parse($dueDate);
-                        $daysUntilDue = Carbon::now()->diffInDays($dueDateObj, false);
-                        
-                        // Determine status
-                        if ($daysUntilDue < 0) {
-                            $statusText = 'Overdue';
-                            $statusClass = 'bg-danger';
-                            $daysText = 'Overdue by ' . abs($daysUntilDue) . ' day' . (abs($daysUntilDue) !== 1 ? 's' : '');
-                        } elseif ($daysUntilDue === 0) {
-                            $statusText = 'Due Today';
-                            $statusClass = 'bg-danger';
-                            $daysText = 'Due Today';
-                        } elseif ($daysUntilDue <= 7) {
-                            $statusText = 'Urgent';
-                            $statusClass = 'bg-danger';
-                            $daysText = $daysUntilDue . ' day' . ($daysUntilDue !== 1 ? 's' : '') . ' remaining';
-                        } elseif ($daysUntilDue <= 14) {
-                            $statusText = 'Due Soon';
-                            $statusClass = 'bg-warning';
-                            $daysText = $daysUntilDue . ' day' . ($daysUntilDue !== 1 ? 's' : '') . ' remaining';
-                        } else {
-                            $statusText = 'Upcoming';
-                            $statusClass = 'bg-info';
-                            $daysText = $daysUntilDue . ' day' . ($daysUntilDue !== 1 ? 's' : '') . ' remaining';
-                        }
-                        
-                        // Check if this service has been marked as paid
-                        $paidServices = is_array($policy->paid_services) ? $policy->paid_services : [];
-                        $isPaid = in_array($serviceName, $paidServices);
-                        
-                        $allPaymentReminders[] = [
-                            'id' => $policy->id,
-                            'client_name' => $policy->client->firstName . ' ' . $policy->client->lastName,
-                            'client_email' => $policy->client->email ?? 'N/A',
-                            'client_phone' => $policy->client->phone ?? 'N/A',
-                            'service_name' => $serviceName,
-                            'due_date' => $dueDateObj->format('M d, Y'),
-                            'amount' => '₱' . number_format($servicePrice, 2),
-                            'status' => $statusText,
-                            'status_class' => $statusClass,
-                            'days_text' => $daysText,
-                            'days_until_due' => $daysUntilDue,
-                            'policy_number' => $policy->policy_number ?? 'N/A',
-                            'paid_status' => $isPaid ? 'paid' : 'unpaid',
-                            'service_index' => $index,
-                        ];
-                    }
+            foreach ($policy->installments as $installment) {
+                $paymentDate = Carbon::parse($installment->payment_date);
+                
+                // Show all installments that are not yet paid
+                if ($paymentDate->isFuture() || $paymentDate->isToday()) {
+                    $paymentData[] = [
+                        'id' => $policy->id,
+                        'type' => 'Policy',
+                        'client_name' => $policy->client->firstName . ' ' . $policy->client->lastName,
+                        'client_email' => $policy->client->email ?? 'N/A',
+                        'client_phone' => $policy->client->phone ?? 'N/A',
+                        'client_address' => $policy->client->address ?? 'N/A',
+                        'initials' => $initials,
+                        'service_name' => 'Policy Payment',
+                        'due_date' => $paymentDate->format('M d, Y'),
+                        'due_date_raw' => $paymentDate->toDateString(),
+                        'amount' => '₱' . number_format($installment->amount ?? 0, 2),
+                        'amount_raw' => $installment->amount ?? 0,
+                        'badge_class' => $this->getPaymentDueBadgeClass($paymentDate->toDateString()),
+                    ];
                 }
-            } elseif ($balance > 0) {
-                // If no services, but has outstanding balance
-                $statusText = 'Due';
-                $statusClass = 'bg-warning';
-                $daysText = 'Payment pending';
-                
-                // Check if policy balance has been marked as paid
-                $paidServices = is_array($policy->paid_services) ? $policy->paid_services : [];
-                $isPaid = in_array('Policy Balance', $paidServices);
-                
-                $allPaymentReminders[] = [
-                    'id' => $policy->id,
-                    'client_name' => $policy->client->firstName . ' ' . $policy->client->lastName,
-                    'client_email' => $policy->client->email ?? 'N/A',
-                    'client_phone' => $policy->client->phone ?? 'N/A',
-                    'service_name' => 'Policy Balance',
-                    'due_date' => 'N/A',
-                    'amount' => '₱' . number_format($balance, 2),
-                    'status' => $statusText,
-                    'status_class' => $statusClass,
-                    'days_text' => $daysText,
-                    'days_until_due' => null,
-                    'policy_number' => $policy->policy_number ?? 'N/A',
-                    'paid_status' => $isPaid ? 'paid' : 'unpaid',
-                    'service_index' => null,
-                ];
             }
         }
         
-        // Sort by due date (most recent first)
-        usort($allPaymentReminders, function ($a, $b) {
-            if ($a['due_date'] === 'N/A') return 1;
-            if ($b['due_date'] === 'N/A') return -1;
-            return strtotime($b['due_date']) - strtotime($a['due_date']);
+        // Get all walk-in installments (without 7-day filter)
+        $walkIns = WalkIn::with('installments')
+            ->whereHas('installments')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        foreach ($walkIns as $walkIn) {
+            $initials = strtoupper(substr($walkIn->insured_name, 0, 1)) . strtoupper(substr(explode(' ', $walkIn->insured_name)[1] ?? '', 0, 1));
+            
+            foreach ($walkIn->installments as $installment) {
+                $paymentDate = Carbon::parse($installment->payment_date);
+                
+                // Show all installments that are not yet paid
+                if ($paymentDate->isFuture() || $paymentDate->isToday()) {
+                    $paymentData[] = [
+                        'id' => $walkIn->id,
+                        'type' => 'Walk-in',
+                        'client_name' => $walkIn->insured_name,
+                        'client_email' => $walkIn->email ?? 'N/A',
+                        'client_phone' => $walkIn->contact_number ?? 'N/A',
+                        'client_address' => $walkIn->address ?? 'N/A',
+                        'initials' => $initials,
+                        'service_name' => 'Walk-in Payment (' . $walkIn->walkin_number . ')',
+                        'due_date' => $paymentDate->format('M d, Y'),
+                        'due_date_raw' => $paymentDate->toDateString(),
+                        'amount' => '₱' . number_format($installment->amount ?? 0, 2),
+                        'amount_raw' => $installment->amount ?? 0,
+                        'badge_class' => $this->getPaymentDueBadgeClass($paymentDate->toDateString()),
+                    ];
+                }
+            }
+        }
+        
+        // Sort by due date
+        usort($paymentData, function($a, $b) {
+            return strtotime($a['due_date_raw']) - strtotime($b['due_date_raw']);
         });
-
+        
+        $allPaymentReminders = $paymentData;
         return view('pages.policies.payment-reminders', compact('allPaymentReminders'));
     }
 

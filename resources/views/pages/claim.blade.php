@@ -181,13 +181,6 @@
 
                                 <div class="row mb-3">
                                     <div class="col-md-6">
-                                        <label class="form-label fw-semibold">Client</label>
-                                        <input type="text" name="client" id="client" value="{{ old('client') }}" class="form-control @error('client') is-invalid @enderror" placeholder="Auto-filled from policy">
-                                        @error('client')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                    <div class="col-md-6">
                                         <label class="form-label fw-semibold">Cellphone</label>
                                         <input type="text" name="client_cellphone" id="client_cellphone" value="{{ old('client_cellphone') }}" class="form-control @error('client_cellphone') is-invalid @enderror" placeholder="Client cellphone number">
                                         @error('client_cellphone')
@@ -340,6 +333,41 @@
                     return null;
                 }
             });
+
+            // Auto-fill when policy is selected using Select2 event
+            $('#policy_id').on('select2:select', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const providerId = selectedOption.getAttribute('data-provider');
+                const policyNumber = selectedOption.getAttribute('data-policy-number');
+                const clientName = selectedOption.getAttribute('data-client');
+                const clientPhone = selectedOption.getAttribute('data-contact-number') || selectedOption.getAttribute('data-client-phone');
+                const plate = selectedOption.getAttribute('data-plate-number') || selectedOption.getAttribute('data-plate');
+                const vehicleModel = selectedOption.getAttribute('data-make-model') || selectedOption.getAttribute('data-vehicle-model');
+                const vehicleColor = selectedOption.getAttribute('data-color') || selectedOption.getAttribute('data-vehicle-color');
+                const address = selectedOption.getAttribute('data-address') || selectedOption.getAttribute('data-client-address');
+                const modelYear = selectedOption.getAttribute('data-model-year');
+
+                // Fill in the fields
+                document.getElementById('insurance_provider_id').value = providerId || '';
+                document.getElementById('policy_number').value = policyNumber || '';
+                if (document.getElementById('client_cellphone')) document.getElementById('client_cellphone').value = clientPhone || '';
+                if (document.getElementById('plate_no')) document.getElementById('plate_no').value = plate || '';
+                if (document.getElementById('vehicle_model')) document.getElementById('vehicle_model').value = vehicleModel || '';
+                if (document.getElementById('vehicle_color')) document.getElementById('vehicle_color').value = vehicleColor || '';
+                if (document.getElementById('address')) document.getElementById('address').value = address || '';
+                if (document.getElementById('model_year')) document.getElementById('model_year').value = modelYear || '';
+            });
+
+            // Handle clear event
+            $('#policy_id').on('select2:clear', function() {
+                document.getElementById('policy_number').value = '';
+                if (document.getElementById('client_cellphone')) document.getElementById('client_cellphone').value = '';
+                if (document.getElementById('plate_no')) document.getElementById('plate_no').value = '';
+                if (document.getElementById('vehicle_model')) document.getElementById('vehicle_model').value = '';
+                if (document.getElementById('vehicle_color')) document.getElementById('vehicle_color').value = '';
+                if (document.getElementById('address')) document.getElementById('address').value = '';
+                if (document.getElementById('model_year')) document.getElementById('model_year').value = '';
+            });
         });
 
         // Auto-fill policy number and client when policy is selected (also fills new client/vehicle fields)
@@ -360,7 +388,6 @@
                 // Fill in the fields
                 document.getElementById('insurance_provider_id').value = providerId || '';
                 document.getElementById('policy_number').value = policyNumber || '';
-                document.getElementById('client').value = clientName || '';
                 if (document.getElementById('client_cellphone')) document.getElementById('client_cellphone').value = clientPhone || '';
                 if (document.getElementById('plate_no')) document.getElementById('plate_no').value = plate || '';
                 if (document.getElementById('vehicle_model')) document.getElementById('vehicle_model').value = vehicleModel || '';
@@ -370,7 +397,6 @@
             } else {
                 // Clear fields if no policy selected
                 document.getElementById('policy_number').value = '';
-                document.getElementById('client').value = '';
                 if (document.getElementById('client_cellphone')) document.getElementById('client_cellphone').value = '';
                 if (document.getElementById('plate_no')) document.getElementById('plate_no').value = '';
                 if (document.getElementById('vehicle_model')) document.getElementById('vehicle_model').value = '';
@@ -404,7 +430,6 @@
             policySelect.value = '';
             $(policySelect).trigger('change');
             document.getElementById('policy_number').value = '';
-            document.getElementById('client').value = '';
             // Also clear newly added client/vehicle fields
             if (document.getElementById('client_cellphone')) document.getElementById('client_cellphone').value = '';
             if (document.getElementById('plate_no')) document.getElementById('plate_no').value = '';
