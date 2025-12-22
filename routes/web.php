@@ -11,6 +11,7 @@ use App\Http\Controllers\SalesReportController;
 use App\Http\Controllers\PolicyController;
 use App\Http\Controllers\FreebieController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\SizeCategoryController;
 use App\Http\Controllers\DashboardController;
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -30,6 +31,19 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/', function () {
     return view('login');
+});
+
+// Debug route - remove after debugging
+Route::get('/debug/claims', function () {
+    $claims = \App\Models\Claim::select('id', 'client_name', 'policy_number', 'claim_number', 'loa_amount')->get();
+    $clients = \App\Models\Client::select('id', 'firstName', 'lastName')->limit(20)->get();
+    
+    return response()->json([
+        'claims_count' => $claims->count(),
+        'claims' => $claims,
+        'clients_count' => $clients->count(),
+        'clients' => $clients
+    ]);
 });
 
 // Protected routes
@@ -81,6 +95,10 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/policies/{policy}/walkin-file', [PolicyController::class, 'deleteWalkinFile'])->name('policies.deleteWalkinFile');
     Route::get('/api/clients/{id}', [PolicyController::class, 'getClientDetails'])->name('clients.details');
     Route::get('/policies/export', [PolicyController::class, 'export'])->name('policies.export');
+    
+    // Services API endpoints
+    Route::get('/api/services/all', [ServiceController::class, 'getAll'])->name('api.services.all');
+    Route::get('/api/services/by-size', [ServiceController::class, 'getBySize'])->name('api.services.by-size');
 
     // Freebies
     Route::get('/freebies/export', [FreebieController::class, 'export'])->name('freebies.export');
@@ -100,6 +118,10 @@ Route::middleware(['auth'])->group(function () {
     // Service routes
     Route::get('/services/export', [ServiceController::class, 'export'])->name('services.export');
     Route::resource('services', ServiceController::class);
+    
+    // Size Category routes
+    Route::resource('size-categories', SizeCategoryController::class);
+    
     // Claims: use controller resource for create/index/store
     Route::get('/claims/create', function () {
         // Load distinct client names from policies for the claim form dropdown
@@ -119,6 +141,7 @@ Route::middleware(['auth'])->group(function () {
     })->name('claims.create');
 
     Route::get('/claims', [App\Http\Controllers\ClaimController::class, 'index'])->name('claims.index');
+    Route::get('/claims/export', [App\Http\Controllers\ClaimController::class, 'export'])->name('claims.export');
     Route::post('/claims', [App\Http\Controllers\ClaimController::class, 'store'])->name('claims.store');
     Route::get('/claims/{claim}', [App\Http\Controllers\ClaimController::class, 'show'])->name('claims.show');
     Route::get('/claims/{claim}/download', [App\Http\Controllers\ClaimController::class, 'download'])->name('claims.download');
@@ -151,8 +174,16 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('check.position:superadmin')
         ->name('collections.index');
 
+    // Export collections to Excel
+    Route::get('/collections/export/excel', [CollectionController::class, 'export'])
+        ->middleware('check.position:superadmin')
+        ->name('collections.export');
+
     // Quick view route for AJAX details
     Route::get('/collections/{collection}/quick-view', [CollectionController::class, 'quickView'])->name('collections.quick-view');
+
+    // Get claim data for a client
+    Route::get('/collections/client/{clientId}/claim-data', [CollectionController::class, 'getClaimData'])->name('collections.get-claim-data');
 
     // The create/store/edit/update endpoints remain accessible to authenticated admins.
     Route::get('/collections/create', [CollectionController::class, 'create'])->name('collections.create');
@@ -171,6 +202,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/commission/create', [App\Http\Controllers\CommissionController::class, 'create'])->name('commission.create');
     Route::post('/commission', [App\Http\Controllers\CommissionController::class, 'store'])->name('commission.store');
     Route::get('/commission/export', [App\Http\Controllers\CommissionController::class, 'export'])->name('commission.export');
+    Route::post('/commission/{id}/update-status', [App\Http\Controllers\CommissionController::class, 'updateStatus'])->name('commission.update-status');
     Route::get('/commission/{id}', [App\Http\Controllers\CommissionController::class, 'show'])->name('commission.show');
     Route::get('/commission/{id}/edit', [App\Http\Controllers\CommissionController::class, 'edit'])->name('commission.edit');
     Route::put('/commission/{id}', [App\Http\Controllers\CommissionController::class, 'update'])->name('commission.update');

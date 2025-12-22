@@ -133,7 +133,7 @@ class ClientController extends Controller
             // Validation for quick client form
             $validatedData = $request->validate([
                 'fullName' => 'required|string|max:255',
-                'email' => 'required|email|unique:clients',
+                'email' => 'required|email',
                 'phone' => 'required|string|size:11',
                 'tin' => 'required|string|max:255',
                 'make_model' => 'required|string|max:255',
@@ -160,7 +160,7 @@ class ClientController extends Controller
                 'firstName' => 'required|string|max:255',
                 'middleName' => 'nullable|string|max:255',
                 'lastName' => 'required|string|max:255',
-                'email' => 'required|email|unique:clients',
+                'email' => 'required|email',
                 'phone' => 'required|string|size:11',
                 'address' => 'required|string|max:255',
                 'city' => 'required|string|max:255',
@@ -237,7 +237,7 @@ class ClientController extends Controller
             'firstName' => 'required|string|max:255',
             'middleName' => 'nullable|string|max:255',
             'lastName' => 'required|string|max:255',
-            'email' => 'required|email|unique:clients,email,' . $client->id,
+            'email' => 'required|email',
             'phone' => 'required|string|size:11',
             'address' => 'required|string|max:255',
             'city' => 'required|string|max:255',
@@ -297,6 +297,17 @@ class ClientController extends Controller
     public function show(Client $client)
     {
         return view('pages.client-show', compact('client'));
+    }
+
+    /**
+     * Delete the specified resource from storage.
+     */
+    public function destroy(Client $client)
+    {
+        $client->delete();
+        
+        return redirect()->route('clients.index')
+                        ->with('success', 'Client deleted successfully');
     }
 
     /**

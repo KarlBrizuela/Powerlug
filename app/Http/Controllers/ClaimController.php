@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Exports\ClaimsExport;
 use Illuminate\Http\Request;
 use App\Models\Claim;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ClaimController extends Controller
 {
@@ -73,12 +75,12 @@ class ClaimController extends Controller
             'policy_number' => $validated['policy_number'],
             'claim_number' => $validated['claim_number'],
             'loa_amount' => $validated['loa_amount'] ?? null,
-            'participation_amount' => $validated['deductible_participation'] ?? null,
+            'deductible_participation' => $validated['deductible_participation'] ?? null,
         ];
 
         // Calculate total amount due (LOA Amount - Deductible/Participation)
         $loaAmount = $data['loa_amount'] ?? 0;
-        $deductibleParticipation = $data['participation_amount'] ?? 0;
+        $deductibleParticipation = $data['deductible_participation'] ?? 0;
         $totalAmount = $loaAmount - $deductibleParticipation;
 
         $data['total_amount'] = $totalAmount >= 0 ? $totalAmount : 0;
@@ -256,5 +258,10 @@ class ClaimController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function export()
+    {
+        return Excel::download(new ClaimsExport, 'claims-' . date('Y-m-d-H-i-s') . '.xlsx');
     }
 }

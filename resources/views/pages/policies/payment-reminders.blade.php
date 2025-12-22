@@ -241,39 +241,18 @@
                                         </td>
                                         <td>
                                             <div class="d-flex flex-column gap-2">
-                                                <span class="badge {{ $reminder['status_class'] }} text-white">
-                                                    {{ $reminder['status'] }}
+                                                <span class="badge {{ $reminder['badge_class'] }}">
+                                                    {{ $reminder['due_date'] }}
                                                 </span>
-                                                <small class="text-muted">
-                                                    <i class="far fa-clock me-1"></i>{{ $reminder['days_text'] }}
-                                                </small>
                                             </div>
                                         </td>
                                         <td>
-                                            <span class="badge payment-status-badge" id="payment-status-{{ $reminder['id'] }}-{{ $reminder['service_name'] }}"
-                                                  data-paid-status="{{ $reminder['paid_status'] }}">
-                                                <i class="fas fa-circle me-1"></i><span class="status-text">{{ ucfirst($reminder['paid_status']) }}</span>
+                                            <span class="badge" style="background-color: #e7f3ff; color: #0066cc;">
+                                                <i class="fas fa-clock me-1"></i>Pending
                                             </span>
                                         </td>
                                         <td class="text-center">
-                                            <div class="btn-group" role="group" aria-label="Payment Status">
-                                                <button type="button" class="btn btn-sm payment-toggle-btn" 
-                                                        data-reminder-id="{{ $reminder['id'] }}" 
-                                                        data-service="{{ $reminder['service_name'] }}"
-                                                        data-action="mark-unpaid"
-                                                        data-service-index="{{ $reminder['service_index'] }}"
-                                                        title="Mark as Unpaid">
-                                                    <i class="fas fa-times me-1"></i>Unpaid
-                                                </button>
-                                                <button type="button" class="btn btn-sm payment-toggle-btn" 
-                                                        data-reminder-id="{{ $reminder['id'] }}" 
-                                                        data-service="{{ $reminder['service_name'] }}"
-                                                        data-action="mark-paid"
-                                                        data-service-index="{{ $reminder['service_index'] }}"
-                                                        title="Mark as Paid">
-                                                    <i class="fas fa-check me-1"></i>Paid
-                                                </button>
-                                            </div>
+                                            <!-- Action buttons removed for simplified view -->
                                         </td>
                                     </tr>
                                     @empty

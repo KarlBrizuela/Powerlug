@@ -72,6 +72,21 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Size Category</label>
+                                <select name="size_category_id" class="form-select">
+                                    <option value="">-- Select a size category --</option>
+                                    @foreach($sizeCategories as $category)
+                                        <option value="{{ $category->id }}" {{ old('size_category_id', $service->size_category_id) == $category->id ? 'selected' : '' }}>
+                                            {{ $category->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <div class="form-text">Optionally assign this service to a specific car size.</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label fw-semibold">Price</label>
                                 <div class="input-group">
                                     <span class="input-group-text">₱</span>
@@ -83,9 +98,7 @@
                                            placeholder="0.00">
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-semibold">Duration</label>
                                 <input type="text" 

@@ -24,6 +24,7 @@ class Commission extends Model
         'commission_amount',
         'commission_rate',
         'payment_status',
+        'status',
         'remarks',
         'created_by',
         'updated_by',

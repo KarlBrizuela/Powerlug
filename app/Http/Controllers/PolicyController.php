@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Exports\PoliciesExport;
 use App\Models\Policy;
 use App\Models\Client;
+use App\Models\Installment;
 use App\Models\InsuranceProvider;
 use App\Models\Service;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
@@ -237,17 +239,17 @@ class PolicyController extends Controller
 
         // Handle file upload if provided
         if ($request->hasFile('policy_file')) {
-            $validated['policy_file'] = $request->file('policy_file')->store('policies', 'public');
+            $validated['policy_file'] = $request->file('policy_file')->store('policy-files', 'public');
         }
 
         // Handle walk-in file upload if provided
         if ($request->hasFile('walkin_file')) {
-            $validated['walkin_file'] = $request->file('walkin_file')->store('policies/walk-ins', 'public');
+            $validated['walkin_file'] = $request->file('walkin_file')->store('policy-files/walk-ins', 'public');
         }
 
         // Handle proof of payment file upload if provided
         if ($request->hasFile('proof_of_payment')) {
-            $validated['proof_of_payment'] = $request->file('proof_of_payment')->store('policies/proofs', 'public');
+            $validated['proof_of_payment'] = $request->file('proof_of_payment')->store('policy-files/proofs', 'public');
         }
 
         // Handle services and service_payment_dues arrays
@@ -267,6 +269,9 @@ class PolicyController extends Controller
             $policy->policy_number = $policy->id; // or: 'POL-' . $policy->id
             $policy->save();
         }
+
+        // Automatically create installments based on policy duration
+        $this->createAutomaticInstallments($policy);
 
         return redirect()->route('policies.show', $policy->id)->with('success', 'Policy created successfully');
     }
@@ -607,7 +612,7 @@ class PolicyController extends Controller
                     $mimeType = $file->getMimeType();
                     
                     // Create directory if it doesn't exist
-                    $directory = public_path('policies/payment-reminders');
+                    $directory = public_path('policy-files/payment-reminders');
                     if (!file_exists($directory)) {
                         mkdir($directory, 0755, true);
                     }
@@ -618,7 +623,7 @@ class PolicyController extends Controller
                     // Move file directly to public folder
                     $file->move($directory, $filename);
                     
-                    $filePath = 'policies/payment-reminders/' . $filename;
+                    $filePath = 'policy-files/payment-reminders/' . $filename;
                     
                     // Store metadata in the array
                     $attachments[] = [
@@ -765,6 +770,52 @@ class PolicyController extends Controller
                 'success' => false,
                 'attachments' => []
             ], 500);
+        }
+    }
+
+    /**
+     * Automatically create installments based on payment terms
+     */
+    private function createAutomaticInstallments(Policy $policy)
+    {
+        // Extract payment term days from string (e.g., "30 days" -> 30)
+        $paymentTerms = $policy->payment_terms ?? null;
+        if (!$paymentTerms) {
+            return; // No payment terms set, skip
+        }
+        
+        // Extract number from payment terms (e.g., "30 days" -> 30)
+        preg_match('/(\d+)/', $paymentTerms, $matches);
+        $paymentDays = isset($matches[1]) ? intval($matches[1]) : null;
+        
+        if (!$paymentDays || $paymentDays <= 0) {
+            return; // Invalid payment days
+        }
+        
+        // Calculate number of installments (divide by 30-day intervals)
+        $installmentCount = intval($paymentDays / 30);
+        if ($installmentCount <= 0) {
+            $installmentCount = 1; // Minimum 1 installment
+        }
+        
+        $startDate = Carbon::parse($policy->start_date);
+        
+        // Calculate amount per installment
+        $amountPerInstallment = ($policy->amount_due ?? 0) / $installmentCount;
+        
+        // Create installments at 30-day intervals
+        for ($i = 1; $i <= $installmentCount; $i++) {
+            $paymentDate = $startDate->copy()->addDays(30 * $i);
+            
+            Installment::create([
+                'policy_id' => $policy->id,
+                'payment_date' => $paymentDate->toDateString(),
+                'amount' => $amountPerInstallment,
+                'payment_method' => 'Pending',
+                'reference_number' => '',
+                'remarks' => 'Auto-generated installment ' . $i . ' of ' . $installmentCount,
+                'created_by' => auth()->id(),
+            ]);
         }
     }
 }

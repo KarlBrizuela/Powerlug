@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>User Commission - Powerlug</title>
     
     <!-- Bootstrap CSS -->
@@ -257,6 +258,43 @@
                                                                 <a href="{{ route('commission.edit', $commission->id) }}" class="btn btn-sm btn-outline-warning border-0" title="Edit">
                                                                     <i class="fas fa-edit"></i>
                                                                 </a>
+                                                                
+                                                                <!-- Status Change Actions - Super Admin Only -->
+                                                                @auth
+                                                                    @if(Auth::user()->position === 'superadmin')
+                                                                        @php
+                                                                            $statusOptions = [];
+                                                                            if ($commission->policy_id && !$commission->claim_id && !$commission->walk_in_id) {
+                                                                                // Policy Commission
+                                                                                $statusOptions = ['PENDING', 'CLEARED'];
+                                                                            } elseif ($commission->claim_id && !$commission->walk_in_id) {
+                                                                                // Claim Commission
+                                                                                $statusOptions = ['PENDING', 'TRANSFERRED'];
+                                                                            }
+                                                                        @endphp
+                                                                        
+                                                                        @if(!empty($statusOptions))
+                                                                            <div class="btn-group" role="group">
+                                                                                <button type="button" class="btn btn-sm btn-outline-info border-0 dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Change Status">
+                                                                                    <i class="fas fa-cogs"></i>
+                                                                                </button>
+                                                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                                                    @foreach($statusOptions as $status)
+                                                                                        <li>
+                                                                                            <a class="dropdown-item change-status-action" href="#" 
+                                                                                               data-commission-id="{{ $commission->id }}"
+                                                                                               data-status="{{ $status }}"
+                                                                                               data-commission-type="{{ $type }}">
+                                                                                                {{ $status }}
+                                                                                            </a>
+                                                                                        </li>
+                                                                                    @endforeach
+                                                                                </ul>
+                                                                            </div>
+                                                                        @endif
+                                                                    @endif
+                                                                @endauth
+                                                                
                                                                 <button class="btn btn-sm btn-outline-danger border-0 delete-commission" data-commission-id="{{ $commission->id }}" data-commission-number="{{ $commission->policy_number }}" title="Delete">
                                                                     <i class="fas fa-trash"></i>
                                                                 </button>
@@ -270,6 +308,16 @@
                                                 </tr>
                                             @endif
                                         </tbody>
+                                        @if(isset($commissions) && $commissions->count() > 0)
+                                            <tfoot>
+                                                <tr class="table-light fw-bold">
+                                                    <td colspan="4" class="text-end">TOTAL:</td>
+                                                    <td>₱{{ number_format($commissions->sum('gross_premium'), 2) }}</td>
+                                                    <td>₱{{ number_format($commissions->sum('net_premium'), 2) }}</td>
+                                                    <td colspan="3"></td>
+                                                </tr>
+                                            </tfoot>
+                                        @endif
                                     </table>
                                 </div>
 
@@ -393,6 +441,62 @@
 
     <script>
         $(document).ready(function() {
+
+            // Change commission status - Super Admin only
+            $(document).on('click', '.change-status-action', function(e) {
+                e.preventDefault();
+                
+                const commissionId = $(this).data('commission-id');
+                const newStatus = $(this).data('status');
+                const commissionType = $(this).data('commission-type');
+                
+                Swal.fire({
+                    title: 'Change Status',
+                    text: `Change commission status to ${newStatus}?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, change it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Send AJAX request to update status
+                        $.ajax({
+                            url: '/commission/' + commissionId + '/update-status',
+                            type: 'POST',
+                            data: {
+                                _token: $('meta[name="csrf-token"]').attr('content'),
+                                status: newStatus,
+                                type: commissionType
+                            },
+                            success: function(response) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Success',
+                                    text: 'Commission status updated successfully',
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            },
+                            error: function(xhr) {
+                                let errorMsg = 'Failed to update commission status';
+                                if (xhr.responseJSON && xhr.responseJSON.message) {
+                                    errorMsg = xhr.responseJSON.message;
+                                }
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: errorMsg,
+                                    timer: 3000,
+                                    showConfirmButton: false
+                                });
+                            }
+                        });
+                    }
+                });
+            });
 
             // View commission details
             $(document).on('click', '.view-commission', function() {
