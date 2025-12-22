@@ -55,6 +55,14 @@ class Commission extends Model
     }
 
     /**
+     * Get the walk-in associated with this commission.
+     */
+    public function walkIn()
+    {
+        return $this->belongsTo(WalkIn::class, 'walk_in_id');
+    }
+
+    /**
      * Get the insurance provider for this commission.
      */
     public function insuranceProvider()

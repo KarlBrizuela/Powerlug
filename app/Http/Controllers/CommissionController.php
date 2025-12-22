@@ -19,7 +19,7 @@ class CommissionController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Commission::with(['insuranceProvider', 'policy'])->orderBy('created_at', 'desc');
+        $query = Commission::with(['insuranceProvider', 'policy', 'walkIn'])->orderBy('created_at', 'desc');
 
         // Apply filters if provided
         if ($request->has('insurance_provider_id') && $request->insurance_provider_id) {
@@ -58,9 +58,9 @@ class CommissionController extends Controller
     public function create()
     {
         $insuranceProviders = InsuranceProvider::orderBy('name')->get();
-        $policies = Policy::with('insuranceProvider')->orderBy('policy_number')->get();
-        $claims = Claim::select('id', 'client_name', 'loa_amount', 'insurance_provider_id', 'policy_number')->orderBy('client_name')->get();
-        $walkIns = WalkIn::select('id', 'insured_name', 'plate_number', 'premium')->orderBy('insured_name')->get();
+        $policies = Policy::with('insuranceProvider')->withTrashed()->orderBy('policy_number')->get();
+        $claims = Claim::with('policy')->orderBy('client_name')->get();
+        $walkIns = WalkIn::select('id', 'insured_name', 'unit', 'plate_number', 'premium')->orderBy('insured_name')->get();
         $services = \App\Models\Service::orderBy('name')->get();
         
         return view('pages.commission-form', compact('insuranceProviders', 'policies', 'claims', 'walkIns', 'services'));
@@ -71,28 +71,94 @@ class CommissionController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'policy_id' => 'nullable|exists:policies,id',
-            'claim_id' => 'nullable|exists:claims,id',
-            'walk_in_id' => 'nullable|exists:walk_ins,id',
-            'insurance_provider_id' => 'required|exists:insurance_providers,id',
-            'policy_number' => 'required|string|max:255',
-            'insured' => 'required|string|max:255',
-            'gross_premium' => 'required|numeric|min:0',
-            'net_premium' => 'required|numeric|min:0',
-            'loa' => 'nullable|string|max:255',
+        // First validate the commission type
+        $commissionType = $request->input('commission_type', 'policy');
+        
+        // For walk-in commissions, set default values for fields that aren't submitted
+        if ($commissionType === 'walkin') {
+            $request->merge([
+                'insurance_provider_id' => null,
+                'policy_number' => '',
+                'insured' => ''
+            ]);
+        } else {
+            // Convert empty strings to null for optional fields (only for policy and claim)
+            if (empty($request->input('insurance_provider_id'))) {
+                $request->merge(['insurance_provider_id' => null]);
+            }
+            if (empty($request->input('policy_number'))) {
+                $request->merge(['policy_number' => null]);
+            }
+            if (empty($request->input('insured'))) {
+                $request->merge(['insured' => null]);
+            }
+        }
+        
+        // Set up conditional validation rules based on commission type
+        $rules = [
+            'commission_type' => 'required|in:policy,claim,walkin',
             'commission_rate' => 'required|numeric|min:0|max:100',
-            'payment_status' => 'required|in:pending,partial,paid',
-            'agent' => 'nullable|string|max:255',
-            'remarks' => 'nullable|string',
-        ]);
+        ];
+        
+        // Add type-specific validation
+        if ($commissionType === 'policy') {
+            $rules['gross_premium'] = 'required|numeric|min:0';
+            $rules['net_premium'] = 'required|numeric|min:0';
+            // All other fields are optional for policy
+            $rules['insurance_provider_id'] = 'nullable|exists:insurance_providers,id';
+            $rules['policy_number'] = 'nullable|string|max:255';
+            $rules['insured'] = 'nullable|string|max:255';
+        } elseif ($commissionType === 'claim') {
+            $rules['gross_premium'] = 'required|numeric|min:0';
+            $rules['insurance_provider_id'] = 'required|exists:insurance_providers,id';
+            $rules['policy_number'] = 'required|string|max:255';
+            $rules['insured'] = 'required|string|max:255';
+        } elseif ($commissionType === 'walkin') {
+            $rules['gross_premium'] = 'required|numeric|min:0';
+            $rules['insurance_provider_id'] = 'nullable|exists:insurance_providers,id';
+            $rules['policy_number'] = 'nullable|string|max:255';
+            $rules['insured'] = 'nullable|string|max:255';
+        }
+        
+        $validated = $request->validate($rules);
+        
+        // Add nullable fields
+        $validated['claim_id'] = null;
+        $validated['walk_in_id'] = null;
+        $validated['policy_id'] = null;
+        $validated['loa'] = $request->input('loa');
+        $validated['payment_status'] = $request->input('payment_status', 'pending');
+        $validated['agent'] = $request->input('agent');
+        $validated['remarks'] = $request->input('remarks');
+        $validated['net_premium'] = $request->input('net_premium', $request->input('gross_premium', 0));
 
+        // Based on commission type, only set the relevant ID field
+        $commissionData = $validated;
+        
+        if ($commissionType === 'policy') {
+            $commissionData['claim_id'] = null;
+            $commissionData['walk_in_id'] = null;
+        } elseif ($commissionType === 'claim') {
+            $commissionData['policy_id'] = null;
+            $commissionData['walk_in_id'] = null;
+            // Set the claim_id from the request
+            $commissionData['claim_id'] = $request->input('claim_id');
+        } elseif ($commissionType === 'walkin') {
+            $commissionData['policy_id'] = null;
+            $commissionData['claim_id'] = null;
+            // Set the walk_in_id from the request
+            $commissionData['walk_in_id'] = $request->input('walk_in_id');
+        }
+        
         // Calculate commission amount
-        $validated['commission_amount'] = ($validated['net_premium'] * $validated['commission_rate']) / 100;
-        $validated['created_by'] = Auth::id();
-        $validated['updated_by'] = Auth::id();
+        $commissionData['commission_amount'] = ($commissionData['net_premium'] * $commissionData['commission_rate']) / 100;
+        $commissionData['created_by'] = Auth::id();
+        $commissionData['updated_by'] = Auth::id();
 
-        $commission = Commission::create($validated);
+        // Remove commission_type from data before saving (not a database column)
+        unset($commissionData['commission_type']);
+
+        $commission = Commission::create($commissionData);
 
         return redirect()->route('commission.index')
             ->with('success', 'Commission created successfully.');
@@ -115,9 +181,9 @@ class CommissionController extends Controller
     {
         $commission = Commission::findOrFail($id);
         $insuranceProviders = InsuranceProvider::orderBy('name')->get();
-        $policies = Policy::with('insuranceProvider')->orderBy('policy_number')->get();
-        $claims = Claim::select('id', 'client_name', 'loa_amount', 'insurance_provider_id', 'policy_number')->orderBy('client_name')->get();
-        $walkIns = WalkIn::select('id', 'insured_name', 'plate_number', 'premium')->orderBy('insured_name')->get();
+        $policies = Policy::with('insuranceProvider')->withTrashed()->orderBy('policy_number')->get();
+        $claims = Claim::with('policy')->orderBy('client_name')->get();
+        $walkIns = WalkIn::select('id', 'insured_name', 'unit', 'plate_number', 'premium')->orderBy('insured_name')->get();
         $services = \App\Models\Service::orderBy('name')->get();
         
         return view('pages.commission-form', compact('commission', 'insuranceProviders', 'policies', 'claims', 'walkIns', 'services'));
@@ -130,27 +196,102 @@ class CommissionController extends Controller
     {
         $commission = Commission::findOrFail($id);
 
-        $validated = $request->validate([
-            'policy_id' => 'nullable|exists:policies,id',
-            'claim_id' => 'nullable|exists:claims,id',
-            'walk_in_id' => 'nullable|exists:walk_ins,id',
-            'insurance_provider_id' => 'required|exists:insurance_providers,id',
-            'policy_number' => 'required|string|max:255',
-            'insured' => 'required|string|max:255',
-            'gross_premium' => 'required|numeric|min:0',
-            'net_premium' => 'required|numeric|min:0',
-            'loa' => 'nullable|string|max:255',
+        // First validate the commission type
+        $commissionType = $request->input('commission_type', 'policy');
+        
+        // For walk-in commissions, set default values for fields that aren't submitted
+        if ($commissionType === 'walkin') {
+            $request->merge([
+                'insurance_provider_id' => null,
+                'policy_number' => '',
+                'insured' => ''
+            ]);
+        } else {
+            // Convert empty strings to null for optional fields (only for policy and claim)
+            if (empty($request->input('insurance_provider_id'))) {
+                $request->merge(['insurance_provider_id' => null]);
+            }
+            if (empty($request->input('policy_number'))) {
+                $request->merge(['policy_number' => null]);
+            }
+            if (empty($request->input('insured'))) {
+                $request->merge(['insured' => null]);
+            }
+        }
+        
+        // Set up conditional validation rules based on commission type
+        $rules = [
+            'commission_type' => 'required|in:policy,claim,walkin',
             'commission_rate' => 'required|numeric|min:0|max:100',
-            'payment_status' => 'required|in:pending,partial,paid',
-            'agent' => 'nullable|string|max:255',
-            'remarks' => 'nullable|string',
-        ]);
+        ];
+        
+        // Add type-specific validation
+        if ($commissionType === 'policy') {
+            $rules['gross_premium'] = 'required|numeric|min:0';
+            $rules['net_premium'] = 'required|numeric|min:0';
+            // All other fields are optional for policy
+            $rules['insurance_provider_id'] = 'nullable|exists:insurance_providers,id';
+            $rules['policy_number'] = 'nullable|string|max:255';
+            $rules['insured'] = 'nullable|string|max:255';
+        } elseif ($commissionType === 'claim') {
+            $rules['gross_premium'] = 'required|numeric|min:0';
+            $rules['insurance_provider_id'] = 'required|exists:insurance_providers,id';
+            $rules['policy_number'] = 'required|string|max:255';
+            $rules['insured'] = 'required|string|max:255';
+        } elseif ($commissionType === 'walkin') {
+            $rules['gross_premium'] = 'required|numeric|min:0';
+            $rules['insurance_provider_id'] = 'nullable|exists:insurance_providers,id';
+            $rules['policy_number'] = 'nullable|string|max:255';
+            $rules['insured'] = 'nullable|string|max:255';
+        }
+        
+        $validated = $request->validate($rules);
+        
+        // Add nullable fields
+        $validated['claim_id'] = null;
+        $validated['walk_in_id'] = null;
+        $validated['policy_id'] = null;
+        $validated['loa'] = $request->input('loa');
+        $validated['payment_status'] = $request->input('payment_status', 'pending');
+        $validated['agent'] = $request->input('agent');
+        
+        // Handle remarks based on commission type
+        if ($commissionType === 'policy') {
+            $validated['remarks'] = $request->input('remarks_policy');
+        } elseif ($commissionType === 'claim') {
+            $validated['remarks'] = $request->input('remarks_claim');
+        } elseif ($commissionType === 'walkin') {
+            $validated['remarks'] = $request->input('remarks_walkin');
+        }
+        
+        $validated['net_premium'] = $request->input('net_premium', $request->input('gross_premium', 0));
+
+        // Based on commission type, only set the relevant ID field
+        $commissionData = $validated;
+        
+        if ($commissionType === 'policy') {
+            $commissionData['claim_id'] = null;
+            $commissionData['walk_in_id'] = null;
+        } elseif ($commissionType === 'claim') {
+            $commissionData['policy_id'] = null;
+            $commissionData['walk_in_id'] = null;
+            // Set the claim_id from the request
+            $commissionData['claim_id'] = $request->input('claim_id');
+        } elseif ($commissionType === 'walkin') {
+            $commissionData['policy_id'] = null;
+            $commissionData['claim_id'] = null;
+            // Set the walk_in_id from the request
+            $commissionData['walk_in_id'] = $request->input('walk_in_id');
+        }
 
         // Recalculate commission amount
-        $validated['commission_amount'] = ($validated['net_premium'] * $validated['commission_rate']) / 100;
-        $validated['updated_by'] = Auth::id();
+        $commissionData['commission_amount'] = ($commissionData['net_premium'] * $commissionData['commission_rate']) / 100;
+        $commissionData['updated_by'] = Auth::id();
 
-        $commission->update($validated);
+        // Remove commission_type from data before saving (not a database column)
+        unset($commissionData['commission_type']);
+
+        $commission->update($commissionData);
 
         return redirect()->route('commission.index')
             ->with('success', 'Commission updated successfully.');
@@ -173,7 +314,7 @@ class CommissionController extends Controller
      */
     public function getDetails($id)
     {
-        $commission = Commission::with(['insuranceProvider', 'policy', 'createdBy', 'updatedBy'])->findOrFail($id);
+        $commission = Commission::with(['insuranceProvider', 'policy', 'walkIn', 'createdBy', 'updatedBy'])->findOrFail($id);
         
         return response()->json($commission);
     }

@@ -243,7 +243,13 @@
                                                         </td>
                                                         <td>{{ $commission->insuranceProvider->name ?? 'N/A' }}</td>
                                                         <td>{{ $commission->policy_number }}</td>
-                                                        <td>{{ $commission->insured }}</td>
+                                                        <td>
+                                                            @if($commission->walk_in_id)
+                                                                {{ $commission->walkIn->insured_name ?? $commission->insured }}
+                                                            @else
+                                                                {{ $commission->insured }}
+                                                            @endif
+                                                        </td>
                                                         <td>₱{{ number_format($commission->gross_premium ?? 0, 2) }}</td>
                                                         <td>₱{{ number_format($commission->net_premium ?? 0, 2) }}</td>
                                                         <td>₱{{ number_format($commission->commission_amount, 2) }}</td>
@@ -522,7 +528,7 @@
                                         </tr>
                                         <tr>
                                             <td><strong>Insured:</strong></td>
-                                            <td>${data.insured}</td>
+                                            <td>${data.walk_in_id ? data.walk_in?.insured_name : data.insured}</td>
                                         </tr>
                                         <tr>
                                             <td><strong>Agent:</strong></td>
