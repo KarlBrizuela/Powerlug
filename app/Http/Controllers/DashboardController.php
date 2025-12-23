@@ -8,8 +8,10 @@ use App\Models\Service;
 use App\Models\Installment;
 use App\Models\WalkIn;
 use App\Models\AuditTrail;
+use App\Mail\InsuranceReminderMail;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class DashboardController extends Controller
 {
@@ -441,7 +443,7 @@ class DashboardController extends Controller
     }
 
     /**
-     * Send insurance renewal reminder email to client (writes to log file for development)
+     * Send insurance renewal reminder email to client
      */
     public function sendInsuranceReminder(Request $request)
     {
@@ -461,11 +463,11 @@ class DashboardController extends Controller
                 ], 400);
             }
 
-            // Get client name
-            $clientName = $policy->client->firstName . ' ' . $policy->client->lastName;
+            // Get client email and name
             $clientEmail = $policy->client->email;
+            $clientName = $policy->client->firstName . ' ' . $policy->client->lastName;
 
-            // Use custom content if provided, otherwise use default
+            // Use custom subject and body if provided
             $subject = $customSubject ?: 'Insurance Policy Renewal Reminder - ' . $policy->policy_number;
             $body = $customBody ?: "Dear " . $clientName . ",\n\n" .
                 "This is a friendly reminder that your insurance policy is due for renewal soon.\n\n" .
@@ -474,24 +476,9 @@ class DashboardController extends Controller
                 "Please renew your policy before the due date.\n\n" .
                 "Best regards,\nPowerlug Team";
 
-            // Log the email to file
-            $logContent = "
-================================================================================
-EMAIL SENT REMINDER - " . date('Y-m-d H:i:s') . "
-================================================================================
-TO: " . $clientEmail . "
-SUBJECT: " . $subject . "
-CLIENT NAME: " . $clientName . "
-
-EMAIL BODY:
-" . $body . "
-
-================================================================================
-";
-
-            // Write to log file
-            $logFile = storage_path('logs/email_reminders_' . date('Y-m-d') . '.log');
-            file_put_contents($logFile, $logContent, FILE_APPEND);
+            // Send email using Laravel Mail with sendmail driver
+            Mail::to($clientEmail)
+                ->send(new InsuranceReminderMail($policy, $subject, $body));
 
             // Log to audit trail
             AuditTrail::create([
@@ -512,7 +499,7 @@ EMAIL BODY:
 
             return response()->json([
                 'success' => true,
-                'message' => 'Reminder email queued successfully for ' . $clientEmail . ' (check logs for details)'
+                'message' => 'Reminder email sent successfully to ' . $clientEmail
             ]);
         } catch (\Exception $e) {
             return response()->json([
