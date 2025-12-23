@@ -7,6 +7,7 @@ use App\Models\Policy;
 use App\Models\Service;
 use App\Models\Installment;
 use App\Models\WalkIn;
+use App\Models\AuditTrail;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -430,6 +431,88 @@ class DashboardController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => $message
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Send insurance renewal reminder email to client (writes to log file for development)
+     */
+    public function sendInsuranceReminder(Request $request)
+    {
+        try {
+            $policyId = $request->input('policy_id');
+            $customSubject = $request->input('subject');
+            $customBody = $request->input('body');
+
+            // Find the policy
+            $policy = Policy::with(['client', 'insuranceProvider'])->findOrFail($policyId);
+
+            // Check if client has an email
+            if (!$policy->client->email) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Client does not have an email address on file.'
+                ], 400);
+            }
+
+            // Get client name
+            $clientName = $policy->client->firstName . ' ' . $policy->client->lastName;
+            $clientEmail = $policy->client->email;
+
+            // Use custom content if provided, otherwise use default
+            $subject = $customSubject ?: 'Insurance Policy Renewal Reminder - ' . $policy->policy_number;
+            $body = $customBody ?: "Dear " . $clientName . ",\n\n" .
+                "This is a friendly reminder that your insurance policy is due for renewal soon.\n\n" .
+                "Policy Number: " . $policy->policy_number . "\n" .
+                "Due Date: " . $policy->end_date . "\n\n" .
+                "Please renew your policy before the due date.\n\n" .
+                "Best regards,\nPowerlug Team";
+
+            // Log the email to file
+            $logContent = "
+================================================================================
+EMAIL SENT REMINDER - " . date('Y-m-d H:i:s') . "
+================================================================================
+TO: " . $clientEmail . "
+SUBJECT: " . $subject . "
+CLIENT NAME: " . $clientName . "
+
+EMAIL BODY:
+" . $body . "
+
+================================================================================
+";
+
+            // Write to log file
+            $logFile = storage_path('logs/email_reminders_' . date('Y-m-d') . '.log');
+            file_put_contents($logFile, $logContent, FILE_APPEND);
+
+            // Log to audit trail
+            AuditTrail::create([
+                'user_id' => auth()->id() ?? null,
+                'action' => 'reminder_sent',
+                'module' => 'Policy',
+                'record_id' => $policy->id,
+                'description' => "Renewal reminder email sent to {$clientEmail} for Policy #{$policy->policy_number}",
+                'old_values' => null,
+                'new_values' => json_encode([
+                    'email_to' => $clientEmail,
+                    'subject' => $subject,
+                    'body_preview' => substr($body, 0, 200) . '...'
+                ]),
+                'ip_address' => request()->ip() ?? null,
+                'user_agent' => request()->userAgent() ?? null,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Reminder email queued successfully for ' . $clientEmail . ' (check logs for details)'
             ]);
         } catch (\Exception $e) {
             return response()->json([
