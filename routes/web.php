@@ -68,6 +68,11 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('check.position:superadmin,admin')
         ->name('api.mark-payment-paid');
     
+    // Send insurance reminder email
+    Route::post('/api/send-insurance-reminder', [DashboardController::class, 'sendInsuranceReminder'])
+        ->middleware('check.position:superadmin,admin')
+        ->name('api.send-insurance-reminder');
+    
     // Mark policy as availed (Superadmin only)
     Route::patch('/policies/{policy}/mark-availed', [PolicyController::class, 'markAsAvailed'])
         ->middleware('check.position:superadmin')

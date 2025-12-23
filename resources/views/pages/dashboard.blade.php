@@ -410,7 +410,7 @@
                     <button type="button" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm" style="font-weight: 500;">
                         <i class="fas fa-phone me-2"></i>Contact Client
                     </button>
-                    <button type="button" class="btn btn-success rounded-pill px-4 py-2 shadow-sm" style="font-weight: 500;">
+                    <button type="button" id="sendReminderBtn" class="btn btn-success rounded-pill px-4 py-2 shadow-sm" style="font-weight: 500;">
                         <i class="fas fa-envelope me-2"></i>Send Reminder
                     </button>
                 </div>
@@ -602,6 +602,112 @@
         </div>
     </div>
 
+    <!-- Email Composition Modal -->
+    <div class="modal fade" id="emailCompositionModal" tabindex="-1" aria-labelledby="emailCompositionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header border-0 bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem;">
+                    <h5 class="modal-title fw-bold text-white" id="emailCompositionModalLabel">
+                        <i class="fas fa-envelope me-2"></i>Compose Reminder Email
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4" style="background-color: #fafbfc;">
+                    <form id="emailCompositionForm">
+                        <!-- Client Info Display -->
+                        <div class="mb-4">
+                            <div class="alert alert-info" role="alert">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>To:</strong> <span id="emailRecipient">N/A</span>
+                                <br>
+                                <small class="text-muted">Client: <span id="emailClientName">N/A</span></small>
+                            </div>
+                        </div>
+
+                        <!-- Subject Field -->
+                        <div class="mb-4">
+                            <label for="emailSubject" class="form-label fw-semibold">Email Subject</label>
+                            <input type="text" class="form-control form-control-lg" id="emailSubject" 
+                                   placeholder="Enter email subject" required>
+                            <small class="text-muted d-block mt-2">
+                                <i class="fas fa-lightbulb me-1"></i>Make it clear and professional
+                            </small>
+                        </div>
+
+                        <!-- Email Body Field -->
+                        <div class="mb-4">
+                            <label for="emailBody" class="form-label fw-semibold">Email Message</label>
+                            <textarea class="form-control" id="emailBody" rows="12" 
+                                      placeholder="Enter email message" required 
+                                      style="font-family: monospace; resize: vertical;"></textarea>
+                            <small class="text-muted d-block mt-2">
+                                <i class="fas fa-pencil-alt me-1"></i>Edit the message as needed. You can use HTML for formatting.
+                            </small>
+                        </div>
+
+                        <!-- Preview Button -->
+                        <div class="mb-4">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="previewEmailBtn">
+                                <i class="fas fa-eye me-2"></i>Preview Email
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-0 bg-white p-4">
+                    <button type="button" class="btn btn-light border rounded-pill px-4 py-2" data-bs-dismiss="modal" style="font-weight: 500;">
+                        Cancel
+                    </button>
+                    <button type="button" id="sendCustomEmailBtn" class="btn btn-success rounded-pill px-4 py-2 shadow-sm" style="font-weight: 500;">
+                        <i class="fas fa-paper-plane me-2"></i>Send Email
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Preview Modal -->
+    <div class="modal fade" id="emailPreviewModal" tabindex="-1" aria-labelledby="emailPreviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header border-bottom bg-light">
+                    <h5 class="modal-title fw-bold" id="emailPreviewModalLabel">
+                        <i class="fas fa-envelope-open me-2"></i>Email Preview
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4" style="background-color: #f8f9fa;">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="mb-3 pb-3 border-bottom">
+                                <small class="text-muted text-uppercase">From:</small>
+                                <p class="mb-0">noreply@powerlug.com</p>
+                            </div>
+                            <div class="mb-3 pb-3 border-bottom">
+                                <small class="text-muted text-uppercase">To:</small>
+                                <p class="mb-0" id="previewEmailRecipient">N/A</p>
+                            </div>
+                            <div class="mb-3 pb-3 border-bottom">
+                                <small class="text-muted text-uppercase">Subject:</small>
+                                <p class="mb-0 fw-bold" id="previewEmailSubject">N/A</p>
+                            </div>
+                            <div class="mt-4">
+                                <small class="text-muted text-uppercase d-block mb-3">Message:</small>
+                                <div id="previewEmailBody" style="background-color: white; padding: 20px; border-radius: 5px; border: 1px solid #dee2e6; min-height: 300px; line-height: 1.6;">
+                                    <!-- Email body will be displayed here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 bg-white p-4">
+                    <button type="button" class="btn btn-light border rounded-pill px-4 py-2" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <style>
         .info-card:hover {
             transform: translateY(-2px);
@@ -661,6 +767,9 @@
                 const policyId = $(this).data('policy-id');
                 const policy = policyData[policyId];
                 
+                // Store policy ID for later use (like sending reminders)
+                currentPolicyId = policyId;
+                
                 if (policy) {
                     $('#clientName').text(policy.name);
                     $('#contactNumber').text(policy.contactNumber);
@@ -693,6 +802,147 @@
                         statusBadge.addClass('bg-white text-dark');
                     }
                 }
+            });
+
+            // Handle Send Reminder button click - show composition modal
+            $('#sendReminderBtn').on('click', function() {
+                if (!currentPolicyId) {
+                    alert('Policy ID not found. Please close and reopen the modal.');
+                    return;
+                }
+
+                const policy = policyData[currentPolicyId];
+                if (!policy) return;
+
+                // Populate the composition modal
+                $('#emailRecipient').text(policy.emailAddress);
+                $('#emailClientName').text(policy.name);
+                
+                // Generate default email content
+                const defaultSubject = 'Insurance Policy Renewal Reminder - ' + policy.policyNumber;
+                const defaultBody = `Dear ${policy.name},
+
+We hope this message finds you well. This is a friendly reminder that your insurance policy is due for renewal soon.
+
+POLICY DETAILS:
+Policy Number: ${policy.policyNumber}
+Insurance Provider: ${policy.insuranceProvider}
+Renewal Due Date: ${policy.dueDate}
+Coverage Amount: ₱${parseFloat(policy.coverageAmount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+Vehicle Plate Number: ${policy.plateNumber}
+Vehicle Model Year: ${policy.modelYear}
+Vehicle Color: ${policy.vehicleColor}
+
+Please ensure that your policy is renewed before the due date to avoid any coverage gaps. If you have any questions or need assistance with the renewal process, please don't hesitate to contact us.
+
+Thank you for your business!
+
+Best regards,
+Powerlug Team`;
+
+                $('#emailSubject').val(defaultSubject);
+                $('#emailBody').val(defaultBody);
+
+                // Close insurance modal and open composition modal
+                bootstrap.Modal.getInstance(document.getElementById('insuranceModal')).hide();
+                new bootstrap.Modal(document.getElementById('emailCompositionModal')).show();
+            });
+
+            // Handle Preview Email button
+            $('#previewEmailBtn').on('click', function() {
+                const subject = $('#emailSubject').val();
+                const body = $('#emailBody').val();
+                const recipient = $('#emailRecipient').text();
+
+                if (!subject || !body) {
+                    alert('Please fill in both subject and message.');
+                    return;
+                }
+
+                // Populate preview modal
+                $('#previewEmailSubject').text(subject);
+                $('#previewEmailRecipient').text(recipient);
+                
+                // Display body as HTML (with line breaks converted to <br>)
+                const bodyHtml = body.replace(/\n/g, '<br>').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                $('#previewEmailBody').html(bodyHtml);
+
+                // Show preview modal
+                bootstrap.Modal.getInstance(document.getElementById('emailCompositionModal')).hide();
+                new bootstrap.Modal(document.getElementById('emailPreviewModal')).show();
+            });
+
+            // Handle Send Custom Email button
+            $('#sendCustomEmailBtn').on('click', function() {
+                const subject = $('#emailSubject').val();
+                const body = $('#emailBody').val();
+
+                if (!subject || !body) {
+                    alert('Please fill in both subject and message.');
+                    return;
+                }
+
+                // Show loading state
+                const btn = $(this);
+                const originalHtml = btn.html();
+                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Sending...');
+
+                // Send AJAX request to backend with custom content
+                $.ajax({
+                    url: '/api/send-insurance-reminder',
+                    type: 'POST',
+                    data: {
+                        policy_id: currentPolicyId,
+                        subject: subject,
+                        body: body
+                    },
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        btn.prop('disabled', false).html(originalHtml);
+                        
+                        if (response.success) {
+                            // Close all modals properly
+                            const emailCompositionModal = bootstrap.Modal.getInstance(document.getElementById('emailCompositionModal'));
+                            if (emailCompositionModal) {
+                                emailCompositionModal.hide();
+                            }
+                            
+                            // Reset the form
+                            $('#emailCompositionForm')[0].reset();
+                            
+                            // Show success message with more details
+                            const successMsg = response.message + '\n\n✅ Check storage/logs/email_reminders_' + new Date().toISOString().split('T')[0] + '.log to view the email details.';
+                            alert(successMsg);
+                            
+                            // Remove modal backdrops that might be stuck
+                            $('.modal-backdrop').remove();
+                            $('body').removeClass('modal-open');
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        btn.prop('disabled', false).html(originalHtml);
+                        
+                        let errorMessage = 'Error sending reminder email.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        
+                        // Remove modal backdrops that might be stuck
+                        $('.modal-backdrop').remove();
+                        $('body').removeClass('modal-open');
+                        
+                        alert(errorMessage);
+                    },
+                    complete: function() {
+                        // Final cleanup to ensure page is responsive
+                        $('.modal-backdrop').remove();
+                        $('body').removeClass('modal-open');
+                    }
+                });
             });
 
             // Pending tasks data
