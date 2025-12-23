@@ -131,6 +131,21 @@ class CommissionController extends Controller
         $validated['agent'] = $request->input('agent');
         $validated['remarks'] = $request->input('remarks');
         $validated['net_premium'] = $request->input('net_premium', $request->input('gross_premium', 0));
+        
+        // Add tax fields
+        if ($commissionType === 'policy') {
+            $validated['vat'] = $request->input('vat_policy', 0);
+            $validated['documentary_stamp_tax'] = $request->input('doc_stamp_tax_policy', 0);
+            $validated['local_gov_tax'] = $request->input('local_gov_tax_policy', 0);
+        } elseif ($commissionType === 'claim') {
+            $validated['vat'] = $request->input('vat_claim', 0);
+            $validated['documentary_stamp_tax'] = $request->input('doc_stamp_tax_claim', 0);
+            $validated['local_gov_tax'] = $request->input('local_gov_tax_claim', 0);
+        } elseif ($commissionType === 'walkin') {
+            $validated['vat'] = $request->input('vat_walkin', 0);
+            $validated['documentary_stamp_tax'] = $request->input('doc_stamp_tax_walkin', 0);
+            $validated['local_gov_tax'] = $request->input('local_gov_tax_walkin', 0);
+        }
 
         // Based on commission type, only set the relevant ID field
         $commissionData = $validated;
@@ -182,8 +197,31 @@ class CommissionController extends Controller
         $commission = Commission::findOrFail($id);
         $insuranceProviders = InsuranceProvider::orderBy('name')->get();
         $policies = Policy::with('insuranceProvider')->withTrashed()->orderBy('policy_number')->get();
-        $claims = Claim::with('policy')->orderBy('client_name')->get();
-        $walkIns = WalkIn::select('id', 'insured_name', 'unit', 'plate_number', 'premium')->orderBy('insured_name')->get();
+        
+        // For claim commissions, show only the selected claim
+        // For other types, show all claims
+        if ($commission->claim_id) {
+            $claims = Claim::with('policy')
+                ->where('id', $commission->claim_id)
+                ->orderBy('client_name')
+                ->get();
+        } else {
+            $claims = Claim::with('policy')->orderBy('client_name')->get();
+        }
+        
+        // For walk-in commissions, show only the selected walk-in
+        // For other types, show all walk-ins
+        if ($commission->walk_in_id) {
+            $walkIns = WalkIn::select('id', 'insured_name', 'unit', 'plate_number', 'premium')
+                ->where('id', $commission->walk_in_id)
+                ->orderBy('insured_name')
+                ->get();
+        } else {
+            $walkIns = WalkIn::select('id', 'insured_name', 'unit', 'plate_number', 'premium')
+                ->orderBy('insured_name')
+                ->get();
+        }
+        
         $services = \App\Models\Service::orderBy('name')->get();
         
         return view('pages.commission-form', compact('commission', 'insuranceProviders', 'policies', 'claims', 'walkIns', 'services'));
@@ -265,6 +303,21 @@ class CommissionController extends Controller
         }
         
         $validated['net_premium'] = $request->input('net_premium', $request->input('gross_premium', 0));
+        
+        // Add tax fields
+        if ($commissionType === 'policy') {
+            $validated['vat'] = $request->input('vat_policy', 0);
+            $validated['documentary_stamp_tax'] = $request->input('doc_stamp_tax_policy', 0);
+            $validated['local_gov_tax'] = $request->input('local_gov_tax_policy', 0);
+        } elseif ($commissionType === 'claim') {
+            $validated['vat'] = $request->input('vat_claim', 0);
+            $validated['documentary_stamp_tax'] = $request->input('doc_stamp_tax_claim', 0);
+            $validated['local_gov_tax'] = $request->input('local_gov_tax_claim', 0);
+        } elseif ($commissionType === 'walkin') {
+            $validated['vat'] = $request->input('vat_walkin', 0);
+            $validated['documentary_stamp_tax'] = $request->input('doc_stamp_tax_walkin', 0);
+            $validated['local_gov_tax'] = $request->input('local_gov_tax_walkin', 0);
+        }
 
         // Based on commission type, only set the relevant ID field
         $commissionData = $validated;

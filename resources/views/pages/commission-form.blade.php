@@ -215,7 +215,7 @@
                                                                 <label>Value Added Tax</label>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <input type="number" step="0.01" name="vat_policy" id="vat_policy" class="form-control form-control-sm" placeholder="PHP" value="0">
+                                                                <input type="number" step="0.01" name="vat_policy" id="vat_policy" class="form-control form-control-sm" placeholder="PHP" value="{{ isset($commission) && $commission->policy_id ? $commission->vat : '0' }}">
                                                             </div>
                                                         </div>
                                                         <div class="row mb-3">
@@ -223,7 +223,7 @@
                                                                 <label>Documentary Stamp Tax</label>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <input type="number" step="0.01" name="doc_stamp_tax_policy" id="doc_stamp_tax_policy" class="form-control form-control-sm" placeholder="PHP" value="0">
+                                                                <input type="number" step="0.01" name="doc_stamp_tax_policy" id="doc_stamp_tax_policy" class="form-control form-control-sm" placeholder="PHP" value="{{ isset($commission) && $commission->policy_id ? $commission->documentary_stamp_tax : '0' }}">
                                                             </div>
                                                         </div>
                                                         <div class="row mb-3">
@@ -231,7 +231,7 @@
                                                                 <label>Local Government tax</label>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <input type="number" step="0.01" name="local_gov_tax_policy" id="local_gov_tax_policy" class="form-control form-control-sm" placeholder="PHP" value="0">
+                                                                <input type="number" step="0.01" name="local_gov_tax_policy" id="local_gov_tax_policy" class="form-control form-control-sm" placeholder="PHP" value="{{ isset($commission) && $commission->policy_id ? $commission->local_gov_tax : '0' }}">
                                                             </div>
                                                         </div>
                                                         <div class="row mb-3">
@@ -312,7 +312,8 @@
                                                         data-policy-number="{{ $claim->policy_number ?? $claim->policy?->policy_number ?? '' }}"
                                                         data-claim-number="{{ $claim->claim_number ?? '' }}"
                                                         data-make-model="{{ $claim->policy?->make_model ?? '' }}"
-                                                        data-plate-number="{{ $claim->policy?->plate_number ?? '' }}">
+                                                        data-plate-number="{{ $claim->policy?->plate_number ?? '' }}"
+                                                        {{ (isset($commission) && $commission->claim_id == $claim->id) ? 'selected' : '' }}>
                                                         {{ $claim->client_name ?? $claim->policy?->client_name ?? 'Unnamed Claim' }}
                                                     </option>
                                                 @empty
@@ -351,7 +352,7 @@
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="loa_amount" class="form-label">LOA Amount <span class="text-danger">*</span></label>
-                                            <input type="number" step="0.01" name="loa_amount" id="loa_amount" class="form-control">
+                                            <input type="number" step="0.01" name="loa_amount" id="loa_amount" class="form-control" value="{{ isset($commission) && $commission->claim_id ? $commission->gross_premium : '' }}">
                                         </div>
 
                                         <div class="col-md-6 mb-3"></div>
@@ -360,7 +361,7 @@
                                     <div class="row">
                                         <div class="col-md-4 mb-3">
                                             <label for="commission_rate_claim" class="form-label">Commission Rate (%) <span class="text-danger">*</span></label>
-                                            <input type="number" step="0.01" name="commission_rate_claim" id="commission_rate_claim" class="form-control" value="15.00">
+                                            <input type="number" step="0.01" name="commission_rate_claim" id="commission_rate_claim" class="form-control" value="{{ isset($commission) && $commission->claim_id ? $commission->commission_rate : '15.00' }}">
                                         </div>
 
                                         <div class="col-md-4 mb-3">
@@ -383,7 +384,7 @@
                                                                 <label class="fw-bold">PREMIUM</label>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <input type="number" step="0.01" name="premium_claim" id="premium_claim" class="form-control form-control-sm" placeholder="PHP" value="0">
+                                                                <input type="number" step="0.01" name="premium_claim" id="premium_claim" class="form-control form-control-sm" placeholder="PHP" value="{{ isset($commission) && $commission->claim_id ? $commission->gross_premium : '0' }}">
                                                             </div>
                                                         </div>
                                                         <div class="row mb-3">
@@ -391,7 +392,7 @@
                                                                 <label>Value Added Tax</label>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <input type="number" step="0.01" name="vat_claim" id="vat_claim" class="form-control form-control-sm" placeholder="PHP" value="0">
+                                                                <input type="number" step="0.01" name="vat_claim" id="vat_claim" class="form-control form-control-sm" placeholder="PHP" value="{{ isset($commission) && $commission->claim_id ? $commission->vat : '0' }}">
                                                             </div>
                                                         </div>
                                                         <div class="row mb-3">
@@ -399,7 +400,7 @@
                                                                 <label>Documentary Stamp Tax</label>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <input type="number" step="0.01" name="doc_stamp_tax_claim" id="doc_stamp_tax_claim" class="form-control form-control-sm" placeholder="PHP" value="0">
+                                                                <input type="number" step="0.01" name="doc_stamp_tax_claim" id="doc_stamp_tax_claim" class="form-control form-control-sm" placeholder="PHP" value="{{ isset($commission) && $commission->claim_id ? $commission->documentary_stamp_tax : '0' }}">
                                                             </div>
                                                         </div>
                                                         <div class="row mb-3">
@@ -407,7 +408,7 @@
                                                                 <label>Local Government tax</label>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <input type="number" step="0.01" name="local_gov_tax_claim" id="local_gov_tax_claim" class="form-control form-control-sm" placeholder="PHP" value="0">
+                                                                <input type="number" step="0.01" name="local_gov_tax_claim" id="local_gov_tax_claim" class="form-control form-control-sm" placeholder="PHP" value="{{ isset($commission) && $commission->claim_id ? $commission->local_gov_tax : '0' }}">
                                                             </div>
                                                         </div>
                                                         <div class="row mb-3">
@@ -432,7 +433,7 @@
                                                 <div class="col-md-5">
                                                     <div class="border rounded p-4">
                                                         <label class="fw-bold mb-3">Remarks</label>
-                                                        <textarea name="remarks_claim" id="remarks_claim" class="form-control" rows="10" placeholder="Enter remarks"></textarea>
+                                                        <textarea name="remarks_claim" id="remarks_claim" class="form-control" rows="10" placeholder="Enter remarks">{{ isset($commission) && $commission->claim_id ? $commission->remarks : '' }}</textarea>
                                                     </div>
                                                 </div>
                                             </div>
@@ -569,7 +570,7 @@
                                                                 <label>Value Added Tax</label>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <input type="number" step="0.01" name="vat_walkin" id="vat_walkin" class="form-control form-control-sm" placeholder="PHP" value="0">
+                                                                <input type="number" step="0.01" name="vat_walkin" id="vat_walkin" class="form-control form-control-sm" placeholder="PHP" value="{{ isset($commission) && $commission->walk_in_id ? $commission->vat : '0' }}">
                                                             </div>
                                                         </div>
                                                         <div class="row mb-3">
@@ -577,7 +578,7 @@
                                                                 <label>Documentary Stamp Tax</label>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <input type="number" step="0.01" name="doc_stamp_tax_walkin" id="doc_stamp_tax_walkin" class="form-control form-control-sm" placeholder="PHP" value="0">
+                                                                <input type="number" step="0.01" name="doc_stamp_tax_walkin" id="doc_stamp_tax_walkin" class="form-control form-control-sm" placeholder="PHP" value="{{ isset($commission) && $commission->walk_in_id ? $commission->documentary_stamp_tax : '0' }}">
                                                             </div>
                                                         </div>
                                                         <div class="row mb-3">
@@ -585,7 +586,7 @@
                                                                 <label>Local Government tax</label>
                                                             </div>
                                                             <div class="col-md-6">
-                                                                <input type="number" step="0.01" name="local_gov_tax_walkin" id="local_gov_tax_walkin" class="form-control form-control-sm" placeholder="PHP" value="0">
+                                                                <input type="number" step="0.01" name="local_gov_tax_walkin" id="local_gov_tax_walkin" class="form-control form-control-sm" placeholder="PHP" value="{{ isset($commission) && $commission->walk_in_id ? $commission->local_gov_tax : '0' }}">
                                                             </div>
                                                         </div>
                                                         <div class="row mb-3">
@@ -923,10 +924,25 @@
             @if(isset($commission))
                 @if($commission->walk_in_id)
                     switchCommissionType('walkin');
+                    // Trigger calculation for walk-in commission after page loads
+                    setTimeout(function() {
+                        $('#amount_walkin').trigger('input');
+                        calculateCommissionWalkin();
+                    }, 200);
                 @elseif($commission->claim_id)
                     switchCommissionType('claim');
+                    // Trigger calculation for claim commission
+                    setTimeout(function() {
+                        $('#insured_claim').trigger('change');
+                        calculateCommissionClaim();
+                    }, 200);
                 @else
                     switchCommissionType('policy');
+                    // Trigger calculation for policy commission
+                    setTimeout(function() {
+                        $('#policy_id').trigger('change');
+                        calculateCommissionPolicy();
+                    }, 200);
                 @endif
             @endif
         });

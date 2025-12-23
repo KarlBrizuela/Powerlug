@@ -20,6 +20,9 @@ class Commission extends Model
         'agent',
         'gross_premium',
         'net_premium',
+        'vat',
+        'documentary_stamp_tax',
+        'local_gov_tax',
         'loa',
         'commission_amount',
         'commission_rate',
@@ -33,6 +36,9 @@ class Commission extends Model
     protected $casts = [
         'gross_premium' => 'decimal:2',
         'net_premium' => 'decimal:2',
+        'vat' => 'decimal:2',
+        'documentary_stamp_tax' => 'decimal:2',
+        'local_gov_tax' => 'decimal:2',
         'commission_amount' => 'decimal:2',
         'commission_rate' => 'decimal:2',
         
