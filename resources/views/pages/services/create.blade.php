@@ -29,7 +29,7 @@
     </style>
 </head>
 <body>
-    @include('components.Sidebar')
+    @include('components.sidebar')
     
     <!-- Main Content Area -->
     <div class="main-content">
