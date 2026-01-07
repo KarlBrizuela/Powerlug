@@ -19,22 +19,40 @@ class CommissionController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Commission::with(['insuranceProvider', 'policy', 'walkIn'])->orderBy('created_at', 'desc');
+        $query = Commission::with(['insuranceProvider', 'policy', 'claim.policy', 'walkIn'])->orderBy('created_at', 'desc');
 
-        // Apply filters if provided
-        if ($request->has('insurance_provider_id') && $request->insurance_provider_id) {
+        // Apply commission type filter
+        if ($request->filled('commission_type')) {
+            $type = $request->commission_type;
+            
+            if ($type === 'policy') {
+                $query->whereNotNull('policy_id')
+                      ->where('policy_id', '>', 0);
+            } elseif ($type === 'claim') {
+                $query->whereNotNull('claim_id')
+                      ->where('claim_id', '>', 0);
+            } elseif ($type === 'walkin') {
+                $query->whereNotNull('walk_in_id')
+                      ->where('walk_in_id', '>', 0);
+            }
+        }
+
+        // Apply insurance provider filter
+        if ($request->filled('insurance_provider_id')) {
             $query->where('insurance_provider_id', $request->insurance_provider_id);
         }
 
-        if ($request->has('payment_status') && $request->payment_status) {
+        // Apply payment status filter
+        if ($request->filled('payment_status')) {
             $query->where('payment_status', $request->payment_status);
         }
 
-        if ($request->has('date_from') && $request->date_from) {
+        // Apply date filters
+        if ($request->filled('date_from')) {
             $query->whereDate('created_at', '>=', $request->date_from);
         }
 
-        if ($request->has('date_to') && $request->date_to) {
+        if ($request->filled('date_to')) {
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
@@ -58,7 +76,7 @@ class CommissionController extends Controller
     public function create()
     {
         $insuranceProviders = InsuranceProvider::orderBy('name')->get();
-        $policies = Policy::with('insuranceProvider')->withTrashed()->orderBy('policy_number')->get();
+        $policies = Policy::with('insuranceProvider')->orderBy('policy_number')->get();
         $claims = Claim::with('policy')->orderBy('client_name')->get();
         $walkIns = WalkIn::select('id', 'insured_name', 'unit', 'plate_number', 'premium')->orderBy('insured_name')->get();
         $services = \App\Models\Service::orderBy('name')->get();
@@ -165,8 +183,23 @@ class CommissionController extends Controller
             $commissionData['walk_in_id'] = $request->input('walk_in_id');
         }
         
-        // Calculate commission amount
-        $commissionData['commission_amount'] = ($commissionData['net_premium'] * $commissionData['commission_rate']) / 100;
+        // Use manually entered commission amount if provided, otherwise calculate it
+        $manualCommissionAmount = null;
+        if ($commissionType === 'policy') {
+            $manualCommissionAmount = $request->input('commission_amount');
+        } elseif ($commissionType === 'claim') {
+            $manualCommissionAmount = $request->input('commission_amount_claim');
+        } elseif ($commissionType === 'walkin') {
+            $manualCommissionAmount = $request->input('commission_amount_walkin');
+        }
+        
+        if ($manualCommissionAmount) {
+            $commissionData['commission_amount'] = $manualCommissionAmount;
+        } else {
+            // Calculate commission amount if not manually provided
+            $commissionData['commission_amount'] = ($commissionData['net_premium'] * $commissionData['commission_rate']) / 100;
+        }
+        
         $commissionData['created_by'] = Auth::id();
         $commissionData['updated_by'] = Auth::id();
 
@@ -337,8 +370,23 @@ class CommissionController extends Controller
             $commissionData['walk_in_id'] = $request->input('walk_in_id');
         }
 
-        // Recalculate commission amount
-        $commissionData['commission_amount'] = ($commissionData['net_premium'] * $commissionData['commission_rate']) / 100;
+        // Use manually entered commission amount if provided, otherwise calculate it
+        $manualCommissionAmount = null;
+        if ($commissionType === 'policy') {
+            $manualCommissionAmount = $request->input('commission_amount');
+        } elseif ($commissionType === 'claim') {
+            $manualCommissionAmount = $request->input('commission_amount_claim');
+        } elseif ($commissionType === 'walkin') {
+            $manualCommissionAmount = $request->input('commission_amount_walkin');
+        }
+        
+        if ($manualCommissionAmount) {
+            $commissionData['commission_amount'] = $manualCommissionAmount;
+        } else {
+            // Recalculate commission amount if not manually provided
+            $commissionData['commission_amount'] = ($commissionData['net_premium'] * $commissionData['commission_rate']) / 100;
+        }
+        
         $commissionData['updated_by'] = Auth::id();
 
         // Remove commission_type from data before saving (not a database column)

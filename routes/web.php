@@ -176,7 +176,7 @@ Route::middleware(['auth'])->group(function () {
     // Collection Management routes
     // Only the list/index should be restricted to superadmin.
     Route::get('/collections', [CollectionController::class, 'index'])
-        ->middleware('check.position:superadmin')
+        ->middleware('check.position:superadmin,admin')
         ->name('collections.index');
 
     // Export collections to Excel
@@ -193,8 +193,12 @@ Route::middleware(['auth'])->group(function () {
     // The create/store/edit/update endpoints remain accessible to authenticated admins.
     Route::get('/collections/create', [CollectionController::class, 'create'])->name('collections.create');
     Route::post('/collections', [CollectionController::class, 'store'])->name('collections.store');
-    Route::get('/collections/{collection}/edit', [CollectionController::class, 'edit'])->name('collections.edit');
-    Route::put('/collections/{collection}', [CollectionController::class, 'update'])->name('collections.update');
+    Route::get('/collections/{collection}/edit', [CollectionController::class, 'edit'])
+        ->middleware('check.position:superadmin')
+        ->name('collections.edit');
+    Route::put('/collections/{collection}', [CollectionController::class, 'update'])
+        ->middleware('check.position:superadmin')
+        ->name('collections.update');
 
     // Audit Trail routes
     Route::get('/audit-trail', [App\Http\Controllers\AuditTrailController::class, 'index'])->name('audit-trail.index');

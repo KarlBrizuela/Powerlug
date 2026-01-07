@@ -58,9 +58,9 @@
             <div class="row">
                 <div class="col-12">
                     <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                        <h4 class="mb-sm-0 font-size-18">Collection Management</h4>
+                        <h4 class="mb-sm-0 font-size-18">Billing Management</h4>
                         <a href="{{ route('collections.index') }}" class="btn btn-outline-primary">
-                            <i class="fas fa-list me-1"></i> View Collection Records
+                            <i class="fas fa-list me-1"></i> View Billing Records
                         </a>
                     </div>
                 </div>
@@ -95,7 +95,7 @@
                                 @csrf
 
                                 <!-- Collection Information -->
-                                <div class="section-title">Billing And Collection</div>
+                                <div class="section-title">Billing </div>
 
                                 <div class="row mb-3">
                                     <div class="col-md-6">
@@ -274,7 +274,7 @@
                                         <i class="fas fa-undo me-1"></i> Reset
                                     </button>
                                     <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-save me-1"></i> Submit Collection
+                                        <i class="fas fa-save me-1"></i> Submit Billing
                                     </button>
                                 </div>
                             </form>

@@ -99,12 +99,11 @@
 
         /* Table Styling */
         .table-container {
-            overflow-x: auto;
             border-radius: 8px;
+            overflow-x: hidden;
         }
         
         .table-container table {
-            min-width: 1000px;
             margin-bottom: 0;
         }
         
@@ -181,12 +180,9 @@
         
         /* Action column styling */
         .action-column {
-            position: sticky;
-            right: 0;
-            background-color: white;
-            z-index: 5;
-            box-shadow: -2px 0 5px rgba(0,0,0,0.05);
+            white-space: nowrap;
             min-width: 120px;
+            text-align: center;
         }
         
         .table-container thead th.action-column {
@@ -276,44 +272,6 @@
             padding: 1.5rem;
         }
 
-        /* Custom scrollbar styling */
-        .table-container::-webkit-scrollbar {
-            height: 8px;
-        }
-        
-        .table-container::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-        
-        .table-container::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 4px;
-        }
-        
-        .table-container::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
-        }
-        
-        /* For Firefox */
-        .table-container {
-            scrollbar-width: thin;
-            scrollbar-color: #c1c1c1 #f1f1f1;
-        }
-
-        /* DataTables Customization */
-        .dataTables_wrapper .dataTables_length,
-        .dataTables_wrapper .dataTables_filter,
-        .dataTables_wrapper .dataTables_info,
-        .dataTables_wrapper .dataTables_paginate {
-            color: #495057;
-        }
-        
-        .dataTables_wrapper .dataTables_paginate .paginate_button {
-            border-radius: 6px;
-            margin: 0 2px;
-        }
-
         /* Footer */
         .footer {
             background-color: #fff;
@@ -380,6 +338,7 @@
                                             <th>Collection #</th>
                                             <th>Client Name</th>
                                             <th>Invoice Number</th>
+                                            <th>Claim Number</th>
                                             <th>Billing Status</th>
                                             <th>Collection Amount</th>
                                             <th>Collection Status</th>
@@ -395,6 +354,7 @@
                                                 <td>{{ $collection->collection_number }}</td>
                                                 <td>{{ $collection->client->lastName }}, {{ $collection->client->firstName }} {{ $collection->client->middleName }}</td>
                                                 <td>{{ $collection->invoice_number }}</td>
+                                                <td>{{ $collection->claim_number ?? '-' }}</td>
                                                 <td>{{ ucfirst($collection->billing_status) }}</td>
                                                 <td>₱{{ number_format($collection->collection_amount, 2) }}</td>
                                                 <td>
@@ -410,9 +370,11 @@
                                                         <button type="button" class="action-btn view-btn view-collection" data-collection-id="{{ $collection->id }}" title="View">
                                                             <i class="bi bi-eye-fill"></i>
                                                         </button>
-                                                        <a href="{{ route('collections.edit', $collection->id) }}" class="action-btn edit-btn" title="Edit">
-                                                            <i class="bi bi-pencil-square"></i>
-                                                        </a>
+                                                        @if(auth()->user()->position === 'superadmin')
+                                                            <a href="{{ route('collections.edit', $collection->id) }}" class="action-btn edit-btn" title="Edit">
+                                                                <i class="bi bi-pencil-square"></i>
+                                                            </a>
+                                                        @endif
                                                         <button type="button" class="action-btn delete-btn delete-collection" 
                                                                 data-collection-id="{{ $collection->id }}" 
                                                                 data-collection-number="{{ $collection->collection_number }}"
@@ -424,7 +386,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="10" class="text-center py-4">
+                                                <td colspan="11" class="text-center py-4">
                                                     <div class="text-muted">
                                                         <i class="fas fa-database fa-2x mb-3"></i>
                                                         <p>No collection records found.</p>
@@ -545,7 +507,7 @@
         $(document).ready(function() {
             // Initialize DataTable
             var table = $('#collectionsTable').DataTable({
-                responsive: true,
+                responsive: false,
                 order: [[7, 'desc']], // Sort by date column descending
                 language: {
                     search: "_INPUT_",
@@ -569,7 +531,7 @@
             function updateTotal() {
                 let total = 0;
                 table.rows({ search: 'applied' }).every(function() {
-                    const amount = parseFloat(this.data()[4].replace('₱', '').replace(/,/g, ''));
+                    const amount = parseFloat(this.data()[5].replace('₱', '').replace(/,/g, ''));
                     if (!isNaN(amount)) {
                         total += amount;
                     }

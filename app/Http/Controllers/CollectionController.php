@@ -125,7 +125,9 @@ class CollectionController extends Controller
             'collection_status' => 'required|in:deposited,pending,cleared,bounced,cash',
             'billing_status' => 'required|in:billed,pending,overdue',
             'collection_date' => 'required|date',
-            'bank_name' => 'nullable|string'
+            'bank_name' => 'nullable|string',
+            'claim_number' => 'nullable|string',
+            'policy_number' => 'nullable|string'
         ]);
 
         $collection->update($validatedData);
@@ -146,7 +148,9 @@ class CollectionController extends Controller
             'collection_status' => 'required|in:deposited,pending,cleared,bounced,cash',
             'billing_status' => 'required|in:billed,pending,overdue',
             'collection_date' => 'required|date',
-            'bank_name' => 'nullable|string'
+            'bank_name' => 'nullable|string',
+            'claim_number' => 'nullable|string',
+            'policy_number' => 'nullable|string'
         ]);
 
         // Generate collection number

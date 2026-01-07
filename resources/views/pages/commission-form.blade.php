@@ -188,8 +188,9 @@
                                         </div>
 
                                         <div class="col-md-4 mb-3">
-                                            <label for="commission_amount_policy" class="form-label">Commission Amount (Auto-calculated)</label>
-                                            <input type="text" id="commission_amount_policy" class="form-control" readonly value="₱0.00">
+                                            <label for="commission_amount_policy" class="form-label">Commission Amount</label>
+                                            <input type="number" step="0.01" name="commission_amount" id="commission_amount_policy" class="form-control" value="{{ old('commission_amount', isset($commission) && $commission->policy_id ? $commission->commission_amount : '') }}">
+                                            <small class="text-muted d-block mt-1"><i class="fas fa-info-circle"></i> Auto-calculated, but you can manually edit</small>
                                         </div>
 
                                         <div class="col-md-4 mb-3"></div>
@@ -365,8 +366,9 @@
                                         </div>
 
                                         <div class="col-md-4 mb-3">
-                                            <label for="commission_amount_claim" class="form-label">Commission Amount (Auto-calculated)</label>
-                                            <input type="text" id="commission_amount_claim" class="form-control" readonly value="₱0.00">
+                                            <label for="commission_amount_claim" class="form-label">Commission Amount</label>
+                                            <input type="number" step="0.01" name="commission_amount_claim" id="commission_amount_claim" class="form-control" value="{{ old('commission_amount_claim', isset($commission) && $commission->claim_id ? $commission->commission_amount : '') }}">
+                                            <small class="text-muted d-block mt-1"><i class="fas fa-info-circle"></i> Auto-calculated, but you can manually edit</small>
                                         </div>
 
                                         <div class="col-md-4 mb-3"></div>
@@ -543,8 +545,9 @@
                                         </div>
 
                                         <div class="col-md-4 mb-3">
-                                            <label for="commission_amount_walkin" class="form-label">Commission Amount (Auto-calculated)</label>
-                                            <input type="text" id="commission_amount_walkin" class="form-control" readonly value="₱0.00">
+                                            <label for="commission_amount_walkin" class="form-label">Commission Amount</label>
+                                            <input type="number" step="0.01" name="commission_amount_walkin" id="commission_amount_walkin" class="form-control" value="{{ old('commission_amount_walkin', isset($commission) && $commission->walk_in_id ? $commission->commission_amount : '') }}">
+                                            <small class="text-muted d-block mt-1"><i class="fas fa-info-circle"></i> Auto-calculated, but you can manually edit</small>
                                         </div>
 
                                         <div class="col-md-4 mb-3"></div>
@@ -823,7 +826,7 @@
 
             // POLICY Commission calculation
             function calculateCommissionPolicy() {
-                const premium = parseFloat($('#premium_policy').val()) || 0;
+                const premium = parseFloat($('#gross_premium').val()) || 0;
                 const commissionRate = parseFloat($('#commission_rate').val()) || 0;
                 const vat = parseFloat($('#vat_policy').val()) || 0;
                 const docStampTax = parseFloat($('#doc_stamp_tax_policy').val()) || 0;
@@ -837,10 +840,13 @@
                 
                 const subtotal = premium + vat + docStampTax + localGovTax;
                 
-                // Set values with proper formatting
-                $('#commission_amount_policy').val('₱' + commissionAmount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+                // Set values - commission amount will be auto-calculated unless manually changed
+                // Only update if not manually changed or if this is triggered by formula fields
+                if (!policyCommissionManuallyChanged) {
+                    $('#commission_amount_policy').val(commissionAmount.toFixed(2));
+                }
+                $('#premium_policy').val(premium.toFixed(2));
                 $('#net_premium').val(netPremium.toFixed(2));
-                $('#gross_premium').val(premium.toFixed(2));
                 $('#services_subtotal_policy').val(subtotal.toFixed(2));
                 $('#amount_due_policy').val(subtotal.toFixed(2));
                 $('#summary_total_commission_policy').text('₱' + commissionAmount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
@@ -857,7 +863,10 @@
                 const subtotal = premium + vat + docStampTax + localGovTax;
                 const commissionAmount = (premium * commissionRate) / 100;
                 
-                $('#commission_amount_claim').val('₱' + commissionAmount.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                // Only update if not manually changed
+                if (!claimCommissionManuallyChanged) {
+                    $('#commission_amount_claim').val('₱' + commissionAmount.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                }
                 $('#services_subtotal_claim').val(subtotal.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
                 $('#amount_due_claim').val(subtotal.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
                 $('#summary_total_commission_claim').text('₱' + commissionAmount.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
@@ -874,16 +883,56 @@
                 const subtotal = premium + vat + docStampTax + localGovTax;
                 const commissionAmount = (premium * commissionRate) / 100;
                 
-                $('#commission_amount_walkin').val('₱' + commissionAmount.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                // Only update if not manually changed
+                if (!walkinCommissionManuallyChanged) {
+                    $('#commission_amount_walkin').val('₱' + commissionAmount.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+                }
                 $('#services_subtotal_walkin').val(subtotal.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
                 $('#amount_due_walkin').val(subtotal.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
                 $('#summary_total_commission_walkin').text('₱' + commissionAmount.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
             }
 
             // Recalculate when rates or amounts change
-            $('#net_premium, #commission_rate, #gross_premium, #premium_policy, #vat_policy, #doc_stamp_tax_policy, #local_gov_tax_policy').on('input', calculateCommissionPolicy);
+            $('#gross_premium, #commission_rate, #vat_policy, #doc_stamp_tax_policy, #local_gov_tax_policy').on('input', calculateCommissionPolicy);
             $('#loa_amount, #commission_rate_claim, #premium_claim, #vat_claim, #doc_stamp_tax_claim, #local_gov_tax_claim').on('input', calculateCommissionClaim);
             $('#amount_walkin, #commission_rate_walkin, #premium_walkin, #vat_walkin, #doc_stamp_tax_walkin, #local_gov_tax_walkin').on('input', calculateCommissionWalkin);
+
+            // Allow manual editing of commission amounts while preserving auto-calculation
+            // For policy commission - allow manual override but recalculate on formula field changes
+            let policyCommissionManuallyChanged = false;
+            $('#commission_amount_policy').on('input', function() {
+                policyCommissionManuallyChanged = true;
+            });
+            
+            // Reset flag when premium or rate is changed so auto-calculation resumes
+            $('#gross_premium, #commission_rate').on('change', function() {
+                policyCommissionManuallyChanged = false;
+                calculateCommissionPolicy();
+            });
+
+            // For claim commission - allow manual override but recalculate on formula field changes
+            let claimCommissionManuallyChanged = false;
+            $('#commission_amount_claim').on('input', function() {
+                claimCommissionManuallyChanged = true;
+            });
+            
+            // Reset flag when premium or rate is changed so auto-calculation resumes
+            $('#premium_claim, #commission_rate_claim').on('change', function() {
+                claimCommissionManuallyChanged = false;
+                calculateCommissionClaim();
+            });
+
+            // For walk-in commission - allow manual override but recalculate on formula field changes
+            let walkinCommissionManuallyChanged = false;
+            $('#commission_amount_walkin').on('input', function() {
+                walkinCommissionManuallyChanged = true;
+            });
+            
+            // Reset flag when premium or rate is changed so auto-calculation resumes
+            $('#premium_walkin, #commission_rate_walkin').on('change', function() {
+                walkinCommissionManuallyChanged = false;
+                calculateCommissionWalkin();
+            });
 
             // Policy form submission - fields are now using correct names
 
@@ -944,6 +993,14 @@
                         calculateCommissionPolicy();
                     }, 200);
                 @endif
+            @else
+                // For new commissions, calculate if values are already filled
+                setTimeout(function() {
+                    // Check if we have premium and rate values, if so calculate
+                    if ($('#premium_policy').val()) {
+                        calculateCommissionPolicy();
+                    }
+                }, 100);
             @endif
         });
     </script>

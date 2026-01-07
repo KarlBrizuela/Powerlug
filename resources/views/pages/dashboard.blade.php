@@ -69,19 +69,21 @@
                         </div>
                        
                         <div class="col-xl-4 col-md-6 mb-4">
-                            <div class="card border-0 shadow-sm h-100 hover-card" style="cursor: pointer; transition: all 0.3s ease; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                                <div class="card-body text-center text-white p-4">
-                                    <div class="rounded-circle bg-white bg-opacity-25 d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
-                                        <i class="fas fa-tasks fa-2x text-white"></i>
+                            <a href="{{ route('policies.index') }}" class="text-decoration-none">
+                                <div class="card border-0 shadow-sm h-100 hover-card" style="cursor: pointer; transition: all 0.3s ease; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                    <div class="card-body text-center text-white p-4">
+                                        <div class="rounded-circle bg-white bg-opacity-25 d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                                            <i class="fas fa-tasks fa-2x text-white"></i>
+                                        </div>
+                                        <h5 class="card-title text-uppercase fw-semibold mb-2" style="font-size: 0.9rem; letter-spacing: 0.5px; opacity: 0.95;">Total Policies</h5>
+                                        <h2 class="fw-bold mb-0" style="font-size: 2.5rem;">{{ $totalPolicies }}</h2>
+                                        <p class="small mb-0 mt-2" style="opacity: 0.9;">
+                                            <i class="fas fa-file-contract me-1"></i>
+                                            Active policies
+                                        </p>
                                     </div>
-                                    <h5 class="card-title text-uppercase fw-semibold mb-2" style="font-size: 0.9rem; letter-spacing: 0.5px; opacity: 0.95;">Total Policies</h5>
-                                    <h2 class="fw-bold mb-0" style="font-size: 2.5rem;">{{ $totalPolicies }}</h2>
-                                    <p class="small mb-0 mt-2" style="opacity: 0.9;">
-                                        <i class="fas fa-file-contract me-1"></i>
-                                        Active policies
-                                    </p>
                                 </div>
-                            </div>
+                            </a>
                         </div>
                     </div>
 

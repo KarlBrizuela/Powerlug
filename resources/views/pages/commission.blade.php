@@ -153,6 +153,15 @@
                                 <div class="mb-4">
                                     <form method="GET" action="{{ route('commission.index') }}" id="filterForm">
                                         <div class="row g-3">
+                                            <div class="col-md-2">
+                                                <label class="form-label">Commission Type</label>
+                                                <select name="commission_type" class="form-select">
+                                                    <option value="">All Types</option>
+                                                    <option value="policy" {{ request('commission_type') == 'policy' ? 'selected' : '' }}>Policy</option>
+                                                    <option value="claim" {{ request('commission_type') == 'claim' ? 'selected' : '' }}>Claim</option>
+                                                    <option value="walkin" {{ request('commission_type') == 'walkin' ? 'selected' : '' }}>Walk-in</option>
+                                                </select>
+                                            </div>
                                             <div class="col-md-3">
                                                 <label class="form-label">Insurance Provider</label>
                                                 <select name="insurance_provider_id" class="form-select">
@@ -181,14 +190,14 @@
                                                 <label class="form-label">Date To</label>
                                                 <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
                                             </div>
-                                            <div class="col-md-3">
+                                            <div class="col-md-1">
                                                 <label class="form-label">&nbsp;</label>
                                                 <div class="d-flex gap-1">
-                                                    <button type="submit" class="btn btn-primary">
+                                                    <button type="submit" class="btn btn-primary btn-sm">
                                                         Filter
                                                     </button>
-                                                    @if(request()->hasAny(['insurance_provider_id', 'payment_status', 'date_from', 'date_to']))
-                                                        <a href="{{ route('commission.index') }}" class="btn btn-outline-secondary">
+                                                    @if(request()->hasAny(['commission_type', 'insurance_provider_id', 'payment_status', 'date_from', 'date_to']))
+                                                        <a href="{{ route('commission.index') }}" class="btn btn-outline-secondary btn-sm">
                                                             Clear
                                                         </a>
                                                     @endif
@@ -210,6 +219,7 @@
                                                 <th>TYPE</th>
                                                 <th>INSURANCE PROVIDER</th>
                                                 <th>POLICY NUMBER</th>
+                                                <th>CLAIM NO.</th>
                                                 <th>INSURED</th>
                                                 <th>GROSS</th>
                                                 <th>NET</th>
@@ -243,6 +253,20 @@
                                                         </td>
                                                         <td>{{ $commission->insuranceProvider->name ?? 'N/A' }}</td>
                                                         <td>{{ $commission->policy_number }}</td>
+                                                        <!-- <td>
+                                                            @if($commission->claim_id && $commission->claim && $commission->claim->policy)
+                                                                {{ $commission->claim->policy->policy_number }}
+                                                            @else
+                                                                -
+                                                            @endif
+                                                        </td> -->
+                                                        <td>
+                                                            @if($commission->claim_id)
+                                                                {{ $commission->claim->claim_number ?? '-' }}
+                                                            @else
+                                                                -
+                                                            @endif
+                                                        </td>
                                                         <td>
                                                             @if($commission->walk_in_id)
                                                                 {{ $commission->walkIn->insured_name ?? $commission->insured }}
@@ -261,9 +285,13 @@
                                                                 <button class="btn btn-sm btn-outline-primary border-0 view-commission" data-commission-id="{{ $commission->id }}" title="View Details">
                                                                     <i class="fas fa-eye"></i>
                                                                 </button>
-                                                                <a href="{{ route('commission.edit', $commission->id) }}" class="btn btn-sm btn-outline-warning border-0" title="Edit">
-                                                                    <i class="fas fa-edit"></i>
-                                                                </a>
+                                                                @auth
+                                                                    @if(Auth::user()->position === 'superadmin')
+                                                                        <a href="{{ route('commission.edit', $commission->id) }}" class="btn btn-sm btn-outline-warning border-0" title="Edit">
+                                                                            <i class="fas fa-edit"></i>
+                                                                        </a>
+                                                                    @endif
+                                                                @endauth
                                                                 
                                                                 <!-- Status Change Actions - Super Admin Only -->
                                                                 @auth
@@ -310,14 +338,14 @@
                                                 @endforeach
                                             @else
                                                 <tr>
-                                                    <td colspan="9" class="text-center py-4 text-muted">No commission records found.</td>
+                                                    <td colspan="11" class="text-center py-4 text-muted">No commission records found.</td>
                                                 </tr>
                                             @endif
                                         </tbody>
                                         @if(isset($commissions) && $commissions->count() > 0)
                                             <tfoot>
                                                 <tr class="table-light fw-bold">
-                                                    <td colspan="4" class="text-end">TOTAL:</td>
+                                                    <td colspan="6" class="text-end">TOTAL:</td>
                                                     <td>₱{{ number_format($commissions->sum('gross_premium'), 2) }}</td>
                                                     <td>₱{{ number_format($commissions->sum('net_premium'), 2) }}</td>
                                                     <td colspan="3"></td>
@@ -447,6 +475,11 @@
 
     <script>
         $(document).ready(function() {
+
+            // Auto-submit filter form when any filter field changes
+            $('#filterForm input, #filterForm select').on('change', function() {
+                $('#filterForm').submit();
+            });
 
             // Change commission status - Super Admin only
             $(document).on('click', '.change-status-action', function(e) {

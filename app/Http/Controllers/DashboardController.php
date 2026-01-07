@@ -164,11 +164,10 @@ class DashboardController extends Controller
             // Check each installment (reminder appears 7 days before due date)
             foreach ($policy->installments as $installment) {
                 $paymentDate = Carbon::parse($installment->payment_date);
-                $reminderDate = $paymentDate->copy()->subDays(7); // 7 days before
-                $daysUntilReminder = $today->diffInDays($reminderDate, false);
+                $daysUntilDueDate = $today->diffInDays($paymentDate, false);
                 
-                // Show reminder from 7 days before to 1 day after the due date
-                if ($daysUntilReminder >= -1 && $daysUntilReminder <= 7) {
+                // Show reminder if due date is within 7 days from today
+                if ($daysUntilDueDate >= 0 && $daysUntilDueDate <= 7) {
                     $paymentData[] = [
                         'id' => $policy->id,
                         'client_name' => $policy->client->firstName . ' ' . $policy->client->lastName,
